@@ -1,6 +1,6 @@
 .text
-.word     0
-.word     Reset_Handler
+.word     0x20004000
+.word     main
 .word     NMI_Handler
 .word     HardFault_Handler
 .word     MemManage_Handler
@@ -106,10 +106,6 @@
 .word     LTDC_IRQHandler
 .word     LTDC_ER_IRQHandler
 .word     DMA2D_IRQHandler
-
-Reset_Handler:
-	LDR     SP, =0x20004000
-	LDR     PC, =main
 
 NMI_Handler:
 HardFault_Handler:
