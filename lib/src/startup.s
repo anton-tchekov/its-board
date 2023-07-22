@@ -1,4 +1,4 @@
-.section start
+.text
 .word     0
 .word     Reset_Handler
 .word     NMI_Handler

@@ -23,6 +23,9 @@ clean:
 upload: $(TARGET).hex
 	st-flash --format ihex write $(TARGET).hex
 
+disasm:
+	arm-none-eabi-objdump -D $(TARGET).elf
+
 SOURCES := $(shell find $(SRCDIR) -type f -name *.c*)
 HEDEARS := $(shell find $(INCDIR) -type f -name *.h*)
 OBJECTS := $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(addsuffix .o,$(basename $(SOURCES))))
@@ -57,7 +60,7 @@ $(TARGET).hex: $(TARGET).elf
 $(TARGET).elf: $(OBJECTS) $(LIBOBJECTS) $(LIBOBJDIR)/startup.o
 	@mkdir -p bin/
 	@$(CC) -nostartfiles -nostdlib -T $(LIBDIR)/linker.ld \
-		$(OBJECTS) $(LIBOBJECTS) $(LIBOBJDIR)/startup.o -o $(TARGET).elf
+		 $(LIBOBJDIR)/startup.o $(OBJECTS) $(LIBOBJECTS) -o $(TARGET).elf
 
 $(LIBOBJDIR)/startup.o: $(LIBSRCDIR)/startup.s
 	arm-none-eabi-as $(LIBSRCDIR)/startup.s -o $(LIBOBJDIR)/startup.o
