@@ -54,9 +54,10 @@ $(LIBOBJDIR)/%.o: $(LIBSRCDIR)/%.c*
 $(TARGET).hex: $(TARGET).elf
 	arm-none-eabi-objcopy -S -O ihex $(TARGET).elf $(TARGET).hex
 
-$(TARGET).elf: $(OBJECTS) $(LIBOBJECTS)
+$(TARGET).elf: $(OBJECTS) $(LIBOBJECTS) $(LIBOBJDIR)/startup.o
 	@mkdir -p bin/
-	@$(CC) -nostartfiles -nostdlib -T $(LIBDIR)/linker.ld $(OBJECTS) $(LIBOBJECTS) -o $(TARGET).elf
+	@$(CC) -nostartfiles -nostdlib -T $(LIBDIR)/linker.ld \
+		$(OBJECTS) $(LIBOBJECTS) $(LIBOBJDIR)/startup.o -o $(TARGET).elf
 
 $(LIBOBJDIR)/startup.o: $(LIBSRCDIR)/startup.s
 	arm-none-eabi-as $(LIBSRCDIR)/startup.s -o $(LIBOBJDIR)/startup.o

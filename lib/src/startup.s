@@ -109,7 +109,8 @@
 
 Reset_Handler:
 	LDR     SP, =0x20004000
-	B       main
+	LDR     R0, =main
+	LDR     PC, [R0]
 
 NMI_Handler:
 HardFault_Handler:
