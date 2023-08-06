@@ -10,7 +10,7 @@
 #define __TIMER_H__
 
 #include <stdint.h>
-#include "hal.h"
+#include "stm32f4xx_hal.h"
 
 /** Ticks per microsecond */
 #define TICKS_PER_US 90

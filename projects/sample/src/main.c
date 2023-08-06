@@ -24,9 +24,14 @@ int main(void)
 	for(;;)
 	{
 		GPIOD->BSRR = (1 << PIN);
-		delay_ms(1000);
+		delay_ms(200);
+		GPIOD->BSRR = (1 << (PIN + 16));
+		delay_ms(200);
+		GPIOD->BSRR = (1 << PIN);
+		delay_ms(200);
 		GPIOD->BSRR = (1 << (PIN + 16));
 		delay_ms(1000);
+
 	}
 
 	return 0;

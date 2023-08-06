@@ -7,7 +7,7 @@
 
 #include "panic.h"
 #include "delay.h"
-#include "hal.h"
+#include "stm32f4xx_hal.h"
 
 void panic(void)
 {
