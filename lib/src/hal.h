@@ -147,4 +147,9 @@ typedef struct
 		(void)tmpreg; \
 	} while(0)
 
+#define __HAL_RCC_GPIOD_CLK_ENABLE() GPIO_CLOCK_EN(1 << 3)
+#define __HAL_RCC_GPIOE_CLK_ENABLE() GPIO_CLOCK_EN(1 << 4)
+#define __HAL_RCC_GPIOF_CLK_ENABLE() GPIO_CLOCK_EN(1 << 5)
+#define __HAL_RCC_GPIOG_CLK_ENABLE() GPIO_CLOCK_EN(1 << 6)
+
 #endif /* __HAL_H__ */
