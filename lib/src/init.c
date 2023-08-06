@@ -10,7 +10,7 @@
 #include "stm32f4xx_hal.h"
 #include "panic.h"
 
-#define VECT_TAB_OFFSET 0x00
+#define VECT_TAB_OFFSET              0x00
 #define PWR_OVERDRIVE_TIMEOUT_VALUE  1000U
 
 static void _HAL_PWREx_EnableOverDrive(void)
