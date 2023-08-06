@@ -207,4 +207,4 @@ SAI1_IRQHandler:
 LTDC_IRQHandler:
 LTDC_ER_IRQHandler:
 DMA2D_IRQHandler:
-	B .
+	BX LR

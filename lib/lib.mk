@@ -1,6 +1,6 @@
 CC        := arm-none-eabi-gcc
 CFLAGS    := -Wall -Wextra -ffreestanding -nostdlib -nostartfiles \
-	-nodefaultlibs -O2
+	-nodefaultlibs -O2 -std=c99 -mcpu=cortex-m4 -mfpu=fpv4-sp-d16
 
 BINDIR    := bin
 SRCDIR    := src
@@ -19,6 +19,8 @@ all:     $(TARGET).hex
 
 clean:
 	rm $(LIBOBJDIR)/* $(OBJDIR)/* $(TARGET) -rf
+
+flash: upload
 
 upload: $(TARGET).hex
 	st-flash --format ihex write $(TARGET).hex
