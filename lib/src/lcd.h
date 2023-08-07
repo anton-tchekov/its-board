@@ -59,8 +59,8 @@ void lcd_set_orientation(int orientation);
 
 void lcd_window_start(int x, int y, int w, int h);
 void lcd_window_end(void);
-void lcd_callback(int x, int y, int w, int h, int handle,
-	int (*callback)(int, int, int));
+void lcd_callback(int x, int y, int w, int h, void *handle,
+	int (*callback)(int, int, void *));
 
 void lcd_rect(int x, int y, int w, int h, int color);
 

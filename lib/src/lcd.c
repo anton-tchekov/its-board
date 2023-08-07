@@ -297,8 +297,8 @@ void lcd_rect(int x, int y, int w, int h, int color)
 	lcd_window_end();
 }
 
-void lcd_callback(int x, int y, int w, int h, int handle,
-	int (*callback)(int, int, int))
+void lcd_callback(int x, int y, int w, int h, void *handle,
+	int (*callback)(int, int, void *))
 {
 	int x0, y0;
 

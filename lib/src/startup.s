@@ -123,7 +123,7 @@ TAMP_STAMP_IRQHandler:
 RTC_WKUP_IRQHandler:
 FLASH_IRQHandler:
 RCC_IRQHandler:
-EXTI0_IRQHandler:
+; EXTI0_IRQHandler:
 EXTI1_IRQHandler:
 EXTI2_IRQHandler:
 EXTI3_IRQHandler:

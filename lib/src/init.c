@@ -250,8 +250,21 @@ static HAL_StatusTypeDef _HAL_RCC_OscConfig(RCC_OscInitTypeDef *RCC_OscInitStruc
 	return HAL_OK;
 }
 
+extern uint32_t __bss_start, __bss_end;
+
+void init_bss(void)
+{
+	uint32_t *p = (uint32_t *)__bss_start;
+	while(p < (uint32_t *)__bss_end)
+	{
+		*p++ = 0;
+	}
+}
+
 void its_board_init(void)
 {
+	init_bss();
+
 	RCC_OscInitTypeDef RCC_OscInitStruct;
 	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 

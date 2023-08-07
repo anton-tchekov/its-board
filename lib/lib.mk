@@ -32,6 +32,9 @@ dump: disasm
 disasm:
 	arm-none-eabi-objdump -d $(TARGET).elf
 
+sizes:
+	nm --print-size --size-sort --radix=d $(TARGET).elf
+
 SOURCES := $(shell find $(SRCDIR) -type f -name *.c*)
 HEDEARS := $(shell find $(INCDIR) -type f -name *.h*)
 OBJECTS := $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(addsuffix .o,$(basename $(SOURCES))))

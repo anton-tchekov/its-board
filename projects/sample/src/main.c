@@ -10,11 +10,15 @@
 #include "timer.h"
 #include "delay.h"
 #include "lcd.h"
+#include "font.h"
+#include "fonts/Terminus16.h"
+#include "fonts/Terminus16_Bold.h"
+#include "ps2.h"
 
 #define PIN 4
 
 // Variante B
-int draw_chessboard(int x, int y, int handle)
+int draw_chessboard(int x, int y, void *handle)
 {
 	if(((x / 8) & 1) == ((y / 8) & 1))
 	{
@@ -32,10 +36,18 @@ int draw_chessboard(int x, int y, int handle)
  */
 int main(void)
 {
+	int cx = 30;
+
 	its_board_init();
 	timer_init();
+	ps2_init();
 	lcd_init(D2U_L2R, 1000, COLOR_BLACK);
+	__enable_irq();
+
+
 	lcd_rect(20, 20, 80, 20, COLOR_RED);
+	font_str(100, 10, "Hello World", COLOR_WHITE, COLOR_BLACK, Terminus16);
+	font_str(100, 20, "Hello World Bold", COLOR_WHITE, COLOR_BLACK, Terminus16_Bold);
 
 	// Variante A - Explizit
 	{
@@ -55,18 +67,18 @@ int main(void)
 
 	// Variante B - Mit Callback
 	lcd_callback(LCD_WIDTH / 2 - 40, LCD_HEIGHT / 2 - 40, 80, 80,
-		0, draw_chessboard);
+		NULL, draw_chessboard);
 
+	KeyEvent event;
 	for(;;)
 	{
-		GPIOD->BSRR = (1 << PIN);
-		delay_ms(200);
-		GPIOD->BSRR = (1 << (PIN + 16));
-		delay_ms(200);
-		GPIOD->BSRR = (1 << PIN);
-		delay_ms(200);
-		GPIOD->BSRR = (1 << (PIN + 16));
-		delay_ms(1000);
+		if(ps2_read(&event))
+		{
+			font_char(cx, 50, event.Codepoint,
+				COLOR_WHITE, COLOR_BLACK, Terminus16);
+
+			cx += 8;
+		}
 
 	}
 
