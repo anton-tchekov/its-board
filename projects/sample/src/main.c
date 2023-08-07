@@ -46,8 +46,8 @@ int main(void)
 
 
 	lcd_rect(20, 20, 80, 20, COLOR_RED);
-	font_str(100, 10, "Hello World", COLOR_WHITE, COLOR_BLACK, Terminus16);
-	font_str(100, 20, "Hello World Bold", COLOR_WHITE, COLOR_BLACK, Terminus16_Bold);
+	font_str(100, 10, "Hello World\xFF\xFF\xFF", COLOR_WHITE, COLOR_BLACK, Terminus16);
+	font_str(100, 30, "Hello World Bold\xFF\xFF", COLOR_WHITE, COLOR_BLACK, Terminus16_Bold);
 
 	// Variante A - Explizit
 	{

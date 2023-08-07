@@ -22,6 +22,8 @@
 #define GPIO_SPEED_50MHZ  0x02
 #define GPIO_PUPD_DOWN    0x02
 
+static int _width, _height;
+
 static const uint8_t _lcd_init_cmds[] =
 {
 	0xF9,
@@ -242,6 +244,9 @@ void lcd_set_orientation(int orientation)
 		b = 0x42;
 		break;
 	}
+
+	_width = LCD_WIDTH;
+	_height = LCD_HEIGHT;
 
 	lcd_cmd(0xB6);
 	lcd_param(0x00);

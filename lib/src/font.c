@@ -3,6 +3,11 @@
 
 void font_char(int x, int y, int c, int fg, int bg, const Font *font)
 {
+	if(c < 32 || c > 126)
+	{
+		c = 127;
+	}
+
 	lcd_window_start(x, y, font->Width, font->Height);
 	int stride = (font->Width + 7) >> 3;
 	const uint8_t *char_bitmap = &font->Bitmap[(c - 32) * font->Height * stride];
