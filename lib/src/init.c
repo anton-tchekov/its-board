@@ -303,7 +303,16 @@ void its_board_init(void)
 	__HAL_RCC_GPIOG_CLK_ENABLE();
 
 	/* Ports D, E Output */
-	GPIOD->MODER = 0x5555;
+
+	// BL: D15
+	// CS: D14
+	GPIOD->MODER = 0x50005555;
+	GPIOD->BSRR = (1 << 15);
+
+	// DC: F13
+	// RST: F12
+	GPIOF->MODER = 0x05000000;
+
 	GPIOE->MODER = 0x5555;
 
 	/* All Pullup */

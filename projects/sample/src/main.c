@@ -9,6 +9,7 @@
 #include "init.h"
 #include "timer.h"
 #include "delay.h"
+#include "lcd.h"
 
 #define PIN 4
 
@@ -20,6 +21,8 @@ int main(void)
 {
 	its_board_init();
 	timer_init();
+	lcd_init(D2U_L2R, 1000, COLOR_BLACK);
+	lcd_rect(20, 20, 80, 20, COLOR_RED);
 
 	for(;;)
 	{
