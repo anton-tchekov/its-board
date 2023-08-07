@@ -25,6 +25,14 @@
 #define LCD_HEIGHT 320
 #define LCD_WIDTH  480
 
+/*
+ORIENTATION_TOP
+ORIENTATION_LEFT
+ORIENTATION_RIGHT
+ORIENTATION_BOTTOM
+
+*/
+
 enum LCD_Orientation
 {
 	L2R_U2D,
@@ -37,9 +45,23 @@ enum LCD_Orientation
 	D2U_R2L
 };
 
+int lcd_byte(int byte);
+void lcd_param(int param);
+void lcd_cmd(int cmd);
+void lcd_emit(int color);
+
 void lcd_init(int orientation, int backlight, int color);
-void lcd_set_backlight(int value);
+void lcd_reset(void);
 int lcd_color(int r, int g, int b);
+
+void lcd_set_backlight(int value);
+void lcd_set_orientation(int orientation);
+
+void lcd_window_start(int x, int y, int w, int h);
+void lcd_window_end(void);
+void lcd_callback(int x, int y, int w, int h, int handle,
+	int (*callback)(int, int, int));
+
 void lcd_rect(int x, int y, int w, int h, int color);
 
 #endif /* __LCD_H__ */

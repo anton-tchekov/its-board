@@ -9,14 +9,14 @@
 #include "delay.h"
 #include "stm32f4xx_hal.h"
 
-#define LCD_RST_0      GPIOF->BSRR |= (1 << (12 + 16))
-#define LCD_RST_1      GPIOF->BSRR |= (1 << 12)
+#define LCD_RST_0         GPIOF->BSRR |= (1 << (12 + 16))
+#define LCD_RST_1         GPIOF->BSRR |= (1 << 12)
 
-#define LCD_DC_0       GPIOF->BSRR |= (1 << (13 + 16))
-#define LCD_DC_1       GPIOF->BSRR |= (1 <<  13)
+#define LCD_DC_0          GPIOF->BSRR |= (1 << (13 + 16))
+#define LCD_DC_1          GPIOF->BSRR |= (1 <<  13)
 
-#define LCD_CS_0       GPIOD->BSRR |= (1 << (14 + 16))
-#define LCD_CS_1       GPIOD->BSRR |= (1 << 14)
+#define LCD_CS_0          GPIOD->BSRR |= (1 << (14 + 16))
+#define LCD_CS_1          GPIOD->BSRR |= (1 << 14)
 
 #define GPIO_MODE_AF      0x02
 #define GPIO_SPEED_50MHZ  0x02
@@ -129,31 +129,13 @@ static const uint8_t _lcd_init_cmds[] =
 	0x55
 };
 
-static uint8_t lcd_byte(uint8_t byte)
+int lcd_byte(int byte)
 {
 	while(!(SPI1->SR & SPI_SR_TXE)) {}
 	SPI1->DR = byte;
 	while(!(SPI1->SR & SPI_SR_RXNE)) {}
 	while(SPI1->SR & SPI_SR_BSY) {}
 	return SPI1->DR;
-}
-
-static void lcd_cmd(int cmd)
-{
-	LCD_DC_0;
-	LCD_CS_0;
-	lcd_byte(cmd);
-	LCD_CS_1;
-}
-
-static void lcd_reset(void)
-{
-	LCD_RST_1;
-	delay_ms(500);
-	LCD_RST_0;
-	delay_ms(500);
-	LCD_RST_1;
-	delay_ms(500);
 }
 
 static void lcd_param0(void)
@@ -169,10 +151,34 @@ static void lcd_param1(int param)
 	LCD_CS_1;
 }
 
-static void lcd_param(int param)
+void lcd_param(int param)
 {
 	lcd_param0();
 	lcd_param1(param);
+}
+
+void lcd_cmd(int cmd)
+{
+	LCD_DC_0;
+	LCD_CS_0;
+	lcd_byte(cmd);
+	LCD_CS_1;
+}
+
+void lcd_emit(int color)
+{
+	lcd_byte(color >> 8);
+	lcd_byte(color & 0xFF);
+}
+
+void lcd_reset(void)
+{
+	LCD_RST_1;
+	delay_ms(500);
+	LCD_RST_0;
+	delay_ms(500);
+	LCD_RST_1;
+	delay_ms(500);
 }
 
 static void lcd_cmd_list(const uint8_t *list, int count)
@@ -190,10 +196,10 @@ static void lcd_cmd_list(const uint8_t *list, int count)
 	}
 }
 
-static void lcd_set_gram_scan_way(int scan_dir)
+void lcd_set_orientation(int orientation)
 {
 	int a, b;
-	switch(scan_dir)
+	switch(orientation)
 	{
 	case L2R_U2D:
 		a = 0x08;
@@ -248,34 +254,64 @@ void lcd_set_backlight(int value)
 {
 }
 
-void lcd_rect(int x, int y, int w, int h, int color)
+void lcd_window_start(int x, int y, int w, int h)
 {
-	int count = w * h;
 	int ex = x + w - 1;
 	int ey = y + h - 1;
 
 	lcd_cmd(0x2A);
 	lcd_param(x >> 8);
-	lcd_param(x);
+	lcd_param(x & 0xFF);
 	lcd_param(ex >> 8);
-	lcd_param(ex);
+	lcd_param(ex & 0xFF);
 
 	lcd_cmd(0x2B);
 	lcd_param(y >> 8);
-	lcd_param(y);
+	lcd_param(y & 0xFF);
 	lcd_param(ey >> 8);
-	lcd_param(ey);
+	lcd_param(ey & 0xFF);
 
 	lcd_cmd(0x2C);
 	LCD_DC_1;
 	LCD_CS_0;
+}
+
+void lcd_window_end(void)
+{
+	LCD_CS_1;
+}
+
+void lcd_rect(int x, int y, int w, int h, int color)
+{
+	int count = w * h;
+	int color_hi = color >> 8;
+	int color_lo = color & 0xFF;
+
+	lcd_window_start(x, y, w, h);
 	while(count--)
 	{
-		lcd_byte(color >> 8);
-		lcd_byte(color);
+		lcd_byte(color_hi);
+		lcd_byte(color_lo);
 	}
 
-	LCD_CS_1;
+	lcd_window_end();
+}
+
+void lcd_callback(int x, int y, int w, int h, int handle,
+	int (*callback)(int, int, int))
+{
+	int x0, y0;
+
+	lcd_window_start(x, y, w, h);
+	for(y0 = 0; y0 < h; ++y0)
+	{
+		for(x0 = 0; x0 < w; ++x0)
+		{
+			lcd_emit(callback(x0, y0, handle));
+		}
+	}
+
+	lcd_window_end();
 }
 
 static void lcd_gpio_init(void)
@@ -318,7 +354,7 @@ void lcd_init(int orientation, int backlight, int color)
 	lcd_reset();
 	lcd_set_backlight(backlight);
 	lcd_cmd_list(_lcd_init_cmds, sizeof(_lcd_init_cmds));
-	lcd_set_gram_scan_way(orientation);
+	lcd_set_orientation(orientation);
 	delay_ms(200);
 	lcd_cmd(0x11);
 	delay_ms(120);
