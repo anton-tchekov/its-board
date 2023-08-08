@@ -9,8 +9,7 @@
 #include <stdint.h>
 #include "ps2.h"
 #include "ps2_ll.h"
-#include "keys.h"
-#include "keyboard-shared.h"
+#include "keyboard.h"
 #include "layout.h"
 
 /* --- States --- */

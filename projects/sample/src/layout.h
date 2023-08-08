@@ -9,7 +9,7 @@
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
 
-#include "keyboard-shared.h"
+#include "keyboard.h"
 
 /**
  * @brief Convert key to codepoint

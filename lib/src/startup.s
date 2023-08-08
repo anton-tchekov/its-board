@@ -3,7 +3,7 @@
 
 vector_table:
 .word     0x20020000
-.word     start
+.word     main
 .word     NMI_Handler
 .word     HardFault_Handler
 .word     MemManage_Handler
@@ -312,11 +312,3 @@ LTDC_IRQHandler:
 LTDC_ER_IRQHandler:
 DMA2D_IRQHandler:
 	BX LR
-
-
-start:
-	LDR R0, =its_board_init
-	BX  R0
-	LDR R1, =main
-	BX  R1
-	B  .

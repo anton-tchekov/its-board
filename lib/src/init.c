@@ -250,12 +250,11 @@ static HAL_StatusTypeDef _HAL_RCC_OscConfig(RCC_OscInitTypeDef *RCC_OscInitStruc
 	return HAL_OK;
 }
 
-extern uint32_t __bss_start, __bss_end;
-
-void init_bss(void)
+static void init_bss(void)
 {
-	uint32_t *p = (uint32_t *)__bss_start;
-	while(p < (uint32_t *)__bss_end)
+	uint32_t *p = &__bss_start;
+	uint32_t *e = &__bss_end;
+	while(p < e)
 	{
 		*p++ = 0;
 	}
@@ -315,15 +314,12 @@ void its_board_init(void)
 
 	/* Ports D, E Output */
 
-	// BL: D15
-	// CS: D14
+	/* BL: D15, CS: D14 */
 	GPIOD->MODER = 0x50005555;
 	GPIOD->BSRR = (1 << 15);
 
-	// DC: F13
-	// RST: F12
+	/* DC: F13, RST: F12 */
 	GPIOF->MODER = 0x05000000;
-
 	GPIOE->MODER = 0x5555;
 
 	/* All Pullup */
@@ -338,5 +334,5 @@ void its_board_init(void)
 	GPIOF->OSPEEDR = 0xFFFF;
 	GPIOG->OSPEEDR = 0x0FFF;
 
-	//init_bss();
+	init_bss();
 }

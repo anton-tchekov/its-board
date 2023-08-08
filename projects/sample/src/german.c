@@ -6,7 +6,7 @@
  * @brief   German keyboard layout conversion
  */
 
-#include "keyboard-shared.h"
+#include "keyboard.h"
 
 /* This is horrible, but it works */
 int key_to_codepoint(int k)

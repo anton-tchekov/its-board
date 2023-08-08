@@ -1,15 +1,15 @@
 /**
- * @file    keys.h
+ * @file    keyboard.h
  * @author  Tim Gabrikowski, Anton Tchekov
  * @version 0.1
  * @date    23.04.2023
  * @brief   Keycode and modifier definitions
  */
 
-#ifndef __KEYS_H__
-#define __KEYS_H__
+#ifndef __KEYBOARD_H__
+#define __KEYBOARD_H__
 
-//! @cond Doxygen_Suppress
+#include <stdint.h>
 
 typedef enum
 {
@@ -126,6 +126,19 @@ typedef enum
 #define MOD_ALT            0x1000
 #define MOD_ALT_GR         0x800
 
-//! @endcond
+/** Key State: Released (Key Up), Pressed (Key Down), Repeat (Held Down) */
+typedef enum
+{
+	KEYSTATE_RELEASED,
+	KEYSTATE_PRESSED,
+	KEYSTATE_REPEAT
+} KeyState;
 
-#endif /* __KEYS_H__ */
+typedef struct
+{
+	uint32_t Codepoint;
+	uint16_t Key;
+	uint8_t State;
+} KeyEvent;
+
+#endif /* __KEYBOARD_H__ */

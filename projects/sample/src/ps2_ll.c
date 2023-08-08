@@ -5,11 +5,16 @@
 #include "fonts/Terminus16.h"
 #include "fonts/Terminus16_Bold.h"
 
+extern volatile int flag;
+
 #define PS2_DATA_PORT_IN GPIOF->IDR
-#define PS2_DATA_PIN     1
+#define PS2_DATA_PIN     2
 
 void ps2_ll_init(void)
 {
+	/* Clock for GPIO Port F */
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;
+
 	/* System conf. clock enable */
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 
@@ -17,29 +22,22 @@ void ps2_ll_init(void)
 	SYSCFG->EXTICR[0] &= ~(0x0f << (4 * 0));
 	SYSCFG->EXTICR[0] |= (0x05 << (4 * 0));
 
-	/* Enable falling trigger */
+	/* Enable rising and falling trigger */
 	EXTI->FTSR |= (1 << 0);
 	EXTI->IMR |= (1 << 0);
 
 	NVIC_SetPriorityGrouping(2);
 	NVIC_SetPriority(EXTI0_IRQn, 8);
 	NVIC_EnableIRQ(EXTI0_IRQn);
-
-	font_char(240, 180, 'X',
-		COLOR_WHITE, COLOR_RED, Terminus16_Bold);
-
 }
-/*
+
 void EXTI0_IRQHandler(void)
 {
 	EXTI->PR |= (1 << 0);
-
-	font_char(240, 160, 'X',
-		COLOR_WHITE, COLOR_BLACK, Terminus16);
-
+	//flag = 1;
 	ps2_clock_falling_edge();
 }
-*/
+
 int ps2_data_read(void)
 {
 	/* Read keyboard data pin */

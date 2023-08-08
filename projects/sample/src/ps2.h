@@ -2,13 +2,7 @@
 #define __PS2_H__
 
 #include <stdint.h>
-
-typedef struct
-{
-	uint32_t Codepoint;
-	uint16_t Key;
-	uint8_t State;
-} KeyEvent;
+#include "keyboard.h"
 
 /**
  * @brief Initialize PS/2 keyboard driver and interrupt, Interrupts must be

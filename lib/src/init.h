@@ -9,6 +9,10 @@
 #ifndef __INIT_H__
 #define	__INIT_H__
 
+#include <stdint.h>
+
+extern uint32_t __bss_start, __bss_end;
+
 /**
  * @brief Initialize ITS-Board
  *        This function must be called at the beginning of the main function
