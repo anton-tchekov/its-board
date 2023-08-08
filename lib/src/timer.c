@@ -7,7 +7,6 @@
 
 #include "timer.h"
 #include <stdio.h>
-#include <inttypes.h>
 
 void timer_init(void)
 {
@@ -31,8 +30,6 @@ void timer_init(void)
 	TIM2->CR1 = TIM_CR1_CEN;
 }
 
-#if 0
-
 void timer_delta_str(char *str, uint32_t dt)
 {
 	uint32_t s, ms, us, ns;
@@ -50,20 +47,18 @@ void timer_delta_str(char *str, uint32_t dt)
 
 	if(s)
 	{
-		sprintf(str, "%"PRIu32",%3"PRIu32" s", s, ms);
+		sprintf(str, "%u,%03u s", s, ms);
 	}
 	else if(ms)
 	{
-		sprintf(str, "%"PRIu32",%3"PRIu32" ms", ms, us);
+		sprintf(str, "%u,%03u ms", ms, us);
 	}
 	else if(us)
 	{
-		sprintf(str, "%"PRIu32",%3"PRIu32" us", us, ns);
+		sprintf(str, "%u,%03u us", us, ns);
 	}
 	else
 	{
-		sprintf(str, "%3"PRIu32" ns", ns);
+		sprintf(str, "%u ns", ns);
 	}
 }
-
-#endif

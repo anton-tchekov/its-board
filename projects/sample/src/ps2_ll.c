@@ -3,6 +3,7 @@
 #include "stm32f4xx_hal.h"
 #include "lcd.h"
 #include "fonts/Terminus16.h"
+#include "fonts/Terminus16_Bold.h"
 
 #define PS2_DATA_PORT_IN GPIOF->IDR
 #define PS2_DATA_PIN     1
@@ -23,8 +24,12 @@ void ps2_ll_init(void)
 	NVIC_SetPriorityGrouping(2);
 	NVIC_SetPriority(EXTI0_IRQn, 8);
 	NVIC_EnableIRQ(EXTI0_IRQn);
-}
 
+	font_char(240, 180, 'X',
+		COLOR_WHITE, COLOR_RED, Terminus16_Bold);
+
+}
+/*
 void EXTI0_IRQHandler(void)
 {
 	EXTI->PR |= (1 << 0);
@@ -34,7 +39,7 @@ void EXTI0_IRQHandler(void)
 
 	ps2_clock_falling_edge();
 }
-
+*/
 int ps2_data_read(void)
 {
 	/* Read keyboard data pin */

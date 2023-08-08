@@ -263,8 +263,6 @@ void init_bss(void)
 
 void its_board_init(void)
 {
-	init_bss();
-
 	RCC_OscInitTypeDef RCC_OscInitStruct;
 	RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
@@ -339,4 +337,6 @@ void its_board_init(void)
 	GPIOE->OSPEEDR = 0xFFFF;
 	GPIOF->OSPEEDR = 0xFFFF;
 	GPIOG->OSPEEDR = 0x0FFF;
+
+	//init_bss();
 }

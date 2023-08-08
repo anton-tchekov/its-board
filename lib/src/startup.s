@@ -1,6 +1,9 @@
 .text
-.word     0x20004000
-.word     main
+.thumb
+
+vector_table:
+.word     0x20020000
+.word     start
 .word     NMI_Handler
 .word     HardFault_Handler
 .word     MemManage_Handler
@@ -107,6 +110,107 @@
 .word     LTDC_ER_IRQHandler
 .word     DMA2D_IRQHandler
 
+.weak NMI_Handler
+.weak HardFault_Handler
+.weak MemManage_Handler
+.weak BusFault_Handler
+.weak UsageFault_Handler
+.weak SVC_Handler
+.weak DebugMon_Handler
+.weak PendSV_Handler
+.weak SysTick_Handler
+.weak Default_Handler
+.weak WWDG_IRQHandler
+.weak PVD_IRQHandler
+.weak TAMP_STAMP_IRQHandler
+.weak RTC_WKUP_IRQHandler
+.weak FLASH_IRQHandler
+.weak RCC_IRQHandler
+.weak EXTI0_IRQHandler
+.weak EXTI1_IRQHandler
+.weak EXTI2_IRQHandler
+.weak EXTI3_IRQHandler
+.weak EXTI4_IRQHandler
+.weak DMA1_Stream0_IRQHandler
+.weak DMA1_Stream1_IRQHandler
+.weak DMA1_Stream2_IRQHandler
+.weak DMA1_Stream3_IRQHandler
+.weak DMA1_Stream4_IRQHandler
+.weak DMA1_Stream5_IRQHandler
+.weak DMA1_Stream6_IRQHandler
+.weak ADC_IRQHandler
+.weak CAN1_TX_IRQHandler
+.weak CAN1_RX0_IRQHandler
+.weak CAN1_RX1_IRQHandler
+.weak CAN1_SCE_IRQHandler
+.weak EXTI9_5_IRQHandler
+.weak TIM1_BRK_TIM9_IRQHandler
+.weak TIM1_UP_TIM10_IRQHandler
+.weak TIM1_TRG_COM_TIM11_IRQHandler
+.weak TIM1_CC_IRQHandler
+.weak TIM2_IRQHandler
+.weak TIM3_IRQHandler
+.weak TIM4_IRQHandler
+.weak I2C1_EV_IRQHandler
+.weak I2C1_ER_IRQHandler
+.weak I2C2_EV_IRQHandler
+.weak I2C2_ER_IRQHandler
+.weak SPI1_IRQHandler
+.weak SPI2_IRQHandler
+.weak USART1_IRQHandler
+.weak USART2_IRQHandler
+.weak USART3_IRQHandler
+.weak EXTI15_10_IRQHandler
+.weak RTC_Alarm_IRQHandler
+.weak OTG_FS_WKUP_IRQHandler
+.weak TIM8_BRK_TIM12_IRQHandler
+.weak TIM8_UP_TIM13_IRQHandler
+.weak TIM8_TRG_COM_TIM14_IRQHandler
+.weak TIM8_CC_IRQHandler
+.weak DMA1_Stream7_IRQHandler
+.weak FMC_IRQHandler
+.weak SDIO_IRQHandler
+.weak TIM5_IRQHandler
+.weak SPI3_IRQHandler
+.weak UART4_IRQHandler
+.weak UART5_IRQHandler
+.weak TIM6_DAC_IRQHandler
+.weak TIM7_IRQHandler
+.weak DMA2_Stream0_IRQHandler
+.weak DMA2_Stream1_IRQHandler
+.weak DMA2_Stream2_IRQHandler
+.weak DMA2_Stream3_IRQHandler
+.weak DMA2_Stream4_IRQHandler
+.weak ETH_IRQHandler
+.weak ETH_WKUP_IRQHandler
+.weak CAN2_TX_IRQHandler
+.weak CAN2_RX0_IRQHandler
+.weak CAN2_RX1_IRQHandler
+.weak CAN2_SCE_IRQHandler
+.weak OTG_FS_IRQHandler
+.weak DMA2_Stream5_IRQHandler
+.weak DMA2_Stream6_IRQHandler
+.weak DMA2_Stream7_IRQHandler
+.weak USART6_IRQHandler
+.weak I2C3_EV_IRQHandler
+.weak I2C3_ER_IRQHandler
+.weak OTG_HS_EP1_OUT_IRQHandler
+.weak OTG_HS_EP1_IN_IRQHandler
+.weak OTG_HS_WKUP_IRQHandler
+.weak OTG_HS_IRQHandler
+.weak DCMI_IRQHandler
+.weak HASH_RNG_IRQHandler
+.weak FPU_IRQHandler
+.weak UART7_IRQHandler
+.weak UART8_IRQHandler
+.weak SPI4_IRQHandler
+.weak SPI5_IRQHandler
+.weak SPI6_IRQHandler
+.weak SAI1_IRQHandler
+.weak LTDC_IRQHandler
+.weak LTDC_ER_IRQHandler
+.weak DMA2D_IRQHandler
+
 NMI_Handler:
 HardFault_Handler:
 MemManage_Handler:
@@ -123,7 +227,7 @@ TAMP_STAMP_IRQHandler:
 RTC_WKUP_IRQHandler:
 FLASH_IRQHandler:
 RCC_IRQHandler:
-; EXTI0_IRQHandler:
+EXTI0_IRQHandler:
 EXTI1_IRQHandler:
 EXTI2_IRQHandler:
 EXTI3_IRQHandler:
@@ -208,3 +312,11 @@ LTDC_IRQHandler:
 LTDC_ER_IRQHandler:
 DMA2D_IRQHandler:
 	BX LR
+
+
+start:
+	LDR R0, =its_board_init
+	BX  R0
+	LDR R1, =main
+	BX  R1
+	B  .
