@@ -6,6 +6,9 @@ int main(void)
 	SymEntry tab;
 	symtab_init(&tab);
 
+	symtab_print(&tab);
+
+
 	symval val = 0;
 	int res = symbol_get(&tab, "hou", &val);
 

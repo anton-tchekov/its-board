@@ -46,6 +46,9 @@ int symbol_remove(SymEntry *tab, const char *ident);
  */
 int symbol_get(SymEntry *root, const char *ident, symval *value);
 
+
+void symtab_print(SymEntry *root);
+
 /**
  * @brief Gets the value for a symbol
  *

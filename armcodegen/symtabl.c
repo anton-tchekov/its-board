@@ -108,3 +108,27 @@ int symbol_get(SymEntry *entry, const char *ident, symval *value)
 		return symbol_get(entry->Next, ident, value);
 	}
 }
+
+static void nspaces(int n)
+{
+	while(n--)
+	{
+		printf(" ");
+	}
+}
+
+static void _symtab_print(SymEntry *entry, int nesting)
+{
+	while(entry)
+	{
+		nspaces(4 * nesting);
+		printf("- %s\n", entry->Piece);
+		_symtab_print(entry->Children, nesting + 1);
+		entry = entry->Next;
+	}
+}
+
+void symtab_print(SymEntry *root)
+{
+	_symtab_print(root, 0);
+}
