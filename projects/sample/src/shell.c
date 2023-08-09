@@ -1,3 +1,20 @@
+/*
+
+Shell Idea Plan:
+
+everythung is a expression
+commands are c code - REPL
+edit("function");
+exit editor:
+	function compiles
+	function does not compile
+	error propagation
+		function cannot be run because it contains errors
+		function "print_str" cannot be run due to error in function "print_char"
+
+
+*/
+
 #include "shell.h"
 #include "terminal.h"
 #include "string.h"

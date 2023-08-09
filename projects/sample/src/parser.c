@@ -43,9 +43,9 @@ int nanoc_compile(NanoC *n, const char *src, u8 *out, u8 *strings, int string_of
 
 	n->Parser.Index = 0;
 
-return_if(_lexer_next(&n->Lexer, &n->Token));
+	return_if(_lexer_next(&n->Lexer, &n->Token));
 	_parser_statement(n);
-n->Parser.Output[n->Parser.Index++] = INSTR_HALT;
+	n->Parser.Output[n->Parser.Index++] = INSTR_HALT;
 
 #if 0
 
