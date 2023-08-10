@@ -228,6 +228,7 @@ int symtab_complete(SymTab *entry, char *ident)
 				*search++ = *edge++;
 			}
 
+			*search = '\0';
 			return 1;
 		}
 	}
