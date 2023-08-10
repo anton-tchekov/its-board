@@ -4,18 +4,27 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* Symbol table interface */
-typedef uint32_t symval;
-typedef struct SYM_ENTRY
-{
-	struct SYM_ENTRY *Next;
-	struct SYM_ENTRY *Children;
-	const char *Piece;
-	symval Value;
-	int IsLeaf;
-} SymEntry;
+#define SYMBOL_MAX_LENGTH 255
 
-void symtab_init(SymEntry *tab);
+#define SYMTAB_DEBUG
+
+/* Symbol table abstract interface */
+typedef uint32_t symval;
+typedef struct SYM_TAB SymTab;
+
+/**
+ * @brief Create a Symbol Table
+ *
+ * @return Pointer to Symbol Table allocated on the heap
+ */
+SymTab *symtab_create(void);
+
+/**
+ * @brief Frees all the memory of a symbol table
+ *
+ * @param tab Pointer to Symbol Table
+ */
+void symtab_destroy(SymTab *tab);
 
 /**
  * @brief Inserts/updates the value for a symbol
@@ -23,18 +32,18 @@ void symtab_init(SymEntry *tab);
  * @param tab Symbol table
  * @param ident Symbol identifier
  * @param value Value
- * @return true if the symbol already existed
+ * @return 1 if the symbol already existed, 0 if it is a new symbol
  */
-int symbol_put(SymEntry *tab, const char *ident, symval value);
+int symtab_put(SymTab *tab, const char *ident, symval value);
 
 /**
  * @brief Removes a symbol
  *
  * @param tab Symbol table
  * @param ident Symbol identifier
- * @return true if the symbol existed
+ * @return 1 if the symbol existed and was removed, 0 else
  */
-int symbol_remove(SymEntry *tab, const char *ident);
+int symtab_remove(SymTab *tab, const char *ident);
 
 /**
  * @brief Gets the value for a symbol
@@ -42,22 +51,59 @@ int symbol_remove(SymEntry *tab, const char *ident);
  * @param tab Symbol table
  * @param ident Symbol identifier
  * @param value Pointer for the result
- * @return true if the symbol existed, false if the symbol was not found
+ * @return 1 if the symbol exists, 0 if the symbol was not found
  */
-int symbol_get(SymEntry *root, const char *ident, symval *value);
-
-
-void symtab_print(SymEntry *root);
+int symtab_get(SymTab *tab, const char *ident, symval *value);
 
 /**
- * @brief Gets the value for a symbol
+ * @brief Check if a symbol exists
  *
  * @param tab Symbol table
  * @param ident Symbol identifier
- * @param value Pointer for the result
- * @return true if the symbol existed, false if the symbol was not found
+ * @return 1 if the symbol exists, 0 if the symbol was not found
  */
-//int symbol_search(SymTab *tab, const char *prefix, const char *cmpl,
-//	int max_results);
+int symtab_exists(SymTab *tab, const char *ident);
+
+/**
+ * @brief Autocomplete the given identifier up to the point
+ *        where all contained symbols that have ident as a prefix
+ *        are the same
+ *
+ * @param tab Symbol table
+ * @param ident Identifer that should be auto-completed. Because it
+ *              is modified in place, ident must point to a buffer
+ *              that is at least (SYMBOL_MAX_LENGTH + 1) bytes in size
+ * @return 1, if ident was changed
+ */
+int symtab_complete(SymTab *tab, char *ident);
+
+/**
+ * @brief Calls the provied callback function for every symbol
+ *        that has a certain prefix
+ *
+ * @param tab Symbol table
+ * @param ident Prefix Identifer that will be completed and passed
+ *              to the callback. Because it is modified in place,
+ *              ident must point to a buffer that is at least
+ *              (SYMBOL_MAX_LENGTH + 1) bytes in size
+ * @param max_results Maximum number of results (0 for unlimited)
+ * @param callback Callback function that is called with the completed
+ *                 identifier
+ * @return The number of times the callback was called
+ */
+int symtab_prefix_iter(SymTab *tab, char *ident, int max_results,
+	void (*callback)(char *ident));
+
+#ifdef SYMTAB_DEBUG
+
+/**
+ * @brief Print the internal representation of a symbol table
+ *        (for debugging purposes only)
+ *
+ * @param tab Pointer to symbol table
+ */
+void symtab_print(SymTab *tab);
+
+#endif
 
 #endif /* __SYMTABL_H__ */
