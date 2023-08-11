@@ -31,11 +31,26 @@ static char *_strdup(const char *s)
 	return p;
 }
 
+static int _is_leaf(SymEntry *entry)
+{
+	return entry->IsLeaf;
+}
+
+static symval _get_value(SymEntry *entry)
+{
+	return entry->Value;
+}
+
+static void _set_value(SymEntry *entry, symval value)
+{
+	entry->Value = value;
+}
+
 /* --- PUBLIC --- */
 SymTab *symtab_create(void)
 {
 	SymEntry *tab = _new_entry(0);
-	tab->Piece = _strdup("_dummy");
+	tab->Piece = _strdup("");
 	tab->IsLeaf = 0;
 	return tab;
 }
@@ -56,7 +71,6 @@ void symtab_destroy(SymTab *tab)
 
 int symtab_put(SymEntry *entry, const char *ident, symval value)
 {
-	/* TODO: Finish insert operation */
 	char *edge;
 	const char *search;
 
@@ -69,14 +83,12 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 		++search;
 	}
 
-	if(!*edge) // End of Edge
+	if(!*edge)
 	{
-		printf(">>> end of edge: %s\n", entry->Piece);
-
+		/* End of edge */
 		if(!*search)
 		{
-			/* Both are finished, symbol was found */
-			/* Update value */
+			/* Both are finished, symbol was found: Update value */
 			entry->Value = value;
 			entry->IsLeaf = 1;
 			return 1;
@@ -84,7 +96,7 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 
 		if(!entry->Children)
 		{
-			/* No children to search - insert here */
+			/* No children to search: Insert here */
 			SymEntry *n = _new_entry(value);
 			n->Piece = _strdup(search);
 			n->IsLeaf = 1;
@@ -97,12 +109,10 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 	}
 	else if(edge == entry->Piece)
 	{
+		/* Beginning of edge */
 		if(!entry->Next)
 		{
 			/* No next entry: symbol not found */
-			// beginning
-			printf(">>> start of edge: %s\n", entry->Piece);
-
 			SymEntry *n = _new_entry(value);
 			n->Piece = _strdup(search);
 			n->Value = value;
@@ -116,11 +126,10 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 	}
 	else
 	{
-		// middle
-		/* split parent */
-		printf(">>> middle of edge: %s\n", entry->Piece);
+		SymEntry *n, *second;
 
-		SymEntry *second = _new_entry(entry->Value);
+		/* Middle of edge: Split parent */
+		second = _new_entry(entry->Value);
 		second->Piece = _strdup(edge);
 		second->Value = value;
 		second->IsLeaf = entry->IsLeaf;
@@ -133,8 +142,7 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 		entry->Piece =
 			realloc(entry->Piece, edge - entry->Piece + 1);
 
-
-		SymEntry *n = _new_entry(value);
+		n = _new_entry(value);
 		n->Piece = _strdup(search);
 		n->Value = value;
 		n->IsLeaf = 1;
@@ -144,11 +152,77 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 	}
 }
 
-int symtab_remove(SymEntry *tab, const char *ident)
+int symtab_remove(SymEntry *entry, const char *ident)
 {
-	/* TODO: Implement remove operation */
-	(void)tab;
-	(void)ident;
+	SymTab *parent, *prev;
+	const char *edge, *search;
+
+	parent = NULL;
+	prev = NULL;
+	while(entry)
+	{
+		search = ident;
+		edge = entry->Piece;
+		while(*edge && *search && *edge == *search)
+		{
+			++edge;
+			++search;
+		}
+
+		if(!*edge)
+		{
+			if(!*search && entry->IsLeaf)
+			{
+				SymEntry *child;
+
+				/* Found: Delete */
+				if(prev)
+				{
+					prev->Next = entry->Next;
+				}
+				else
+				{
+					parent->Children = entry->Next;
+				}
+
+				free(entry->Piece);
+				free(entry);
+
+				child = parent->Children;
+				if(child && !parent->IsLeaf && !child->Next)
+				{
+					int parent_len, child_len, len;
+
+					/* Merge parent with child */
+					parent->IsLeaf = 1;
+					parent->Value = child->Value;
+
+					parent_len = strlen(parent->Piece);
+					child_len = strlen(child->Piece);
+					len = parent_len + child_len + 1;
+					parent->Piece = realloc(parent->Piece, len);
+					strcpy(parent->Piece + parent_len, child->Piece);
+
+					free(child->Piece);
+					free(child);
+					parent->Children = NULL;
+				}
+
+				return 1;
+			}
+
+			prev = NULL;
+			parent = entry;
+			entry = entry->Children;
+			ident = search;
+		}
+		else
+		{
+			prev = entry;
+			entry = entry->Next;
+		}
+	}
+
 	return 0;
 }
 
@@ -236,13 +310,13 @@ int symtab_complete(SymTab *entry, char *ident)
 	return 0;
 }
 
-int symtab_prefix_iter(SymTab *tab, char *ident, int max_results,
+int symtab_prefix_iter(SymTab *entry, char *ident, int max_results,
 	void (*callback)(char *ident))
 {
 	int num_results = 0;
 
 	/* TODO: Implement prefix iteration functionality */
-	(void)tab;
+	(void)entry;
 	(void)ident;
 	(void)max_results;
 	(void)callback;
@@ -278,7 +352,7 @@ static void _symtab_print(SymEntry *entry, int nesting)
 
 void symtab_print(SymTab *tab)
 {
-	_symtab_print(tab, 0);
+	_symtab_print(tab->Children, 0);
 }
 
 #endif
