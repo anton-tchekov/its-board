@@ -27,5 +27,6 @@ void terminal_init(void);
 void terminal_print(const char *s);
 void terminal_char(int c);
 void terminal_fg(int color);
+void terminal_xy(int x, int y);
 
 #endif /* __TERMINAL_H__ */

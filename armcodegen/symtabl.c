@@ -10,7 +10,6 @@ typedef struct SYM_TAB
 	struct SYM_TAB *Children;
 	char *Piece;
 	symval Value;
-	int IsLeaf;
 } SymEntry;
 
 /* --- PRIVATE --- */
@@ -31,27 +30,12 @@ static char *_strdup(const char *s)
 	return p;
 }
 
-static int _is_leaf(SymEntry *entry)
-{
-	return entry->IsLeaf;
-}
-
-static symval _get_value(SymEntry *entry)
-{
-	return entry->Value;
-}
-
-static void _set_value(SymEntry *entry, symval value)
-{
-	entry->Value = value;
-}
-
 /* --- PUBLIC --- */
 SymTab *symtab_create(void)
 {
 	SymEntry *tab = _new_entry(0);
 	tab->Piece = _strdup("");
-	tab->IsLeaf = 0;
+	tab->Value = 0;
 	return tab;
 }
 
@@ -89,8 +73,7 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 		if(!*search)
 		{
 			/* Both are finished, symbol was found: Update value */
-			entry->Value = value;
-			entry->IsLeaf = 1;
+			entry->Value = (value << 1) | 1;
 			return 1;
 		}
 
@@ -99,7 +82,7 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 			/* No children to search: Insert here */
 			SymEntry *n = _new_entry(value);
 			n->Piece = _strdup(search);
-			n->IsLeaf = 1;
+			n->Value = (value << 1) | 1;
 			entry->Children = n;
 			return 0;
 		}
@@ -115,8 +98,7 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 			/* No next entry: symbol not found */
 			SymEntry *n = _new_entry(value);
 			n->Piece = _strdup(search);
-			n->Value = value;
-			n->IsLeaf = 1;
+			n->Value = (value << 1) | 1;
 			entry->Next = n;
 			return 0;
 		}
@@ -131,12 +113,11 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 		/* Middle of edge: Split parent */
 		second = _new_entry(entry->Value);
 		second->Piece = _strdup(edge);
-		second->Value = value;
-		second->IsLeaf = entry->IsLeaf;
 		second->Children = entry->Children;
 
+		/* BUG ? overwrite value */
+
 		entry->Value = 0;
-		entry->IsLeaf = 0;
 		entry->Children = second;
 		*edge = '\0';
 		entry->Piece =
@@ -144,8 +125,7 @@ int symtab_put(SymEntry *entry, const char *ident, symval value)
 
 		n = _new_entry(value);
 		n->Piece = _strdup(search);
-		n->Value = value;
-		n->IsLeaf = 1;
+		n->Value = (value << 1) | 1;
 
 		second->Next = n;
 		return 0;
@@ -171,7 +151,7 @@ int symtab_remove(SymEntry *entry, const char *ident)
 
 		if(!*edge)
 		{
-			if(!*search && entry->IsLeaf)
+			if(!*search && (entry->Value & 1))
 			{
 				SymEntry *child;
 
@@ -189,14 +169,13 @@ int symtab_remove(SymEntry *entry, const char *ident)
 				free(entry);
 
 				child = parent->Children;
-				if(child && !parent->IsLeaf && !child->Next)
+				if(child && !(parent->Value & 1) && !child->Next)
 				{
-					int parent_len, child_len, len;
-
 					/* Merge parent with child */
-					parent->IsLeaf = 1;
-					parent->Value = child->Value;
 
+					size_t parent_len, child_len, len;
+
+					parent->Value = (child->Value << 1) | 1;
 					parent_len = strlen(parent->Piece);
 					child_len = strlen(child->Piece);
 					len = parent_len + child_len + 1;
@@ -226,7 +205,7 @@ int symtab_remove(SymEntry *entry, const char *ident)
 	return 0;
 }
 
-int symtab_get(SymEntry *entry, const char *ident, symval *value)
+int symtab_get(const SymEntry *entry, const char *ident, symval *value)
 {
 	const char *edge, *search;
 
@@ -242,9 +221,9 @@ int symtab_get(SymEntry *entry, const char *ident, symval *value)
 
 		if(!*edge)
 		{
-			if(!*search && entry->IsLeaf)
+			if(!*search && (entry->Value & 1))
 			{
-				*value = entry->Value;
+				*value = entry->Value >> 1;
 				return 1;
 			}
 
@@ -339,9 +318,9 @@ static void _symtab_print(SymEntry *entry, int nesting)
 	{
 		nspaces(4 * nesting);
 		printf("- %s", entry->Piece);
-		if(entry->IsLeaf)
+		if(entry->Value & 1)
 		{
-			printf(" = %d", entry->Value);
+			printf(" = %d", entry->Value >> 1);
 		}
 
 		printf("\n");

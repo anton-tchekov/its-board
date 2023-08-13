@@ -43,8 +43,15 @@ typedef struct
 	void (*FN)(void);
 } Command;
 
+void cmd_clear(void)
+{
+	idx = 0;
+	cmd[0] = '\0';
+}
+
 void cmd_append(int c)
 {
+	terminal_char(c);
 	cmd[idx++] = c;
 	cmd[idx] = '\0';
 }
@@ -196,34 +203,100 @@ void run_command(void)
 	}*/
 }
 
+static void cmd_left(void)
+{
+
+}
+
+static void cmd_right(void)
+{
+
+}
+
+static void cmd_home(void)
+{
+
+}
+
+static void cmd_end(void)
+{
+
+}
+
+static void cmd_backspace(void)
+{
+
+}
+
+static void cmd_delete(void)
+{
+
+}
+
 void shell_update(void)
 {
 	KeyEvent event;
-	int c;
+	int c, key;
+
 	if(!ps2_read(&event))
 	{
 		return;
 	}
-	if(event.State != KEYSTATE_PRESSED)
+
+	if(event.State == KEYSTATE_RELEASED)
 	{
 		return;
 	}
 
 	c = event.Codepoint;
-	if(c == '\n')
+	key = event.Key;
+	if(key == KEY_LEFT)
 	{
-		terminal_print("\n");
+		cmd_left();
+	}
+	else if(key == KEY_RIGHT)
+	{
+		cmd_right();
+	}
+	else if(key == KEY_UP)
+	{
+		/* TODO: Cycle through previously used commands */
+	}
+	else if(key == KEY_DOWN)
+	{
+		/* TODO: Cycle through previously used commands */
+	}
+	else if(key == (MOD_CTRL | KEY_C))
+	{
+		terminal_print("^C\n");
+		shell_prompt();
+		cmd_clear();
+	}
+	else if(key == KEY_BACKSPACE)
+	{
+		cmd_backspace();
+	}
+	else if(key == KEY_DELETE)
+	{
+		cmd_delete();
+	}
+	else if(key == KEY_HOME)
+	{
+		cmd_end();
+	}
+	else if(key == KEY_END)
+	{
+		cmd_home();
+	}
+	else if(c == '\n')
+	{
+		terminal_char('\n');
 		run_command();
 		shell_prompt();
-		idx = 0;
-		cmd[0] = '\0';
+		cmd_clear();
 	}
 	else if(isprint(c))
 	{
-		char buf[2];
-		buf[0] = event.Codepoint;
-		buf[1] = '\0';
-		terminal_print(buf);
 		cmd_append(c);
 	}
 }

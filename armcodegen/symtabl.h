@@ -53,7 +53,7 @@ int symtab_remove(SymTab *tab, const char *ident);
  * @param value Pointer for the result
  * @return 1 if the symbol exists, 0 if the symbol was not found
  */
-int symtab_get(SymTab *tab, const char *ident, symval *value);
+int symtab_get(const SymTab *tab, const char *ident, symval *value);
 
 /**
  * @brief Check if a symbol exists

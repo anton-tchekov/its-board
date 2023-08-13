@@ -5,11 +5,9 @@
 
 #define TERMINAL_CHARS 1200
 
-static uint16_t terminal_buf[TERMINAL_CHARS];
+static uint16_t terminal_buf[TERMINAL_CHARS], terminal_cur[TERMINAL_CHARS];
 static int terminal_x, terminal_y, terminal_w, terminal_h,
-	char_w, char_h;
-static int terminal_style;
-
+	char_w, char_h, terminal_style;
 
 #define CT_BLACK          0x0000
 #define CT_RED            0xA800
@@ -60,14 +58,24 @@ static inline int extract_char(int v)
 	return v & 0xFF;
 }
 
+static inline int extract_fg_id(int v)
+{
+	return (v >> 8) & 0x0F;
+}
+
+static inline int extract_bg_id(int v)
+{
+	return v >> 12;
+}
+
 static inline int extract_fg(int v)
 {
-	return color_table[(v >> 8) & 0x0F];
+	return color_table[extract_fg_id(v)];
 }
 
 static inline int extract_bg(int v)
 {
-	return color_table[v >> 12];
+	return color_table[extract_bg_id(v)];
 }
 
 static inline int style(int fg, int bg)
@@ -83,9 +91,6 @@ static inline int combine(int c, int style)
 static void terminal_set(int x, int y, int v)
 {
 	terminal_buf[y * terminal_w + x] = v;
-	font_char(x * char_w, y * char_h, extract_char(v),
-		extract_fg(v), extract_bg(v),
-		is_bold(v) ? Terminus16_Bold : Terminus16);
 }
 
 static int terminal_get(int x, int y)
@@ -93,35 +98,37 @@ static int terminal_get(int x, int y)
 	return terminal_buf[y * terminal_w + x];
 }
 
-static void terminal_update(int x, int y, int v)
+static void terminal_render(int x, int y, int v)
 {
-	if(terminal_get(x, y) == v)
-	{
-		return;
-	}
-
-	terminal_set(x, y, v);
+	font_char(x * char_w, y * char_h, extract_char(v),
+		extract_fg(v), extract_bg(v),
+		is_bold(v) ? Terminus16_Bold : Terminus16);
 }
 
-void terminal_clear(void)
+static void terminal_update(void)
 {
-	int x, y, v;
-	v = combine(' ', terminal_style);
+	int x, y, v, c, fg, bg;
 	for(y = 0; y < terminal_h; ++y)
 	{
 		for(x = 0; x < terminal_w; ++x)
 		{
-			terminal_update(x, y, v);
+			v = terminal_get(x, y);
+			c = extract_char(v);
+			fg = extract_fg_id(v);
+			bg = extract_bg_id(v);
+
+			if(x == terminal_x && y == terminal_y)
+			{
+				v = combine(c, style(bg, fg));
+			}
+
+			if(terminal_cur[y * terminal_w + x] != v)
+			{
+				terminal_render(x, y, v);
+				terminal_cur[y * terminal_w + x] = v;
+			}
 		}
 	}
-
-	terminal_x = 0;
-	terminal_y = 0;
-}
-
-static const char *terminal_escape(const char *s)
-{
-	return s;
 }
 
 static void terminal_clear_line(int line)
@@ -130,7 +137,7 @@ static void terminal_clear_line(int line)
 	v = combine(' ', terminal_style);
 	for(x = 0; x < terminal_w; ++x)
 	{
-		terminal_update(x, line, v);
+		terminal_set(x, line, v);
 	}
 }
 
@@ -141,16 +148,11 @@ static void terminal_scroll_up(void)
 	{
 		for(x = 0; x < terminal_w; ++x)
 		{
-			terminal_update(x, y, terminal_get(x, y + 1));
+			terminal_set(x, y, terminal_get(x, y + 1));
 		}
 	}
 
 	terminal_clear_line(terminal_h - 1);
-}
-
-static void terminal_tab(void)
-{
-
 }
 
 static void terminal_newline(void)
@@ -163,6 +165,40 @@ static void terminal_newline(void)
 	}
 }
 
+static void _terminal_char(int c)
+{
+	if(c == '\n')
+	{
+		terminal_newline();
+	}
+	else
+	{
+		terminal_set(terminal_x, terminal_y, combine(c, terminal_style));
+		if(++terminal_x == terminal_w)
+		{
+			terminal_newline();
+		}
+	}
+}
+
+/* --- PUBLIC --- */
+void terminal_clear(void)
+{
+	int x, y, v;
+	v = combine(' ', terminal_style);
+	for(y = 0; y < terminal_h; ++y)
+	{
+		for(x = 0; x < terminal_w; ++x)
+		{
+			terminal_set(x, y, v);
+		}
+	}
+
+	terminal_x = 0;
+	terminal_y = 0;
+	terminal_update();
+}
+
 void terminal_fg(int color)
 {
 	terminal_style &= 0xF0;
@@ -171,14 +207,10 @@ void terminal_fg(int color)
 
 void terminal_char(int c)
 {
-	terminal_update(terminal_x, terminal_y, combine(c, terminal_style));
-	if(++terminal_x == terminal_w)
-	{
-		terminal_newline();
-	}
+	_terminal_char(c);
+	terminal_update();
 }
 
-/* --- PUBLIC --- */
 void terminal_init(void)
 {
 	char_w = 8;
@@ -194,21 +226,15 @@ void terminal_print(const char *s)
 	int c;
 	while((c = *s++))
 	{
-		if(c == '\n')
-		{
-			terminal_newline();
-		}
-		else if(c == '\t')
-		{
-			terminal_tab();
-		}
-		else if(c == 0x1B)
-		{
-			s = terminal_escape(s);
-		}
-		else
-		{
-			terminal_char(c);
-		}
+		_terminal_char(c);
 	}
+
+	terminal_update();
+}
+
+void terminal_xy(int x, int y)
+{
+	terminal_x = x;
+	terminal_y = y;
+	terminal_update();
 }
