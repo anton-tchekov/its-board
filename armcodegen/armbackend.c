@@ -215,6 +215,7 @@ typedef enum
 
 	TT_IDENTIFIER,
 	TT_NUMBER,
+	TT_STRING,
 
 	TT_L_SHIFT,
 	TT_R_SHIFT,
@@ -240,6 +241,9 @@ typedef enum
 	TT_B_AND_ASSIGN,
 	TT_B_NOT_ASSIGN,
 	TT_XOR_ASSIGN,
+	TT_INCREMENT,
+	TT_DECREMENT,
+	TT_ARROW,
 } TokenType;
 
 typedef struct
@@ -251,6 +255,7 @@ typedef struct
 
 typedef struct
 {
+	const char *Pos;
 	size_t Capacity;
 	size_t Length;
 	Token *Buffer;
@@ -320,14 +325,215 @@ static int is_instruction(char *ident)
 		valuesize (default 1) */
 	}
 
-	"LDR"
-	"STR"
-	"MOV"
-	"";
-
+	return 0;
 }
 
-static TokenType _get_operator(char *line, size_t *out_len)
+
+
+
+#if 0
+
+static int _parser_expression(NanoC *n)
+{
+	TokenType prev, op_stack[NANOC_MAX_OP];
+	u32 idx_old, paren_cnt, cnt;
+	size_t si;
+
+	prev = TT_NULL;
+	paren_cnt = 1;
+	si = 0;
+	idx_old = n->Parser.Index;
+	cnt = 0;
+
+	for(;;)
+	{
+		switch(n->Token.Type)
+		{
+			case TT_NUMBER:
+			{
+				u32 value;
+				if(prev == TT_NUMBER || prev == TT_IDENTIFIER ||
+						prev == TT_R_PAREN)
+				{
+					TRACE(ERROR_UNEXPECTED_TOKEN);
+				}
+
+				++cnt;
+
+				value = n->Token.Value.Number;
+				n->Parser.Output[n->Parser.Index++] = INSTR_PUSHI32;
+				_write_32(n->Parser.Output + n->Parser.Index, value);
+				n->Parser.Index += 4;
+				break;
+			}
+
+			case TT_IDENTIFIER:
+			{
+				int i;
+				if(prev == TT_NUMBER || prev == TT_IDENTIFIER ||
+						prev == TT_R_PAREN)
+				{
+					TRACE(ERROR_UNEXPECTED_TOKEN);
+				}
+
+
+				if((i = _map_find(&n->Parser.Variables, tok.Value.Identifier.Name,
+					tok.Value.Identifier.Length)) < 0)
+				{
+					TRACE(ERROR_UNDEFINED_VAR);
+				}
+
+				++cnt;
+				n->Parser.Output[n->Parser.Index++] = INSTR_PUSHL;
+				n->Parser.Output[n->Parser.Index++] = (u8)(i & 0xFF);
+				break;
+			}
+
+			case TT_L_PAREN:
+			{
+				if(si >= sizeof(op_stack) / sizeof(*op_stack) - 1)
+				{
+					TRACE(ERROR_STACK_OVERFLOW);
+				}
+
+				cnt = 0;
+				++paren_cnt;
+				op_stack[si++] = n->Token.Type;
+				break;
+			}
+
+			case TT_R_PAREN:
+			{
+				if(--paren_cnt == 0)
+				{
+					goto exit;
+				}
+
+				for(; si; --si)
+				{
+					if(op_stack[si - 1] == TT_L_PAREN)
+					{
+						--si;
+						goto found;
+					}
+
+					n->Parser.Output[n->Parser.Index++] = token_to_instr(op_stack[si - 1]);
+				}
+
+				TRACE(ERROR_MISMATCHED_PAREN);
+found:
+				if(!cnt)
+				{
+					TRACE(ERROR_UNEXPECTED_TOKEN);
+				}
+				break;
+			}
+
+			case TT_COMMA:
+			case TT_SEMICOLON:
+			case TT_R_BRACKET:
+			{
+				goto exit;
+			}
+
+			case TT_SUB:
+			{
+				if(prev == TT_NULL || prev == TT_L_PAREN)
+				{
+					n->Token.Type = TT_U_MINUS;
+				}
+			}
+			/* fall through */
+
+			default:
+			{
+				if(IS_OPERATOR(n->Token.Type))
+				{
+					int prec;
+					if(IS_OPERATOR(prev) && n->Token.Type != TT_U_MINUS)
+					{
+						TRACE(ERROR_UNEXPECTED_TOKEN);
+					}
+
+					prec = _get_precedence(n->Token.Type);
+					for(; si; --si)
+					{
+						if((_get_precedence(op_stack[si - 1]) > prec) ||
+							(op_stack[si - 1] == TT_L_PAREN))
+						{
+							break;
+						}
+
+						n->Parser.Output[n->Parser.Index++] = token_to_instr(op_stack[si - 1]);
+					}
+
+					if(si >= sizeof(op_stack) / sizeof(*op_stack) - 1)
+					{
+						TRACE(ERROR_STACK_OVERFLOW);
+					}
+
+					op_stack[si++] = n->Token.Type;
+				}
+				else
+				{
+					TRACE(ERROR_UNEXPECTED_TOKEN);
+				}
+				break;
+			}
+		}
+
+		prev = n->Token.Type;
+		return_if(_lexer_next(&n->Lexer, &n->Token));
+		if(IS_OPERATOR(prev) &&
+				n->Token.Type != TT_NUMBER &&
+				n->Token.Type != TT_L_PAREN &&
+				n->Token.Type != TT_IDENTIFIER)
+		{
+			if(prev != TT_U_MINUS)
+			{
+				TRACE(ERROR_UNEXPECTED_TOKEN);
+			}
+		}
+	}
+
+exit:
+	for(; si; --si)
+	{
+		if(op_stack[si - 1] == TT_L_PAREN)
+		{
+			TRACE(ERROR_MISMATCHED_PAREN);
+		}
+
+		n->Parser.Output[n->Parser.Index++] = token_to_instr(op_stack[si - 1]);
+	}
+
+	if(n->Parser.Index == idx_old)
+	{
+		TRACE(ERROR_INV_EXPR);
+	}
+
+	return 0;
+}
+
+#endif
+
+
+static int hexdigit_value(int c)
+{
+	return (c & 15) + (c >= 'A' ? 9 : 0);
+}
+
+static int isbinary(int c)
+{
+	return c == '0' || c == '1';
+}
+
+static int isoctal(int c)
+{
+	return c >= '0' && c <= '7';
+}
+
+static TokenType _get_operator(const char *line, size_t *out_len)
 {
 	/* Must be sorted from longer to shorter operator
 		strings because of common prefixes */
@@ -355,6 +561,9 @@ static TokenType _get_operator(char *line, size_t *out_len)
 		'&', '=', TT_B_AND_ASSIGN,
 		'|', '=', TT_B_OR_ASSIGN,
 		'^', '=', TT_XOR_ASSIGN,
+		'+', '+', TT_INCREMENT,
+		'-', '-', TT_DECREMENT,
+		'-', '>', TT_ARROW,
 
 		/* Not found */
 		TT_UNKNOWN
@@ -384,125 +593,319 @@ static TokenType _get_operator(char *line, size_t *out_len)
 	}
 }
 
-static int parse_line(size_t line_nr, char *line, size_t len)
+static int parse_identifier(TokenList *tokens)
 {
-	Token token_buffer[10];
+	const char *p, *start;
+
+	p = tokens->Pos;
+	if(!is_identifer_start(*p)) { return 0; }
+	start = p;
+	do { ++p; } while(is_identifier_char(*p));
+	save_token(tokens, start, p - start, TT_IDENTIFIER);
+	tokens->Pos = p;
+	return 1;
+}
+
+static int parse_number(TokenList *tokens)
+{
+	const char *p, *start;
+	int n, c;
+
+	p = tokens->Pos;
+	c = *p;
+	if(!isdigit(c))
+	{
+		return 0;
+	}
+
+	n = c - '0';
+	start = p;
+	++p;
+	c = *p;
+	if(n > 0)
+	{
+		/* decimal */
+		while(isdigit(c))
+		{
+			n = n * 10 + (c - '0');
+			++p;
+			c = *p;
+		}
+	}
+	else
+	{
+		if(c == 'x' || c == 'X')
+		{
+			/* hexadecimal */
+			++p;
+			while(isxdigit((c = *p)))
+			{
+				n = n * 16 + hexdigit_value(c);
+				++p;
+			}
+		}
+		else if(c == 'b' || c == 'B')
+		{
+			/* binary */
+			++p;
+			while(isbinary((c = *p)))
+			{
+				n = n * 2 + (c - '0');
+				++p;
+			}
+		}
+		else
+		{
+			/* octal */
+			while(isoctal(c))
+			{
+				n = n * 8 + (c - '0');
+				++p;
+				c = *p;
+			}
+		}
+	}
+
+	save_token(tokens, start, p - start, TT_NUMBER);
+	tokens->Pos = p;
+	return 1;
+}
+
+static int escseq(const char *p, size_t *out_len)
+{
+	static const char tab[] =
+	{
+		'\\', '\\',
+		'\'', '\'',
+		'\"', '\"',
+		't', '\t',
+		'v', '\v',
+		'r', '\r',
+		'n', '\n',
+		'b', '\b',
+		'0', '\0',
+		'\0'
+	};
+
+	const char *t;
+	int c;
+
+	c = *p;
+	if(c == 'x' && isxdigit(p[1]) && isxdigit(p[2]))
+	{
+		*out_len = 3;
+		return 16 * hexdigit_value(p[1]) + hexdigit_value(p[2]);
+	}
+
+	for(t = tab; *t; t += 2)
+	{
+		if(c == *t)
+		{
+			*out_len = 1;
+			return t[1];
+		}
+	}
+
+	return -1;
+}
+
+static int parse_char(TokenList *tokens)
+{
+	const char *p, *start;
+	int c, v;
+
+	p = tokens->Pos;
+	if(*p != '\'')
+	{
+		return 0;
+	}
+
+	start = p;
+	++p;
+	c = *p;
+	if(c == '\\')
+	{
+		size_t len;
+		++p;
+		v = escseq(p, &len);
+		if(v < 0)
+		{
+			return 0;
+		}
+
+		p += len;
+	}
+	else if(c >= 32 && c <= 126 && c != '\'')
+	{
+		v = c;
+		++p;
+	}
+	else
+	{
+		return 0;
+	}
+
+	if(*p != '\'')
+	{
+		return 0;
+	}
+
+	++p;
+	tokens->Pos = p;
+	save_token(tokens, start, p - start, TT_NUMBER);
+	return 1;
+}
+
+static int parse_string(TokenList *tokens)
+{
+	const char *p, *start;
+	int c, v;
+
+	p = tokens->Pos;
+	if(*p != '\"') { return 0; }
+	start = p;
+	++p;
+	while((c = *p) != '\"')
+	{
+		if(c == '\\')
+		{
+			size_t len;
+			++p;
+			v = escseq(p, &len);
+			if(v < 0)
+			{
+				return 0;
+			}
+
+			p += len;
+		}
+		else if(c >= 32 && c <= 126 && c != '\'')
+		{
+			v = c;
+			++p;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	++p;
+	save_token(tokens, start, p - start, TT_STRING);
+	tokens->Pos = p;
+	return 1;
+}
+
+static int parse_operator(TokenList *tokens)
+{
+	const char *p;
+	size_t len;
+	TokenType op_type;
+
+	p = tokens->Pos;
+	op_type = _get_operator(p, &len);
+	if(op_type == TT_UNKNOWN)
+	{
+		save_token(tokens, p, 1, *p);
+		++p;
+	}
+	else
+	{
+		save_token(tokens, p, len, op_type);
+		p += len;
+	}
+
+	tokens->Pos = p;
+	return 0;
+}
+
+static int parse_whitespace(TokenList *tokens)
+{
+	const char *p;
+
+	p = tokens->Pos;
+	if(!isspace(*p))
+	{
+		return 0;
+	}
+
+	do { ++p; } while(isspace(*p));
+	tokens->Pos = p;
+	return 1;
+}
+
+static void parse_piece(TokenList *tokens)
+{
+	if(parse_whitespace(tokens)) { return; }
+	if(parse_identifier(tokens)) { return; }
+	if(parse_number(tokens)) { return; }
+	if(parse_char(tokens)) { return; }
+	if(parse_string(tokens)) { return; }
+	if(parse_operator(tokens)) { return; }
+}
+
+#define COLOR_RESET "\033[0m"
+#define COLOR_BOLD_RED "\033[1;31m"
+
+static void print_token_marked(Token *token, const char *line)
+{
+	int i, token_offset, token_len;
+
+	token_offset = (int)(token->Start - line);
+	token_len = token->Length;
+
+	printf("\n\n");
+	printf("%.*s", token_offset, line);
+	printf(COLOR_BOLD_RED "%.*s" COLOR_RESET, token_len, token->Start);
+	printf("%s\n", token->Start + token->Length);
+
+	for(i = 0; i < token_offset; ++i)
+	{
+		printf(" ");
+	}
+
+	printf(COLOR_BOLD_RED "^");
+	for(i = 1; i < token_len; ++i)
+	{
+		printf("~");
+	}
+
+	printf(COLOR_RESET "\n\n");
+}
+
+static void debug_tokens(TokenList *tokens, const char *line)
+{
+	size_t i;
+	for(i = 0; i < tokens->Length; ++i)
+	{
+		print_token_marked(&tokens->Buffer[i], line);
+	}
+}
+
+static int parse_line(size_t line_nr, const char *line, size_t len)
+{
+	Token token_buffer[256];
 	TokenList tokens =
 	{
+		.Pos = line,
 		.Length = 0,
 		.Capacity = ARRLEN(token_buffer),
 		.Buffer = token_buffer
 	};
 
-	char *p;
+	const char *p;
 	int c;
 
-	printf("parsing line %ld (len = %ld): %s\n", line_nr, len, line);
+	printf("Parsing line %ld (len = %ld): %s\n", line_nr, len, line);
 
 	p = line;
-	while((c = *p))
+	while((c = *p) && c != ';')
 	{
-		if(is_identifer_start(c))
-		{
-			size_t identifier_len;
-			const char *identifier_start = p;
-			++p;
-			while(is_identifier_char((c = *p)))
-			{
-				++p;
-			}
-
-			identifier_len = p - identifier_start;
-			save_token(&tokens, p, identifier_len, TT_IDENTIFIER);
-		}
-		else if(isdigit(c))
-		{
-			const char *start = p;
-
-			/* number */
-			int n = c - '0';
-			++p;
-			if(n > 0)
-			{
-				/* decimal */
-				while(isdigit((c = *p)))
-				{
-					n = n * 10 + (c - '0');
-					++p;
-				}
-			}
-			else
-			{
-				if((c = *p) == 'x' || c == 'X')
-				{
-					/* hexadecimal */
-					++p;
-					while(isxdigit((c = *p)))
-					{
-						n = n * 16 + (c & 15) + (c >= 'A' ? 9 : 0);
-						++p;
-					}
-				}
-				else if((c = *p) == 'b' || c == 'B')
-				{
-					/* binary */
-					++p;
-					while((c = *p) == '0' || c == '1')
-					{
-						n = n * 2 + (c - '0');
-						++p;
-					}
-				}
-				else
-				{
-					/* octal */
-					while((c = *p) >= '0' && c <= '7')
-					{
-						n = n * 8 + (c - '0');
-						++p;
-					}
-				}
-			}
-
-			save_token(&tokens, start, p - start, TT_NUMBER);
-		}
-		else if(c == '\'')
-		{
-			/* character */
-		}
-		else if(c == '\"')
-		{
-			/* string */
-		}
-		else if(isspace(c))
-		{
-			/* skip whitespace */
-			do { ++p; } while(isspace((c = *p)));
-		}
-		else if(c == ';')
-		{
-			/* comment */
-			break;
-		}
-		else
-		{
-			size_t len;
-			TokenType op_type = _get_operator(p, &len);
-			if(op_type == TT_UNKNOWN)
-			{
-				save_token(&tokens, p, 1, c);
-				++p;
-			}
-			else
-			{
-				save_token(&tokens, p, len, op_type);
-				p += len;
-			}
-		}
+		parse_piece(&tokens);
+		p = tokens.Pos;
 	}
 
-
-
+	debug_tokens(&tokens, line);
 	return 0;
 }
 

@@ -62,7 +62,7 @@ int symtab_get(const SymTab *tab, const char *ident, symval *value);
  * @param ident Symbol identifier
  * @return 1 if the symbol exists, 0 if the symbol was not found
  */
-int symtab_exists(SymTab *tab, const char *ident);
+int symtab_exists(const SymTab *tab, const char *ident);
 
 /**
  * @brief Autocomplete the given identifier up to the point
@@ -75,7 +75,7 @@ int symtab_exists(SymTab *tab, const char *ident);
  *              that is at least (SYMBOL_MAX_LENGTH + 1) bytes in size
  * @return 1, if ident was changed
  */
-int symtab_complete(SymTab *tab, char *ident);
+int symtab_complete(const SymTab *tab, char *ident);
 
 /**
  * @brief Calls the provied callback function for every symbol
@@ -91,7 +91,7 @@ int symtab_complete(SymTab *tab, char *ident);
  *                 identifier
  * @return The number of times the callback was called
  */
-int symtab_prefix_iter(SymTab *tab, char *ident, int max_results,
+int symtab_prefix_iter(const SymTab *tab, char *ident, int max_results,
 	void (*callback)(char *ident));
 
 #ifdef SYMTAB_DEBUG
@@ -102,7 +102,7 @@ int symtab_prefix_iter(SymTab *tab, char *ident, int max_results,
  *
  * @param tab Pointer to symbol table
  */
-void symtab_print(SymTab *tab);
+void symtab_print(const SymTab *tab);
 
 #endif
 

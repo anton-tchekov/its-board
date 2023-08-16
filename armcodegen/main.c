@@ -111,46 +111,24 @@ printf("RATIO = %g times faster\n", s1 / s0);
 int main(void)
 {
 
-	stresstest();
-
-#if  0
+	//stresstest();
 
 	SymTab *tab;
 	tab = symtab_create();
 
-	symtab_put(tab, "fuck", 55);
-	symtab_put(tab, "fucking", 42);
-	symtab_put(tab, "fuckingshit", 77);
+	symtab_put(tab, "test", 1);
+	symtab_put(tab, "team", 2);
+	symtab_put(tab, "toast", 3);
+	symtab_put(tab, "a", 5);
+
+	symval val = 0xFF;
+	symtab_get(tab, "", &val);
+
+	printf("symtab_get(\"\") = %d", val);
 
 	symtab_print(tab);
 
-	symtab_remove(tab, "fuck");
-	symtab_print(tab);
-
-
-	symtab_put(tab, "lcd_init", 1);
-	symtab_put(tab, "lcd_set_orientation", 1);
-	symtab_put(tab, "lcd_rect", 1);
-	symtab_put(tab, "lcd_callback", 1);
-	symtab_put(tab, "lcd_clear", 1);
-	symtab_put(tab, "lcd_set_backlight", 1);
-
-	symtab_print(tab);
-	symtab_remove(tab, "lcd_set_backlight");
-	symtab_print(tab);
-	symtab_remove(tab, "lcd_clear");
-	symtab_print(tab);
-	symtab_remove(tab, "lcd_callback");
-	symtab_print(tab);
-	symtab_remove(tab, "lcd_init");
-	symtab_print(tab);
-	symtab_remove(tab, "lcd_bla");
-	symtab_print(tab);
-	symtab_remove(tab, "lcd_rect");
-	symtab_print(tab);
-	symtab_remove(tab, "lcd_set_orientation");
-	symtab_print(tab);
-
+/*
 	char test[] = "Radix trees support insertion, deletion, and searching operations. Insertion adds a new string to the trie while trying to minimize the amount of data stored. Deletion removes a string from the trie. Searching operations include (but are not necessarily limited to) exact lookup, find predecessor, find successor, and find all strings with a prefix. All of these operations are O(k) where k is the maximum length of all strings in the set, where length is measured in the quantity of bits equal to the radix of the radix trie. ";
 	int n = 0;
 	char *s, *start = NULL;
@@ -184,12 +162,10 @@ int main(void)
 	char buf[256] = "lcd_s";
 	int rv = symtab_complete(tab, buf);
 	printf("%d -> %s\n", rv, buf);
-
-	test_iteration(tab);
+*/
+	//test_iteration(tab);
 
 	symtab_destroy(tab);
-
-#endif
 
 	return 0;
 }
