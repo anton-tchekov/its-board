@@ -176,17 +176,6 @@ static void _remove_entry(SymEntry *entry, SymEntry *parent, SymEntry *prev)
 	}
 }
 
-/* --- PUBLIC --- */
-SymTab *symtab_create(void)
-{
-	SymEntry *tab;
-
-	tab = _new_entry();
-	tab->Piece = "";
-	tab->Value = 0;
-	return tab;
-}
-
 static void _symtab_destroy(SymTab *tab)
 {
 	if(!tab)
@@ -197,6 +186,17 @@ static void _symtab_destroy(SymTab *tab)
 	_symtab_destroy(tab->Next);
 	_symtab_destroy(tab->Children);
 	_free_entry(tab);
+}
+
+/* --- PUBLIC --- */
+SymTab *symtab_create(void)
+{
+	SymEntry *tab;
+
+	tab = _new_entry();
+	tab->Piece = "";
+	tab->Value = 0;
+	return tab;
 }
 
 void symtab_destroy(SymTab *tab)
