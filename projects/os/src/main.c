@@ -10,6 +10,13 @@
 #include "timer.h"
 #include "delay.h"
 #include "lcd.h"
+#include "font.h"
+#include "fonts/Terminus16.h"
+#include "fonts/Terminus16_Bold.h"
+#include "ps2.h"
+#include "stdio.h"
+#include "terminal.h"
+#include "shell.h"
 
 /**
  * @brief Main function
@@ -20,9 +27,13 @@ int main(void)
 	its_board_init();
 	timer_init();
 	lcd_init(D2U_L2R, 1000, COLOR_BLACK);
+	ps2_init();
+	terminal_init();
+	shell_init();
 
 	for(;;)
 	{
+		shell_update();
 	}
 
 	return 0;
