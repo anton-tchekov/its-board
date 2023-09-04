@@ -14,7 +14,7 @@ LIBSRCDIR := $(LIBDIR)/src
 LIBINCDIR := $(LIBDIR)/src
 LIBOBJDIR := $(LIBDIR)/obj
 
-INC       := -I $(LIBINCDIR) -I $(INCDIR) \
+INC       := -I $(LIBINCDIR) -I $(INCDIR) -I $(LIBINCDIR)/stdlib/ \
              -I $(LIBINCDIR)/stm32f4xx_hal/inc/ \
 
 all:     $(TARGET).hex

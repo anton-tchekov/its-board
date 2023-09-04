@@ -1,93 +1,43 @@
+#include "stdio.h"
+#include "string.h"
+#include "ctype.h"
+
 #include "shell.h"
 #include "terminal.h"
-#include "string.h"
 #include "ps2.h"
 #include "nanoc.h"
 #include "error.h"
-#include "stdio.h"
 #include "command.h"
+#include "clipboard.h"
 
-#define COMMAND_MAX_LENGTH  58
+#define COMMAND_MAX_LENGTH  57
+#define COMMAND_BUFFER_SIZE 60
+#define COMMAND_LINES        4
 
 #define NORMAL                TERMINAL_COLOR(TERMINAL_WHITE, TERMINAL_BLACK)
 #define CURSOR                TERMINAL_COLOR(TERMINAL_BLACK, TERMINAL_WHITE)
-#define SELECTED              TERMINAL_COLOR(TERMINAL_BLACK, TERMINAL_RED)
+#define SELECTED              TERMINAL_COLOR(TERMINAL_BLACK, TERMINAL_YELLOW)
 #define CLEAR                 TERMINAL_CHAR(' ', NORMAL)
 
-static char _clipboard[60];
-static int _clipboard_len;
-
-static char _command[60];
-static int _length, _cursor, _selection;
-
-static int _shell_fg, _shell_x, _shell_y;
-
-/* --- PRIVATE --- */
-static inline int _isprint(int c)
+typedef struct
 {
-	return c >= 32 && c <= 126;
-}
+	int Length;
+	int Cursor;
+	int Selection;
+	char Text[COMMAND_BUFFER_SIZE];
+} Line;
 
-static void shell_output_reset(void)
+typedef struct
 {
-	_shell_x = 0;
-	_shell_y = 1;
-	_shell_fg = TERMINAL_WHITE;
-}
+	int Slot;
+	int X, Y;
+	int FG;
+	Line Lines[COMMAND_LINES];
+} Shell;
 
-static void selection_get(int *start, int *end)
-{
-	if(_selection < _cursor)
-	{
-		*start = _selection;
-		*end = _cursor;
-	}
-	else
-	{
-		*start = _cursor;
-		*end = _selection;
-	}
-}
+static Shell this;
 
-static void replace_selection(const char *s, int len)
-{
-	int start, end, sel_len, new_len;
-
-	selection_get(&start, &end);
-	sel_len = end - start;
-	new_len = _length + len - sel_len;
-
-	if(new_len > COMMAND_MAX_LENGTH)
-	{
-		return;
-	}
-
-	memmove(_command + start + len, _command + end, _length - end);
-	memcpy(_command + start, s, len);
-
-	_length = new_len;
-	_cursor = start + len;
-	_selection = _cursor;
-}
-
-static void delete_selection(void)
-{
-	int start, end;
-	selection_get(&start, &end);
-	memmove(_command + start, _command + end, _length - end);
-	_length -= (end - start);
-	_cursor = start;
-	_selection = start;
-}
-
-static void copy_selection(void)
-{
-	int start, end;
-	selection_get(&start, &end);
-	_clipboard_len = end - start;
-	memcpy(_clipboard, _command + start, _clipboard_len);
-}
-
+/* --- UTILS --- */
 static void cls(void)
 {
 	int x, y;
@@ -100,7 +50,229 @@ static void cls(void)
 	}
 }
 
-static int get_char_at(int i, int start, int end)
+/* --- PRIVATE --- */
+static void shell_output_reset(void)
+{
+	this.X = 0;
+	this.Y = 1;
+	this.FG = TERMINAL_WHITE;
+}
+
+/* --- SELECTION --- */
+static void selection_get(Line *line, int *start, int *end)
+{
+	if(line->Selection < line->Cursor)
+	{
+		*start = line->Selection;
+		*end = line->Cursor;
+	}
+	else
+	{
+		*start = line->Cursor;
+		*end = line->Selection;
+	}
+}
+
+static void selection_replace(Line *line, const char *s, int len)
+{
+	int start, end, sel_len, new_len;
+	selection_get(line, &start, &end);
+	sel_len = end - start;
+	new_len = line->Length + len - sel_len;
+	if(new_len > COMMAND_MAX_LENGTH)
+	{
+		return;
+	}
+
+	memmove(line->Text + start + len, line->Text + end, line->Length - end);
+	memcpy(line->Text + start, s, len);
+	line->Length = new_len;
+	line->Cursor = start + len;
+	line->Selection = line->Cursor;
+}
+
+static void selection_delete(Line *line)
+{
+	int start, end;
+	selection_get(line, &start, &end);
+	memmove(line->Text + start, line->Text + end, line->Length - end);
+	line->Length -= (end - start);
+	line->Cursor = start;
+	line->Selection = start;
+}
+
+static void selection_copy(Line *line)
+{
+	int start, end;
+	selection_get(line, &start, &end);
+	clipboard_save(line->Text + start, end - start);
+}
+
+/* --- LINE EDIT --- */
+static void key_left(Line *line)
+{
+	if(line->Cursor == line->Selection)
+	{
+		if(line->Cursor > 0)
+		{
+			--line->Cursor;
+			line->Selection = line->Cursor;
+		}
+	}
+	else
+	{
+		line->Cursor = (line->Cursor < line->Selection)
+			? line->Cursor : line->Selection;
+		line->Selection = line->Cursor;
+	}
+}
+
+static void key_shift_left(Line *line)
+{
+	if(line->Cursor > 0)
+	{
+		--line->Cursor;
+	}
+}
+
+static void key_right(Line *line)
+{
+	if(line->Cursor == line->Selection)
+	{
+		if(line->Cursor < line->Length)
+		{
+			++line->Cursor;
+			line->Selection = line->Cursor;
+		}
+	}
+	else
+	{
+		line->Cursor = (line->Cursor > line->Selection)
+			? line->Cursor : line->Selection;
+		line->Selection = line->Cursor;
+	}
+}
+
+static void key_shift_right(Line *line)
+{
+	if(line->Cursor < line->Length)
+	{
+		++line->Cursor;
+	}
+}
+
+static void key_backspace(Line *line)
+{
+	if(line->Selection == line->Cursor)
+	{
+		if(line->Cursor > 0)
+		{
+			char *p = line->Text + line->Cursor;
+			memmove(p - 1, p, line->Length - line->Cursor);
+			--line->Cursor;
+			line->Selection = line->Cursor;
+			--line->Length;
+		}
+	}
+	else
+	{
+		selection_delete(line);
+	}
+}
+
+static void key_delete(Line *line)
+{
+	if(line->Selection == line->Cursor)
+	{
+		if(line->Cursor < line->Length)
+		{
+			char *p = line->Text + line->Cursor;
+			--line->Length;
+			memmove(p, p + 1, line->Length - line->Cursor);
+		}
+	}
+	else
+	{
+		selection_delete(line);
+	}
+}
+
+static void key_ctrl_a(Line *line)
+{
+	line->Selection = 0;
+	line->Cursor = line->Length;
+}
+
+static void key_ctrl_c(Line *line)
+{
+	selection_copy(line);
+}
+
+static void key_ctrl_x(Line *line)
+{
+	selection_copy(line);
+	selection_delete(line);
+}
+
+static void key_ctrl_v(Line *line)
+{
+	int len;
+	const char *text = clipboard_get(&len);
+	selection_replace(line, text, len);
+}
+
+static void key_home(Line *line)
+{
+	line->Cursor = 0;
+	line->Selection = line->Cursor;
+}
+
+static void key_shift_home(Line *line)
+{
+	line->Cursor = 0;
+}
+
+static void key_end(Line *line)
+{
+	line->Cursor = line->Length;
+	line->Selection = line->Cursor;
+}
+
+static void key_shift_end(Line *line)
+{
+	line->Cursor = line->Length;
+}
+
+static void key_enter(Line *line)
+{
+	cls();
+	shell_output_reset();
+	command_run(line->Text, line->Length);
+}
+
+static void key_insert(Line *line, int c)
+{
+	if(line->Selection == line->Cursor)
+	{
+		if(line->Length < COMMAND_MAX_LENGTH)
+		{
+			char *p = line->Text + line->Cursor;
+			memmove(p + 1, p, line->Length - line->Cursor);
+			line->Text[line->Cursor] = c;
+			++line->Cursor;
+			line->Selection = line->Cursor;
+			++line->Length;
+		}
+	}
+	else
+	{
+		char s[1] = { c };
+		selection_replace(line, s, 1);
+	}
+}
+
+/* --- RENDER --- */
+static inline int get_char_at(Line *line, int i, int start, int end)
 {
 	int color = NORMAL;
 	int chr = ' ';
@@ -110,14 +282,14 @@ static int get_char_at(int i, int start, int end)
 		color = SELECTED;
 	}
 
-	if(i == _cursor)
+	if(i == line->Cursor)
 	{
 		color = CURSOR;
 	}
 
-	if(i < _length)
+	if(i < line->Length)
 	{
-		chr = _command[i];
+		chr = line->Text[i];
 	}
 
 	return TERMINAL_CHAR(chr, color);
@@ -125,172 +297,45 @@ static int get_char_at(int i, int start, int end)
 
 static void command_render(void)
 {
+	static const uint8_t _colors[COMMAND_LINES] =
+	{
+		TERMINAL_BRIGHT_WHITE,
+		TERMINAL_BRIGHT_RED,
+		TERMINAL_BRIGHT_GREEN,
+		TERMINAL_BRIGHT_BLUE
+	};
+
+	Line *line = &this.Lines[this.Slot];
 	int i, start, end;
-	selection_get(&start, &end);
-	terminal_set(0, 0, TERMINAL_CHAR('>', NORMAL));
+	int color = TERMINAL_COLOR(_colors[this.Slot], TERMINAL_BLACK);
+	selection_get(line, &start, &end);
+	terminal_set(0, 0, TERMINAL_CHAR('>', color));
 	terminal_set(1, 0, TERMINAL_CHAR(' ', NORMAL));
 	for(i = 0; i < COMMAND_MAX_LENGTH; ++i)
 	{
-		terminal_set(i + 2, 0, get_char_at(i, start, end));
+		terminal_set(i + 2, 0, get_char_at(line, i, start, end));
 	}
 }
 
-static void key_left(void)
+static void key_up(Line *line)
 {
-	if(_cursor == _selection)
+	if(this.Slot == 0)
 	{
-		if(_cursor > 0)
-		{
-			--_cursor;
-			_selection = _cursor;
-		}
+		this.Slot = COMMAND_LINES;
 	}
-	else
+
+	--this.Slot;
+	(void)line;
+}
+
+static void key_down(Line *line)
+{
+	++this.Slot;
+	if(this.Slot >= COMMAND_LINES)
 	{
-		_cursor = (_cursor < _selection) ? _cursor : _selection;
-		_selection = _cursor;
+		this.Slot = 0;
 	}
-}
-
-static void key_shift_left(void)
-{
-	if(_cursor > 0)
-	{
-		--_cursor;
-	}
-}
-
-static void key_right(void)
-{
-	if(_cursor == _selection)
-	{
-		if(_cursor < _length)
-		{
-			++_cursor;
-			_selection = _cursor;
-		}
-	}
-	else
-	{
-		_cursor = (_cursor > _selection) ? _cursor : _selection;
-		_selection = _cursor;
-	}
-}
-
-static void key_shift_right(void)
-{
-	if(_cursor < _length)
-	{
-		++_cursor;
-	}
-}
-
-static void key_backspace(void)
-{
-	if(_selection == _cursor)
-	{
-		if(_cursor > 0)
-		{
-			char *p = _command + _cursor;
-			memmove(p - 1, p, _length - _cursor);
-			--_cursor;
-			_selection = _cursor;
-			--_length;
-		}
-	}
-	else
-	{
-		delete_selection();
-	}
-}
-
-static void key_delete(void)
-{
-	if(_selection == _cursor)
-	{
-		if(_cursor < _length)
-		{
-			char *p = _command + _cursor;
-			--_length;
-			memmove(p, p + 1, _length - _cursor);
-		}
-	}
-	else
-	{
-		delete_selection();
-	}
-}
-
-static void key_ctrl_a(void)
-{
-	_selection = 0;
-	_cursor = _length;
-}
-
-static void key_ctrl_c(void)
-{
-	copy_selection();
-}
-
-static void key_ctrl_x(void)
-{
-	copy_selection();
-	delete_selection();
-}
-
-static void key_ctrl_v(void)
-{
-	replace_selection(_clipboard, _clipboard_len);
-}
-
-static void key_home(void)
-{
-	_cursor = 0;
-	_selection = _cursor;
-}
-
-static void key_shift_home(void)
-{
-	_cursor = 0;
-}
-
-static void key_end(void)
-{
-	_cursor = _length;
-	_selection = _cursor;
-}
-
-static void key_shift_end(void)
-{
-	_cursor = _length;
-}
-
-static void key_enter(void)
-{
-	cls();
-	shell_output_reset();
-	command_run(_command, _length);
-}
-
-static void key_insert(int c)
-{
-	if(_selection == _cursor)
-	{
-		if(_length < COMMAND_MAX_LENGTH)
-		{
-			char *p = _command + _cursor;
-			memmove(p + 1, p, _length - _cursor);
-			_command[_cursor] = c;
-			++_cursor;
-			_selection = _cursor;
-			++_length;
-		}
-	}
-	else
-	{
-		char s[1] = { c };
-		replace_selection(s, 1);
-	}
+	(void)line;
 }
 
 static void shell_key(int key, int c)
@@ -298,7 +343,7 @@ static void shell_key(int key, int c)
 	typedef struct KEYBIND
 	{
 		int Key;
-		void (*Action)(void);
+		void (*Action)(Line *);
 	} KeyBind;
 
 	static const KeyBind keybinds[] =
@@ -307,6 +352,8 @@ static void shell_key(int key, int c)
 		{ MOD_SHIFT | KEY_LEFT,  key_shift_left  },
 		{ KEY_RIGHT,             key_right       },
 		{ MOD_SHIFT | KEY_RIGHT, key_shift_right },
+		{ KEY_UP,                key_up          },
+		{ KEY_DOWN,              key_down        },
 		{ KEY_BACKSPACE,         key_backspace   },
 		{ KEY_DELETE,            key_delete      },
 		{ MOD_CTRL | KEY_A,      key_ctrl_a      },
@@ -319,13 +366,14 @@ static void shell_key(int key, int c)
 		{ MOD_SHIFT | KEY_END,   key_shift_end   },
 	};
 
+	Line *line = &this.Lines[this.Slot];
 	const KeyBind *kb = keybinds;
 	const KeyBind *end = kb + ARRLEN(keybinds);
 	for(; kb < end; ++kb)
 	{
 		if(key == kb->Key)
 		{
-			kb->Action();
+			kb->Action(line);
 			break;
 		}
 	}
@@ -334,11 +382,11 @@ static void shell_key(int key, int c)
 	{
 		if(c == '\n')
 		{
-			key_enter();
+			key_enter(line);
 		}
-		else if(_isprint(c))
+		else if(isprint(c))
 		{
-			key_insert(c);
+			key_insert(line, c);
 		}
 	}
 
@@ -381,20 +429,20 @@ void shell_char(int c)
 {
 	if(c == '\n')
 	{
-		_shell_x = 0;
-		++_shell_y;
+		this.X = 0;
+		++this.Y;
 	}
 	else
 	{
-		if(_shell_y < TERMINAL_H)
+		if(this.Y < TERMINAL_H)
 		{
-			int color = TERMINAL_COLOR(_shell_fg, TERMINAL_BLACK);
-			terminal_set(_shell_x, _shell_y, TERMINAL_CHAR(c, color));
-			++_shell_x;
-			if(_shell_x >= TERMINAL_W)
+			int color = TERMINAL_COLOR(this.FG, TERMINAL_BLACK);
+			terminal_set(this.X, this.Y, TERMINAL_CHAR(c, color));
+			++this.X;
+			if(this.X >= TERMINAL_W)
 			{
-				_shell_x = 0;
-				++_shell_y;
+				this.X = 0;
+				++this.Y;
 			}
 		}
 	}
@@ -402,5 +450,5 @@ void shell_char(int c)
 
 void shell_fg(int color)
 {
-	_shell_fg = color;
+	this.FG = color;
 }

@@ -16,11 +16,11 @@
 #define CT_BLACK              0x0000
 #define CT_RED                0xA800
 #define CT_GREEN              0x0540
-#define CT_YELLOW             0xAAA0
+#define CT_YELLOW             0xFC00
 #define CT_BLUE               0x0015
 #define CT_MAGENTA            0xA815
 #define CT_CYAN               0x0555
-#define CT_WHITE              0xAD55
+#define CT_WHITE              0xFFFF
 
 #define CT_BRIGHT_BLACK       0x52AA
 #define CT_BRIGHT_RED         0xFAAA
