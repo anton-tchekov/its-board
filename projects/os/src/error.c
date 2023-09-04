@@ -1,7 +1,5 @@
 #include "nanoc.h"
 
-#if defined(NANOC_DEBUG) && NANOC_DEBUG != 0
-
 static const char *_err_msgs[] =
 {
 	"ERROR_UNEXPECTED_EOF",
@@ -47,5 +45,3 @@ const char *nanoc_error_message(int code)
 
 	return _err_msgs[idx];
 }
-
-#endif

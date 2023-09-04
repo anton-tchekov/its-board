@@ -28,9 +28,8 @@ int main(void)
 	timer_init();
 	lcd_init(D2U_L2R, 1000, COLOR_BLACK);
 	ps2_init();
-	terminal_init();
-	shell_init();
 
+	shell_init();
 	for(;;)
 	{
 		shell_update();

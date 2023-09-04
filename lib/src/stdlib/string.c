@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdint.h>
 
 size_t strlen(const char *s)
 {
@@ -65,4 +66,62 @@ int strncmp(const char *p1, const char *p2, size_t count)
 	}
 
 	return 0;
+}
+
+void *memcpy(void *dest, const void *src, size_t count)
+{
+	uint8_t *d, *s, *end;
+
+	s = (uint8_t *)src;
+	d = (uint8_t *)dest;
+	end = d + count;
+
+	if(d != s)
+	{
+		while(d != end)
+		{
+			*d++ = *s++;
+		}
+	}
+
+	return dest;
+}
+
+void *memmove(void *dest, const void *src, size_t count)
+{
+	uint8_t *d, *s, *end;
+
+	s = (uint8_t *)src;
+	d = (uint8_t *)dest;
+	end = s + count;
+
+	if(d > s && d < end)
+	{
+		s = end;
+		d += count;
+		while(s > (uint8_t *)src)
+		{
+			*--d = *--s;
+		}
+	}
+	else if(s != d)
+	{
+		while(s < end)
+		{
+			*d++ = *s++;
+		}
+	}
+
+	return dest;
+}
+
+void *memset(void *ptr, int value, size_t count)
+{
+	uint8_t *p, *end;
+	for(p = (uint8_t *)ptr, end = p + count; p < end; ++p)
+	{
+		*p = value;
+	}
+
+	return ptr;
 }

@@ -3,7 +3,7 @@
 
 
 /* feature selection */
-#define NANOC_DEBUG               1
+#define NANOC_DEBUG               0
 #define NANOC_ENABLE_COMPILER     1
 #define NANOC_ENABLE_INTERPRETER  1
 
@@ -237,8 +237,6 @@ void nanoc_disasm(u8 *program, int len);
 int nanoc_run(NanoC *n, u8 *program, u8 *data);
 #endif
 
-#if defined(NANOC_DEBUG) && NANOC_DEBUG != 0
 const char *nanoc_error_message(int code);
-#endif
 
 #endif
