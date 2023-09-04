@@ -1,0 +1,9 @@
+fn main()
+{
+	let a, b, c;
+	a = 10.0;
+	b = 5.0;
+	c = sqrt(addf(mulf(a, a), mulf(b, b)));
+	fputf(0, c);
+	fputc(0, '\n');
+}

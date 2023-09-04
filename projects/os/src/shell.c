@@ -1,12 +1,11 @@
-#include "stdio.h"
-#include "string.h"
-#include "ctype.h"
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "shell.h"
+#include "util.h"
 #include "terminal.h"
 #include "ps2.h"
-#include "nanoc.h"
-#include "error.h"
 #include "command.h"
 #include "clipboard.h"
 
@@ -247,6 +246,7 @@ static void key_enter(Line *line)
 {
 	cls();
 	shell_output_reset();
+	line->Text[line->Length] = '\0';
 	command_run(line->Text, line->Length);
 }
 

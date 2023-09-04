@@ -14,7 +14,6 @@
 #include "fonts/Terminus16.h"
 #include "fonts/Terminus16_Bold.h"
 #include "ps2.h"
-#include "stdio.h"
 #include "terminal.h"
 #include "shell.h"
 

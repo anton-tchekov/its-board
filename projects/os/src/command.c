@@ -1,13 +1,14 @@
 #include "command.h"
 #include "shell.h"
-#include "nanoc.h"
+#include "nanoc_parser.h"
+#include "nanoc_instruction.h"
+#include "nanoc_interpreter.h"
+#include "nanoc_status.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#define STRINGS_OFFSET (2 * 1024)
-
-static int _putd(int a, int *p)
+static i32r debug_print(i32r a, i32 *p)
 {
 	char buf[128];
 	sprintf(buf, "%d\n", p[0]);
@@ -15,7 +16,7 @@ static int _putd(int a, int *p)
 	return 0;
 }
 
-static int _puts(int a, int *p)
+static i32r _puts(i32r a, i32 *p)
 {
 	char buf[128];
 	sprintf(buf, "%s\n", (char *)p[0]);
@@ -23,7 +24,7 @@ static int _puts(int a, int *p)
 	return 0;
 }
 
-static int _about(int a, int *p)
+static i32r _about(i32r a, i32 *p)
 {
 	shell_print(
 		"ITS Board Shell V0.1\n"
@@ -33,9 +34,8 @@ static int _about(int a, int *p)
 	return 0;
 }
 
-static int _printf(int a, int *p)
+static i32r _printf(i32r a, i32 *p)
 {
-	int i;
 	char buf[128];
 	char *format = (char *)p[0];
 
@@ -70,58 +70,56 @@ static int _printf(int a, int *p)
 
 static void compile(const char *src, int length)
 {
-	NanoC nanoc;
-	uint8_t program[4 * 1024], data[4 * 1024];
-	char buf[128];
-	int ret;
+	NanoC_Parser parser;
+	u8 output_buf[1024];
+	u8r status;
 
-	nanoc_init(&nanoc);
-	nanoc_add_function(&nanoc, 0, "putd",  1, _putd);
-	nanoc_add_function(&nanoc, 1, "puts",  1, _puts);
-	nanoc_add_function(&nanoc, 2, "about", 0, _about);
-	nanoc_add_function(&nanoc, 3, "printf", 0xFF, _printf);
-	ret = nanoc_compile(&nanoc, src, program,
-		data + STRINGS_OFFSET, STRINGS_OFFSET);
-
-	if(ret)
+	i32r (*functions[])(i32r, i32 *) =
 	{
-		int i;
-		const char *s;
-		sprintf(buf, "parse error: %s\n"
-				"row: %d, col: %d\n",
-				nanoc_error_message(ret),
-				nanoc.Token.Pos.Row, nanoc.Token.Pos.Col);
+		debug_print
+	};
+
+	NanoC_Builtins builtins =
+	{
+		1,
+		functions
+	};
+
+	shell_print("Compiling ... ");
+
+	nanoc_parser_init(&parser, src, output_buf, sizeof(output_buf));
+	status = nanoc_statement(&parser);
+	if(status)
+	{
+		char buf[128];
+		sprintf(buf, "\nParse error: %s\n", nanoc_status_message(status));
 		shell_print(buf);
-
-		for(i = 0, s = nanoc.Lexer.LineBegin; *s != '\n' &&
-			s - src < length; ++s, ++i)
-		{
-			if(i == nanoc.Token.Pos.Col)
-			{
-				shell_fg(TERMINAL_BRIGHT_RED);
-			}
-
-			if(i == nanoc.Lexer.Pos.Col)
-			{
-				shell_fg(TERMINAL_WHITE);
-			}
-
-			shell_char(*s);
-		}
-
-		shell_fg(TERMINAL_WHITE);
-		shell_char('\n');
 		return;
 	}
 
-	if((ret = nanoc_run(&nanoc, program, data)))
+	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
+
+	shell_print("DONE\nRunning ... ");
+
+	status = nanoc_interpreter_run(parser.Output.Buffer, &builtins);
+	if(status)
 	{
-		sprintf(buf, "runtime error: %s\n", nanoc_error_message(ret));
+		char buf[128];
+		sprintf(buf, "\nRuntime error: %s\n",
+			nanoc_interpreter_status_message(status));
+
 		shell_print(buf);
+		return;
 	}
+
+	shell_print("DONE\n");
 }
 
 void command_run(const char *cmd, int len)
 {
+	shell_print("Command to be ran:\n");
+	shell_print(cmd);
+	shell_print("\n\n");
+
 	compile(cmd, len);
 }

@@ -1,5 +1,5 @@
 #include "clipboard.h"
-#include "string.h"
+#include <string.h>
 
 static int _clipboard_len;
 static char _clipboard_text[CLIPBOARD_MAX_LENGTH];
