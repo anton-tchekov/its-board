@@ -444,7 +444,7 @@ int nanoc_run(NanoC *n, u8 *program, u8 *data)
 				/* native function */
 				int ret;
 				func = -func - 1;
-				ret = i->Functions[func]((int *)(i->CallStack + i->SP + 2), i->Heap);
+				ret = i->Functions[func](args, (int *)(i->CallStack + i->SP + 2));
 				if(op >= NANOC_OP_STACK_SIZE - 1)
 				{
 					TRACE(ERROR_STACK_OVERFLOW);

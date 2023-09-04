@@ -3,14 +3,8 @@
 
 void nanoc_init(NanoC *n)
 {
-#if defined(NANOC_ENABLE_COMPILER) && NANOC_ENABLE_COMPILER != 0
 	_map_init(&n->Parser.Variables, n->Parser.VariableBuffer, sizeof(n->Parser.VariableBuffer) / sizeof(*n->Parser.VariableBuffer));
 	_map_init(&n->Parser.Functions, n->Parser.FunctionBuffer, sizeof(n->Parser.FunctionBuffer) / sizeof(*n->Parser.FunctionBuffer));
-#endif
-
-#if defined(NANOC_ENABLE_INTERPRETER) && NANOC_ENABLE_INTERPRETER != 0
-
-#endif
 }
 
 #if defined(NANOC_ENABLE_COMPILER) && NANOC_ENABLE_COMPILER != 0
@@ -227,7 +221,7 @@ static int _parser_function(NanoC *n, const char *name, u32 len)
 
 	if(impl)
 	{
-		if(args != n->Parser.FN_Args[i])
+		if(n->Parser.FN_Args[i] < 0xFF && args != n->Parser.FN_Args[i])
 		{
 			TRACE(ERROR_FN_NUM_ARGS);
 		}
@@ -814,7 +808,8 @@ static int _parser_substmt(NanoC *n, TokenType term)
 	return 0;
 }
 
-int nanoc_add_function(NanoC *n, u16 id, const char *name, u8 num_args, int (*function)(int *parameters, u8 *heap))
+int nanoc_add_function(NanoC *n, u16 id, const char *name, u8 num_args,
+	int (*function)(int, int *))
 {
 #if defined(NANOC_ENABLE_COMPILER) && NANOC_ENABLE_COMPILER != 0
 	int i;

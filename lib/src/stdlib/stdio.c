@@ -1,8 +1,7 @@
 /**
- * @file    format.c
- * @author  Tim Gabrikowski, Anton Tchekov
+ * @file    stdio.c
  * @version 0.1
- * @date    23.04.2023
+ * @date    04.09.2023
  */
 
 #include "stdio.h"
@@ -482,5 +481,3 @@ int vsnprintf(char *str, size_t size, const char *format, va_list arg)
 
 	return ret;
 }
-
-

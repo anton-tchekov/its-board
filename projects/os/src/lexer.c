@@ -461,7 +461,7 @@ int _lexer_next(Lexer *lexer, Token *token)
 				{
 					int v, offset;
 
-					offset = lexer->StringsPtr - lexer->Strings;
+					offset = (int)lexer->StringsPtr;
 					_lexer_advance(lexer);
 					for(;;)
 					{
@@ -477,7 +477,7 @@ int _lexer_next(Lexer *lexer, Token *token)
 
 					*lexer->StringsPtr++ = '\0';
 					token->Type = TT_NUMBER;
-					token->Value.Number = lexer->StringsOffset + offset;
+					token->Value.Number = offset;
 					_lexer_advance(lexer);
 					return 0;
 				}

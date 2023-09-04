@@ -311,7 +311,7 @@ static void command_render(void)
 	selection_get(line, &start, &end);
 	terminal_set(0, 0, TERMINAL_CHAR('>', color));
 	terminal_set(1, 0, TERMINAL_CHAR(' ', NORMAL));
-	for(i = 0; i < COMMAND_MAX_LENGTH; ++i)
+	for(i = 0; i < COMMAND_MAX_LENGTH + 1; ++i)
 	{
 		terminal_set(i + 2, 0, get_char_at(line, i, start, end));
 	}

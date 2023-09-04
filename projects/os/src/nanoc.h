@@ -200,7 +200,7 @@ enum INSTRUCTION
 /* interpreter */
 typedef struct INTERPRETER
 {
-	int (*Functions[NANOC_MAX_NATIVE_FNS])(int *parameter, u8 *heap);
+	int (*Functions[NANOC_MAX_NATIVE_FNS])(int, int *);
 	u8 *Heap;
 	int OperatorStack[NANOC_OP_STACK_SIZE];
 	u32 CallStack[NANOC_CALL_STACK_SIZE];
@@ -225,7 +225,8 @@ typedef struct NANOC
 } NanoC;
 
 void nanoc_init(NanoC *n);
-int nanoc_add_function(NanoC *n, u16 id, const char *name, u8 num_args, int (*function)(int *parameter, u8 *heap));
+int nanoc_add_function(NanoC *n, u16 id, const char *name, u8 num_args,
+	int (*function)(int, int *));
 
 #if defined(NANOC_ENABLE_COMPILER) && NANOC_ENABLE_COMPILER != 0
 int nanoc_compile(NanoC *n, const char *src, u8 *out, u8 *strings, int strings_offset);
