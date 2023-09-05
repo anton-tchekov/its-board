@@ -66,7 +66,6 @@ u8r nanoc_interpreter_run(const u8 *program, NanoC_Builtins *builtins)
 		switch(program[ip])
 		{
 		case NANOC_INSTR_HALT:
-			shell_print("halt\n");
 			return NANOC_INTERPRETER_SUCCESS;
 
 		case NANOC_INSTR_PUSHI8:
@@ -173,19 +172,15 @@ u8r nanoc_interpreter_run(const u8 *program, NanoC_Builtins *builtins)
 				call_stack[sp + 2 + i] = op_stack[op + i];
 			}
 
-			shell_print("Call of Duty\n");
 			if(addr < 0)
 			{
-				shell_print("before native\n");
 				CHECK_OVERFLOW(1);
 				op_stack[op] = builtins->Functions[-addr - 1]
 					(args, call_stack + sp + 2);
 				op += 1;
-				shell_print("after native\n");
 			}
 			else
 			{
-				shell_print("wtf why here?\n");
 				call_stack[sp] = ip;
 				sp += 1;
 				call_stack[sp] = fp;
@@ -207,13 +202,6 @@ u8r nanoc_interpreter_run(const u8 *program, NanoC_Builtins *builtins)
 		case NANOC_INSTR_ISP:
 			sp += program[ip + 1];
 			ip += 2;
-			break;
-
-		case NANOC_INSTR_DUP:
-			CHECK_UNDERFLOW(1);
-			op_stack[op] = op_stack[op - 1];
-			op += 1;
-			ip += 1;
 			break;
 
 		case NANOC_INSTR_POP:

@@ -78,11 +78,6 @@ u8r nanoc_instr_print(const u8 *program, size_t offset)
 		size = 1;
 		break;
 
-	case NANOC_INSTR_DUP:
-		printf(R("DUP") "\n");
-		size = 1;
-		break;
-
 	case NANOC_INSTR_CALL:
 		printf(R("CALL") " %d (%d)\n", read_s16(p + 2), p[1]);
 		size = 4;

@@ -9,11 +9,6 @@ void nanoc_output_init(NanoC_Output *output, u8 *buffer, size_t size)
 	output->Size = size;
 }
 
-void nanoc_output_skip(NanoC_Output *output, u8r bytes)
-{
-	output->Pos += bytes;
-}
-
 void nanoc_output_emit(NanoC_Output *output, u8r val)
 {
 	output->Buffer[output->Pos] = val;
@@ -43,11 +38,6 @@ void nanoc_output_emit16_at(NanoC_Output *output, u32r loc, u16r val)
 	write_16(output->Buffer + loc, val);
 }
 
-void nanoc_output_emit32_at(NanoC_Output *output, u32r loc, u32r val)
-{
-	write_32(output->Buffer + loc, val);
-}
-
 void nanoc_output_pushi(NanoC_Output *output, u32 value)
 {
 	if(value <= 0xFF)
@@ -72,7 +62,7 @@ u16r nanoc_output_unknown_jump(NanoC_Output *output, u8r instr)
 	u16r idx;
 	nanoc_output_emit(output, instr);
 	idx = output->Pos;
-	nanoc_output_skip(output, 2);
+	output->Pos += 2;
 	return idx;
 }
 

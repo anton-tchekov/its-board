@@ -40,8 +40,8 @@ void nanoc_parser_init(NanoC_Parser *parser, const char *source,
 	parser->AndOrTop = 0;
 	parser->BreakNesting = 0;
 	parser->ContinueNesting = 0;
-	nanoc_address_stack_init(&parser->BreakStack);
-	nanoc_address_stack_init(&parser->ContinueStack);
+	nanoc_address_stack_init(&parser->BreakStack, parser->BreakBuffer);
+	nanoc_address_stack_init(&parser->ContinueStack, parser->ContinueBuffer);
 }
 
 u8r nanoc_block_inner(NanoC_Parser *parser)
@@ -65,6 +65,7 @@ u8r nanoc_block(NanoC_Parser *parser)
 u8r nanoc_fn_call(NanoC_Parser *parser)
 {
 	u8r arg_cnt = 0;
+	u16r fn_id = -1;
 	NEXT();
 	NEXT();
 	if(TT(0) != NANOC_TT_R_PAREN)
@@ -103,7 +104,7 @@ u8r nanoc_fn_call(NanoC_Parser *parser)
 #endif
 
 	nanoc_output_emit2(&parser->Output, NANOC_INSTR_CALL, arg_cnt);
-	nanoc_output_emit16(&parser->Output, -1);
+	nanoc_output_emit16(&parser->Output, fn_id);
 	return NANOC_STATUS_SUCCESS;
 }
 
@@ -194,7 +195,7 @@ static u8r nanoc_let(NanoC_Parser *parser, u8r constant)
 	{
 		NEXT();
 		token = TOKEN(0);
-		insert_var(parser, token, &idx);
+		PROPAGATE(insert_var(parser, token, &idx));
 		NEXT();
 		token = TOKEN(0);
 		if(token->Type == NANOC_TT_ASSIGN)

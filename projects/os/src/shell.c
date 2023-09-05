@@ -374,22 +374,20 @@ static void shell_key(int key, int c)
 		if(key == kb->Key)
 		{
 			kb->Action(line);
-			break;
+			goto render;
 		}
 	}
 
-	if(kb == end)
+	if(c == '\n')
 	{
-		if(c == '\n')
-		{
-			key_enter(line);
-		}
-		else if(isprint(c))
-		{
-			key_insert(line, c);
-		}
+		key_enter(line);
+	}
+	else if(isprint(c))
+	{
+		key_insert(line, c);
 	}
 
+render:
 	command_render();
 }
 

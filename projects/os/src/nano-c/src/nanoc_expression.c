@@ -95,7 +95,7 @@ static u8r nanoc_expression_identifier(NanoC_Parser *parser)
 	token = TOKEN(0);
 	if(TT(1) == NANOC_TT_L_PAREN)
 	{
-		/* TODO */
+		PROPAGATE(nanoc_fn_call(parser));
 	}
 	else
 	{
@@ -197,7 +197,6 @@ static u8r token_class(u8r tt)
 u8r nanoc_expression(NanoC_Parser *parser)
 {
 	NanoC_Token *cur_token;
-	size_t old_out_pos = parser->Output.Pos;
 	u8r local_top = parser->OpTop;
 	u8r aoprev_top = parser->AndOrTop;
 	u8r tt = NANOC_TT_NULL;
@@ -248,11 +247,5 @@ u8r nanoc_expression(NanoC_Parser *parser)
 	}
 
 	and_or_addr_here(parser, aoprev_top);
-
-	if(parser->Output.Pos == old_out_pos)
-	{
-		THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
-	}
-
 	return NANOC_STATUS_SUCCESS;
 }

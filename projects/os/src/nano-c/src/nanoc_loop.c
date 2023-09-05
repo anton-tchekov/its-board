@@ -2,20 +2,7 @@
 #include "nanoc_status.h"
 #include "nanoc_instruction.h"
 #include "nanoc_expression.h"
-
-static void address_stack_update(
-	NanoC_Output *output, NanoC_AddressStack *as, u8r prev, u16r addr)
-{
-	u8r top = as->Top;
-	u16 *stack = as->Stack;
-	while(top > prev)
-	{
-		--top;
-		nanoc_output_emit16_at(output, stack[top], addr);
-	}
-
-	as->Top = top;
-}
+#include "nanoc_address_stack.h"
 
 static u8r loop_nest(NanoC_Parser *parser)
 {
@@ -27,23 +14,20 @@ static u8r loop_nest(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
-static void handle_break_continue(NanoC_Parser *parser,
-	u8r prev_break, u8r prev_continue, u8r idx_branch)
+static void break_continue_addr(NanoC_Parser *parser,
+	u8r prev_break, u8r prev_continue, u16r idx_branch)
 {
-	address_stack_update(&parser->Output, &parser->BreakStack,
+	nanoc_address_stack_update(&parser->BreakStack, &parser->Output,
 		prev_break, parser->Output.Pos);
 
-	address_stack_update(&parser->Output, &parser->ContinueStack,
+	nanoc_address_stack_update(&parser->ContinueStack, &parser->Output,
 		prev_continue, idx_branch);
 }
 
-static void break_continue(NanoC_Parser *parser, NanoC_AddressStack *stack)
+static void break_continue_jump(NanoC_Output *output, NanoC_AddressStack *stack)
 {
-	/*address_stack_push(stack,
-		nanoc_output_unknown_jump(&parser->Output, NANOC_INSTR_JMP));
-
-	nanoc_output_emit16_at(&parser->Output, as->Stack[as->Top], addr);
-	++as->Top;*/
+	nanoc_address_stack_push(stack,
+		nanoc_output_unknown_jump(output, NANOC_INSTR_JMP));
 }
 
 u8r nanoc_loop(NanoC_Parser *parser)
@@ -54,7 +38,7 @@ u8r nanoc_loop(NanoC_Parser *parser)
 	NEXT();
 	PROPAGATE(loop_nest(parser));
 	nanoc_output_jump(&parser->Output, NANOC_INSTR_JMP, idx_before);
-	handle_break_continue(parser, prev_break, prev_continue, idx_before);
+	break_continue_addr(parser, prev_break, prev_continue, idx_before);
 	return NANOC_STATUS_SUCCESS;
 }
 
@@ -94,7 +78,7 @@ u8r nanoc_while(NanoC_Parser *parser)
 	PROPAGATE(loop_nest(parser));
 	nanoc_output_jump(&parser->Output, NANOC_INSTR_JMP, idx_before);
 	nanoc_output_emit16_at(&parser->Output, idx_branch, parser->Output.Pos);
-	handle_break_continue(parser, prev_break, prev_continue, idx_before);
+	break_continue_addr(parser, prev_break, prev_continue, idx_before);
 	return NANOC_STATUS_SUCCESS;
 }
 
@@ -117,7 +101,7 @@ u8r nanoc_do_while(NanoC_Parser *parser)
 	EXPECT(NANOC_TT_SEMICOLON, NANOC_ERROR_EXPECTED_SEMICOLON);
 	idx_branch = parser->Output.Pos;
 	nanoc_output_jump(&parser->Output, NANOC_INSTR_JNZ, idx_begin);
-	handle_break_continue(parser, prev_break, prev_continue, idx_branch);
+	break_continue_addr(parser, prev_break, prev_continue, idx_branch);
 	return NANOC_STATUS_SUCCESS;
 }
 
@@ -130,7 +114,7 @@ u8r nanoc_break(NanoC_Parser *parser)
 		THROW(NANOC_ERROR_BREAK_NOT_WITHIN_LOOP_OR_SWITCH);
 	}
 
-	break_continue(parser, &parser->BreakStack);
+	break_continue_jump(&parser->Output, &parser->BreakStack);
 	return NANOC_STATUS_SUCCESS;
 }
 
@@ -143,6 +127,6 @@ u8r nanoc_continue(NanoC_Parser *parser)
 		THROW(NANOC_ERROR_CONTINUE_NOT_WITHIN_LOOP);
 	}
 
-	break_continue(parser, &parser->ContinueStack);
+	break_continue_jump(&parser->Output, &parser->ContinueStack);
 	return NANOC_STATUS_SUCCESS;
 }

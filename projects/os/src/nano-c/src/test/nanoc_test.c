@@ -13,6 +13,7 @@
 
 #include "types.h"
 #include <stdio.h>
+#include <assert.h>
 
 static i32r output;
 
@@ -22,7 +23,7 @@ static i32r test(i32r a, i32 *p)
 	return 0;
 }
 
-static int test_run(const char *source, int expected)
+static int test_positive_run(const char *source, int expected)
 {
 	int ret;
 	NanoC_Parser parser;
@@ -43,11 +44,11 @@ static int test_run(const char *source, int expected)
 	}
 
 	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
-	nanoc_disasm(parser.Output.Buffer, parser.Output.Pos);
 	ret = nanoc_interpreter_run(parser.Output.Buffer, &builtins);
 	if(ret)
 	{
-		printf("Interpreter error: %d\n", ret);
+		printf("Interpreter error: %s\n",
+			nanoc_interpreter_status_message(ret));
 		return 0;
 	}
 
@@ -60,14 +61,23 @@ static int test_run(const char *source, int expected)
 	return 1;
 }
 
+static int test_negative_run(const char *source)
+{
+	NanoC_Parser parser;
+	u8 output_buf[1024];
+	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf));
+	return nanoc_statement(&parser);
+}
+
 void nanoc_test_run(void)
 {
-	struct
+	typedef struct
 	{
 		const char *Source;
 		int Expected;
-	}
-	tests[] =
+	} TestCase;
+
+	static const TestCase tests[] =
 	{
 		/* Simple Arithmetic and Logic */
 		{ "test(5 + 5);", 10 },
@@ -96,8 +106,27 @@ void nanoc_test_run(void)
 		{ "test(1 && 0);", 0 },
 		{ "test(1 && 1);", 1 },
 
+		{ "test('\\x55');", '\x55' },
+		{ "test('\\x7a');", '\x7a' },
+		{ "test('A');", 65 },
+		{ "test('\\t');", '\t' },
+		{ "test('\\0');", '\0' },
+		{ "test('\\n');", '\n' },
+		{ "test(0b1010);", 10 },
+		{ "test(0b11111);", 31 },
+		{ "test(0644);", 420 },
+		{ "test(0755);", 493 },
+		{ "test(0777);", 511 },
+		{ "{ let/* comment */i =/*comment*/79; test(i); }", 79 },
+		{ "{ let i = 0; // i = 10;\ni = 5; test(i); }", 5},
+
 		{ "test(2+(5*8)-9*(3-1)/6);", 39},
 		{ "test(7+1*9-0+43*89*3);", 11497},
+
+		{ "test(5 >= 5);", 1 },
+		{ "test(1 >= -1);", 1 },
+		{ "test(3 >= 9);", 0 },
+		{ "test(-5 >= -9);", 1 },
 
 		{ "test(0);", 0 },
 		{ "test(3 - 3);", 0 },
@@ -125,18 +154,18 @@ void nanoc_test_run(void)
 		"}"
 		"test(c); }", 669 },
 
-		// 101
+		/* 101 */
 		{ "{let c=0; do {} while(0); test(c); }", 0},
 
-		// 102
+		/* 102 */
 		{ "{let x, y = 0; x = 1; if ((x << 1) != 2) {y = 1;} test(y);}", 0 },
 
-		// 126
+		/* 126 */
 		{ "{ let x; x = 3; x = !x; x = !x; x = ~x; x = -x; test(x); }", 2 },
 
-		// 127
+		/* 127 */
 		{ "{ let x=0, c = 0;"
-			"if(0) { x =1; }"
+			"if(0) { x = 1; }"
 			"else if(0) { }"
 			"else {"
 			"    if(1) {"
@@ -156,51 +185,106 @@ void nanoc_test_run(void)
 		/* If */
 		{ "{let i=5; if(i == 5) { ++i; } test(i); }", 6 },
 
+		{ "{let i = 5; i*=i;i*=2;i+=7;test(i);}", 57},
+
 		/* Loops */
 		{ "{let i=0,q=0; while(i < 100) { ++i; q += i; } test(q); }", 5050 },
 
 		/* Break and continue! */
+		{ "{let i=0;while(i<10){if(i==5){break;}++i;} test(i);}", 5 },
+		{ "{let i,n=14512891;while(i<=n/2){if(n%i==0){test(i);break;}++i;}}", 2371 },
+		{
+			"{\n"
+			"    let count = 0, i = 2;\n"
+			"    while(i < 10000) {\n"
+			"        let j = 2, isprime = 1;\n"
+			"        while(j <= i / 2) {\n"
+			"            if(!(i % j)) {\n"
+			"                isprime = 0;\n"
+			"                break;\n"
+			"            }\n"
+			"            ++j;\n"
+			"        }\n"
+			"        if(isprime) { ++count; }\n"
+			"        ++i;\n"
+			"    }\n"
+			"    test(count);\n"
+			"}\n",
+			1229 },
 
-		/* For Loops */
+		{ "{ let i = 42;do { ++i;break; ++i; } while(1); test(i); }", 43},
+		{ "{ let i = 0; loop { ++i; if(i == 10) {break;} } test(i); }", 10 },
+		{ "{let i = 0, n = 0; while(i < 50) { if(i%3==0){++i;continue;} ++n;++i;} test(n); }", 33},
+		{ "{let counter = 100; while(counter > 5) { --counter; } test(counter);}", 5 },
 
-		{ "test(5+);", 0 },
-		{ "test(90;", 0 },
-		{ "test(1)", 0 },
-		{ "{if[1) {} }", 0 },
-		{ "{if(1 {} }", 0 },
-		{ "{if() {} }", 0 },
-		{ "{if {} }", 0 },
-		{ "{if(()) {} }", 0 },
-		{ "{if(-()) {} }", 0 },
-		{ "{if(1) { }", 0 },
-		{ "{if(1) { break; }}", 0 },
-		{ "{if(1) { continue; }}", 0 },
-		{ "{while(1) { break }}", 0 },
-		{ "{while(0) { continue }}", 0 },
-		{ "blub; ", 0},
-		{ "x = 0; ", 0},
-		{ "let a = ; ", 0},
-		{ "let b, a,; ", 0},
-		{ "let b, a, c,", 0},
-		{ "{ let a, c; a = 0 c = 6; }", 0},
-		{ "{ let a, c; a = 0; c = 6 }", 0},
-		{ "{ let a += 1; }", 0},
+	};
+
+	static const char *tofail[] =
+	{
+		"test('\\xHG');",
+		"test('\\k');",
+		"let a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,\n"
+			"aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,mm,nn,oo;",
+		"test(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);",
+		"{ le/* comment */t i; }",
+		"{ let i, i = 0; }",
+		"++bla;",
+		"?",
+		"{ let i = 0; if(i == 1) { let i = 6; } }",
+		"test(bla); ",
+		"test(5+);",
+		"test(90;",
+		"test(1)",
+		"{if[1) {} }",
+		"{if(1 {} }",
+		"{if() {} }",
+		"{if {} }",
+		"{if(()) {} }",
+		"{if(-()) {} }",
+		"{if(1) { }",
+		"{if(1) { break; }}",
+		"{if(1) { continue; }}",
+		"{while(1) { break }}",
+		"{while(0) { continue }}",
+		"blub; ",
+		"x = 0; ",
+		"let a = ; ",
+		"let b, a,; ",
+		"let b, a, c,",
+		"{ let a, c; a = 0 c = 6; }",
+		"{ let a, c; a = 0; c = 6 }",
+		"{ let a += 1; }",
 	};
 
 	size_t i;
 	int success = 0;
 	for(i = 0; i < ARRLEN(tests); ++i)
 	{
-		int ret = test_run(tests[i].Source, tests[i].Expected);
+		int ret = test_positive_run(tests[i].Source, tests[i].Expected);
 		if(!ret)
 		{
-			printf("Test %ld failed!\n%s\n\n", i, tests[i].Source);
+			printf("Positive Test %ld failed!\n%s\n\n", i, tests[i].Source);
 		}
 
 		success += ret;
 	}
 
-	printf("%d/%ld tests succeeded\n", success, ARRLEN(tests));
+	for(i = 0; i < ARRLEN(tofail); ++i)
+	{
+		int ret = test_negative_run(tofail[i]);
+		if(!ret)
+		{
+			printf("Negative Test %ld should fail but didn't!\n%s\n\n",
+				i, tofail[i]);
+		}
+		else
+		{
+			++success;
+		}
+	}
+
+
+	printf("%d/%ld tests succeeded\n", success, ARRLEN(tests) + ARRLEN(tofail));
 }
 
 #endif /* NANOC_DESKTOP */

@@ -11,6 +11,7 @@
 #define NANOC_OPERATOR_STACK_SIZE 32
 #define NANOC_ANDOR_STACK_SIZE    16
 #define NANOC_MAX_FN_ARGS         16
+#define NANOC_BC_BUFFER_SIZE      16
 
 #define EXPECT(TYPE, ERROR) \
 	do \
@@ -44,6 +45,8 @@ typedef struct NANOC_PARSER
 	NanoC_MapElement VariableBuffer[NANOC_VARIABLE_CAPACITY];
 	u8 OperatorStack[NANOC_OPERATOR_STACK_SIZE];
 	u16 AndOrStack[NANOC_ANDOR_STACK_SIZE];
+	u16 BreakBuffer[NANOC_BC_BUFFER_SIZE];
+	u16 ContinueBuffer[NANOC_BC_BUFFER_SIZE];
 	NanoC_TokenStream TokenStream;
 	NanoC_Output Output;
 	NanoC_AddressStack BreakStack;
@@ -59,6 +62,7 @@ typedef struct NANOC_PARSER
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
 	u8 *output, size_t output_size);
 
+u8r nanoc_fn_call(NanoC_Parser *parser);
 u8r nanoc_statement(NanoC_Parser *parser);
 u8r nanoc_block(NanoC_Parser *parser);
 
