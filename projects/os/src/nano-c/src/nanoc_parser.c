@@ -232,7 +232,8 @@ static NanoC_Status nanoc_return(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
-static NanoC_Status nanoc_parser_inc_dec(NanoC_Parser *parser, u8r instr)
+static NanoC_Status nanoc_parser_inc_dec(
+	NanoC_Parser *parser, NanoC_Opcode instr)
 {
 	size_t idx;
 	NanoC_Token *token;

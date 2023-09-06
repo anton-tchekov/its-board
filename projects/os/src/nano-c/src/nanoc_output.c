@@ -15,7 +15,7 @@ void nanoc_output_emit(NanoC_Output *output, u8r val)
 	output->Pos += 1;
 }
 
-void nanoc_output_emit2(NanoC_Output *output, u8r instr, u8r val)
+void nanoc_output_emit2(NanoC_Output *output, NanoC_Opcode instr, u8r val)
 {
 	nanoc_output_emit(output, instr);
 	nanoc_output_emit(output, val);

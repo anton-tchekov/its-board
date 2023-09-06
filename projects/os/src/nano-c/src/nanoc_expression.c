@@ -76,7 +76,7 @@ static u8r precedence_get(NanoC_TokenType token_type)
 	return precedence_lut[LUT(token_type)];
 }
 
-static u8r token_to_instr(NanoC_TokenType token_type)
+static NanoC_Opcode token_to_instr(NanoC_TokenType token_type)
 {
 	nanoc_assert(token_is_operator(token_type));
 	return token_type - NANOC_TT_INSTR_OP_START + NANOC_INSTR_OP_START;

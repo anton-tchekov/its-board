@@ -23,6 +23,6 @@ static inline void nanoc_address_stack_push(
 }
 
 void nanoc_address_stack_update(
-	NanoC_AddressStack *as, NanoC_Output *output, u8r prev, u16r addr);
+	NanoC_AddressStack *as, NanoC_Output *output, u8r prev, NanoC_Address addr);
 
 #endif /* __NANOC_ADDRESS_STACK_H__ */

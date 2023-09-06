@@ -14,7 +14,7 @@ typedef struct NANOC_OUTPUT
 void nanoc_output_init(NanoC_Output *output, u8 *buffer, size_t size);
 
 void nanoc_output_emit(NanoC_Output *output, u8r val);
-void nanoc_output_emit2(NanoC_Output *output, u8r instr, u8r val);
+void nanoc_output_emit2(NanoC_Output *output, NanoC_Opcode instr, u8r val);
 void nanoc_output_emit16(NanoC_Output *output, u16r val);
 void nanoc_output_emit32(NanoC_Output *output, u32r val);
 

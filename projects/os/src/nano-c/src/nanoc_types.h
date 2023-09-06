@@ -6,8 +6,8 @@
 typedef u8r NanoC_Bool;
 typedef u8r NanoC_TokenType;
 typedef u8r NanoC_Status;
-typedef u16r NanoC_Address;
 typedef u8r NanoC_Opcode;
 typedef u8r NanoC_Char;
+typedef u16r NanoC_Address;
 
 #endif /* __NANOC_TYPES__ */
