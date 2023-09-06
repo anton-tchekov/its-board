@@ -6,6 +6,7 @@
 #include "nanoc_output.h"
 #include "nanoc_address_stack.h"
 #include "nanoc_map.h"
+#include "nanoc_types.h"
 
 #define NANOC_VARIABLE_CAPACITY   32
 #define NANOC_OPERATOR_STACK_SIZE 32

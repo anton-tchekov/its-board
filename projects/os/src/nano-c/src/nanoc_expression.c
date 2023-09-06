@@ -39,13 +39,13 @@ static void token_class_print(u8r token_class)
 #endif /* NANOC_DESKTOP */
 #endif /* NANOC_DEBUG */
 
-static u8r token_is_operator(u8r token_type)
+static NanoC_Bool token_is_operator(NanoC_TokenType token_type)
 {
 	return (token_type >= NANOC_TT_OP_START) &&
 		(token_type <= NANOC_TT_OP_END);
 }
 
-static u8r precedence_get(u8r token_type)
+static u8r precedence_get(NanoC_TokenType token_type)
 {
 	static const u8 precedence_lut[] =
 	{
@@ -76,7 +76,7 @@ static u8r precedence_get(u8r token_type)
 	return precedence_lut[LUT(token_type)];
 }
 
-static u8r token_to_instr(u8r token_type)
+static u8r token_to_instr(NanoC_TokenType token_type)
 {
 	nanoc_assert(token_is_operator(token_type));
 	return token_type - NANOC_TT_INSTR_OP_START + NANOC_INSTR_OP_START;
@@ -87,7 +87,7 @@ static void nanoc_expression_number(NanoC_Parser *parser, NanoC_Token *token)
 	nanoc_output_pushi(&parser->Output, token->Value.Integer);
 }
 
-static u8r nanoc_expression_identifier(NanoC_Parser *parser)
+static NanoC_Status nanoc_expression_identifier(NanoC_Parser *parser)
 {
 	size_t local;
 	NanoC_Token *token;

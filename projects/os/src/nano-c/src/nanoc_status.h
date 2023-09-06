@@ -49,7 +49,7 @@ void nanoc_log(
 
 #endif /* NANOC_DEBUG */
 
-typedef enum NANOC_STATUS
+enum
 {
 	NANOC_STATUS_SUCCESS,
 	NANOC_ERROR_UNEXPECTED_TOKEN,
@@ -67,7 +67,7 @@ typedef enum NANOC_STATUS
 	NANOC_ERROR_TOO_MANY_VARIABLES,
 	NANOC_ERROR_UNDEFINED_VARIABLE,
 	NANOC_ERROR_TOO_MANY_FN_ARGS
-} NanoC_Status;
+};
 
 const char *nanoc_status_message(u8r status_code);
 

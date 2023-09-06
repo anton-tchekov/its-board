@@ -2,17 +2,17 @@
 #include "nanoc_util.h"
 #include <ctype.h>
 
-static u8r is_identifer_start(u8r c)
+static NanoC_Bool is_identifer_start(u8r c)
 {
 	return isalpha(c) || c == '_';
 }
 
-static u8r is_identifier_char(u8r c)
+static NanoC_Bool is_identifier_char(u8r c)
 {
 	return isalnum(c) || c == '_';
 }
 
-static u8r keyword_detect(const char *ident, size_t len)
+static NanoC_TokenType keyword_detect(const char *ident, size_t len)
 {
 	static const u8 keywords[] =
 	{
@@ -49,7 +49,7 @@ static u8r keyword_detect(const char *ident, size_t len)
 	}
 }
 
-u8r nanoc_lexer_identifier(NanoC_Lexer *lexer, NanoC_Token *token)
+NanoC_Status nanoc_lexer_identifier(NanoC_Lexer *lexer, NanoC_Token *token)
 {
 	u8r c;
 

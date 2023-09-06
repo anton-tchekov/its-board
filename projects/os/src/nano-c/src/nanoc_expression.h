@@ -3,6 +3,6 @@
 
 #include "nanoc_parser.h"
 
-u8r nanoc_expression(NanoC_Parser *parser);
+NanoC_Status nanoc_expression(NanoC_Parser *parser);
 
 #endif /* __NANOC_EXPRESSION_H__ */

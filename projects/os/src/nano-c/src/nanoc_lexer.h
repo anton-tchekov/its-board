@@ -1,6 +1,7 @@
 #ifndef __NANOC_LEXER_H__
 #define __NANOC_LEXER_H__
 
+#include "nanoc_types.h"
 #include "nanoc_token.h"
 
 typedef struct NANOC_LEXER

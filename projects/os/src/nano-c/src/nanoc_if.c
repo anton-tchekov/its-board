@@ -3,7 +3,7 @@
 #include "nanoc_expression.h"
 #include "nanoc_instruction.h"
 
-u8r nanoc_if(NanoC_Parser *parser)
+NanoC_Status nanoc_if(NanoC_Parser *parser)
 {
 	u16r addr;
 	NEXT();

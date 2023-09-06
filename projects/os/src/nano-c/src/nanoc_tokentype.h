@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-typedef enum NANOC_TOKENTYPE
+enum
 {
 	NANOC_TT_NULL,
 	NANOC_TT_UNKNOWN,
@@ -85,7 +85,7 @@ typedef enum NANOC_TOKENTYPE
 	NANOC_TT_B_NOT,                           /* "~"  */
 	NANOC_TT_U_MINUS,                         /* "-"  */
 	NANOC_TT_OP_END = NANOC_TT_U_MINUS
-} NanoC_TokenType;
+};
 
 #ifdef NANOC_DEBUG
 
