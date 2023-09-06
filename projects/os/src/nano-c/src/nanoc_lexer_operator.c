@@ -2,7 +2,7 @@
 #include "nanoc_util.h"
 #include <ctype.h>
 
-static u8r operator_detect(const char *p, size_t *out_len)
+static NanoC_TokenType operator_detect(const char *p, size_t *out_len)
 {
 	/* Must be sorted from longer to shorter operator
 		strings because of common prefixes */

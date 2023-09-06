@@ -29,7 +29,7 @@ u8r nanoc_map_find(NanoC_Map *map, const char *key, size_t len, size_t *idx)
 	return 0;
 }
 
-u8r nanoc_map_insert(NanoC_Map *map, const char *key, size_t len, size_t *idx)
+NanoC_Status nanoc_map_insert(NanoC_Map *map, const char *key, size_t len, size_t *idx)
 {
 	if(map->Count >= map->Capacity)
 	{

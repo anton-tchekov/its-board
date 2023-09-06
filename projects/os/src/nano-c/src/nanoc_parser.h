@@ -63,10 +63,10 @@ typedef struct NANOC_PARSER
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
 	u8 *output, size_t output_size);
 
-u8r nanoc_fn_call(NanoC_Parser *parser);
-u8r nanoc_statement(NanoC_Parser *parser);
-u8r nanoc_block(NanoC_Parser *parser);
-u8r nanoc_substmt(NanoC_Parser *parser, u8r end);
-u8r nanoc_let(NanoC_Parser *parser);
+NanoC_Status nanoc_fn_call(NanoC_Parser *parser);
+NanoC_Status nanoc_statement(NanoC_Parser *parser);
+NanoC_Status nanoc_block(NanoC_Parser *parser);
+NanoC_Status nanoc_substmt(NanoC_Parser *parser, NanoC_TokenType end);
+NanoC_Status nanoc_let(NanoC_Parser *parser);
 
 #endif /* __NANOC_PARSER_H__ */
