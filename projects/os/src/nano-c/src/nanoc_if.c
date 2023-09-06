@@ -5,7 +5,7 @@
 
 NanoC_Status nanoc_if(NanoC_Parser *parser)
 {
-	u16r addr;
+	NanoC_Address addr;
 	NEXT();
 	EXPECT(NANOC_TT_L_PAREN, NANOC_ERROR_EXPECTED_L_PAREN);
 	NEXT();

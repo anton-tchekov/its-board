@@ -57,22 +57,22 @@ void nanoc_output_pushi(NanoC_Output *output, u32 value)
 	}
 }
 
-u16r nanoc_output_unknown_jump(NanoC_Output *output, u8r instr)
+NanoC_Address nanoc_output_unknown_jump(NanoC_Output *output, u8r instr)
 {
-	u16r idx;
+	NanoC_Address idx;
 	nanoc_output_emit(output, instr);
 	idx = output->Pos;
 	output->Pos += 2;
 	return idx;
 }
 
-void nanoc_output_jump(NanoC_Output *output, u8r instr, u16r addr)
+void nanoc_output_jump(NanoC_Output *output, u8r instr, NanoC_Address addr)
 {
 	nanoc_output_emit(output, instr);
 	nanoc_output_emit16(output, addr);
 }
 
-void nanoc_output_jump_here(NanoC_Output *output, u16r addr)
+void nanoc_output_jump_here(NanoC_Output *output, NanoC_Address addr)
 {
 	nanoc_output_emit16_at(output, addr, output->Pos);
 }

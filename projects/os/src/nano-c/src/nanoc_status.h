@@ -2,6 +2,7 @@
 #define __NANOC_ERROR_H__
 
 #include "types.h"
+#include "nanoc_types.h"
 
 #ifdef NANOC_DEBUG
 
@@ -10,7 +11,7 @@
 #define THROW(e) \
 	do \
 	{ \
-		u8r __ret = e; \
+		NanoC_Status __ret = e; \
 		nanoc_log(__FILE__, __func__, __LINE__, __ret); \
 		return __ret; \
 	} while(0)
@@ -18,7 +19,7 @@
 #define PROPAGATE(E) \
 	do \
 	{ \
-		u8r __ret; \
+		NanoC_Status __ret; \
 		if((__ret = (E))) \
 		{ \
 			nanoc_log(__FILE__, __func__, __LINE__, __ret); \
@@ -27,7 +28,7 @@
 	} while(0)
 
 void nanoc_log(
-	const char *file, const char *func, int line, u8r status_code);
+	const char *file, const char *func, int line, NanoC_Status status_code);
 
 #else /* NANOC_DEBUG */
 
@@ -40,7 +41,7 @@ void nanoc_log(
 #define PROPAGATE(E) \
 	do \
 	{ \
-		u8r __ret; \
+		NanoC_Status __ret; \
 		if((__ret = (E))) \
 		{ \
 			return __ret; \

@@ -15,7 +15,7 @@ static NanoC_Status loop_nest(NanoC_Parser *parser)
 }
 
 static void break_continue_addr(NanoC_Parser *parser,
-	u8r prev_break, u8r prev_continue, u16r idx_branch)
+	u8r prev_break, u8r prev_continue, NanoC_Address idx_branch)
 {
 	nanoc_address_stack_update(&parser->BreakStack, &parser->Output,
 		prev_break, parser->Output.Pos);
@@ -32,9 +32,12 @@ static void break_continue_jump(NanoC_Output *output, NanoC_AddressStack *stack)
 
 NanoC_Status nanoc_loop(NanoC_Parser *parser)
 {
-	u8r prev_break = parser->BreakStack.Top;
-	u8r prev_continue = parser->ContinueStack.Top;
-	u16r idx_before = parser->Output.Pos;
+	NanoC_Address idx_before;
+	u8r prev_break, prev_continue;
+
+	prev_break = parser->BreakStack.Top;
+	prev_continue = parser->ContinueStack.Top;
+	idx_before = parser->Output.Pos;
 	NEXT();
 	PROPAGATE(loop_nest(parser));
 	nanoc_output_jump(&parser->Output, NANOC_INSTR_JMP, idx_before);
@@ -45,10 +48,10 @@ NanoC_Status nanoc_loop(NanoC_Parser *parser)
 NanoC_Status nanoc_for(NanoC_Parser *parser)
 {
 	size_t var_cnt = nanoc_map_count(&parser->Variables);
-	u16r idx_before, idx_branch = 0, idx_continue, idx_skip_inc = 0;
+	NanoC_Address idx_before, idx_branch = 0, idx_continue, idx_skip_inc;
 	u8r prev_break = parser->BreakStack.Top;
 	u8r prev_continue = parser->ContinueStack.Top;
-	u8r tt;
+	NanoC_TokenType tt;
 	NEXT();
 	EXPECT(NANOC_TT_L_PAREN, NANOC_ERROR_EXPECTED_L_PAREN);
 	NEXT();
@@ -103,10 +106,13 @@ NanoC_Status nanoc_for(NanoC_Parser *parser)
 
 NanoC_Status nanoc_while(NanoC_Parser *parser)
 {
-	u16r idx_branch;
-	u16r idx_before = parser->Output.Pos;
-	u8r prev_break = parser->BreakStack.Top;
-	u8r prev_continue = parser->ContinueStack.Top;
+	NanoC_Address idx_branch, idx_before;
+	u8r prev_break, prev_continue;
+
+	idx_before = parser->Output.Pos;
+	prev_break = parser->BreakStack.Top;
+	prev_continue = parser->ContinueStack.Top;
+
 	NEXT();
 	EXPECT(NANOC_TT_L_PAREN, NANOC_ERROR_EXPECTED_L_PAREN);
 	NEXT();
@@ -123,10 +129,12 @@ NanoC_Status nanoc_while(NanoC_Parser *parser)
 
 NanoC_Status nanoc_do_while(NanoC_Parser *parser)
 {
-	u16r idx_branch;
-	u16r idx_begin = parser->Output.Pos;
-	u8r prev_break = parser->BreakStack.Top;
-	u8r prev_continue = parser->ContinueStack.Top;
+	NanoC_Address idx_branch, idx_begin;
+	u8r prev_break, prev_continue;
+
+	idx_begin = parser->Output.Pos;
+	prev_break = parser->BreakStack.Top;
+	prev_continue = parser->ContinueStack.Top;
 	NEXT();
 	PROPAGATE(loop_nest(parser));
 	NEXT();
