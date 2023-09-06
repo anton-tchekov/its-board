@@ -70,9 +70,9 @@ static i32r _printf(i32r a, i32 *p)
 
 static void compile(const char *src, int length)
 {
+	NanoC_Status status;
 	NanoC_Parser parser;
 	u8 output_buf[1024];
-	u8r status;
 
 	i32r (*functions[])(i32r, i32 *) =
 	{
@@ -106,7 +106,7 @@ static void compile(const char *src, int length)
 	{
 		char buf[128];
 		sprintf(buf, "\nRuntime error: %s\n",
-			nanoc_interpreter_status_message(status));
+			nanoc_status_message(status));
 
 		shell_print(buf);
 		return;

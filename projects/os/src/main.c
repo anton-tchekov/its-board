@@ -28,7 +28,9 @@ int main(void)
 	lcd_init(D2U_L2R, 1000, COLOR_BLACK);
 	ps2_init();
 
-	shell_init();
+	editor_open(NULL);
+
+	//shell_init();
 	for(;;)
 	{
 		shell_update();
