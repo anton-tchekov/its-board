@@ -189,6 +189,12 @@ void nanoc_test_run(void)
 
 		{ "{ let v = test(0); test(v); }", 0 },
 
+		/* Short circuit evaluation */
+		{ "{ let i = 0; test(1); let n = i && test(5); }", 1 },
+		{ "{ let i = 1; test(49); let n = i || test(9); }", 49 },
+		{ "{ let i = 1; test(12); let n = i && test(90); }", 90 },
+		{ "{ let i = 0; test(7); let n = i || test(9); }", 9 },
+
 		/* Loops */
 		{ "{let i=0,q=0; while(i < 100) { ++i; q += i; } test(q); }", 5050 },
 
@@ -197,20 +203,20 @@ void nanoc_test_run(void)
 		{ "{let i,n=14512891;while(i<=n/2){if(n%i==0){test(i);break;}++i;}}", 2371 },
 		{
 			"{\n"
-			"    let count = 0, i = 2;\n"
-			"    while(i < 10000) {\n"
-			"        let j = 2, isprime = 1;\n"
-			"        while(j <= i / 2) {\n"
-			"            if(!(i % j)) {\n"
-			"                isprime = 0;\n"
-			"                break;\n"
-			"            }\n"
-			"            ++j;\n"
-			"        }\n"
-			"        if(isprime) { ++count; }\n"
-			"        ++i;\n"
-			"    }\n"
-			"    test(count);\n"
+			"\tlet count = 0, i = 2;\n"
+			"\twhile(i < 10000) {\n"
+			"\t\tlet j = 2, isprime = 1;\n"
+			"\t\twhile(j <= i / 2) {\n"
+			"\t\t\tif(!(i % j)) {\n"
+			"\t\t\t\tisprime = 0;\n"
+			"\t\t\t\tbreak;\n"
+			"\t\t\t}\n"
+			"\t\t\t++j;\n"
+			"\t\t}\n"
+			"\t\tif(isprime) { ++count; }\n"
+			"\t\t++i;\n"
+			"\t}\n"
+			"\ttest(count);\n"
 			"}\n",
 			1229 },
 
@@ -221,6 +227,7 @@ void nanoc_test_run(void)
 
 		/* Scope */
 		{ "{ { let i = 0; } { let i = 5; } test(0); }\n", 0 },
+		{ "{ let i; { i = 7; { let var1 = 0; } } { let var1; ++i; } test(8); }\n", 8 },
 
 		/* For Loops - TDD!*/
 		{ "{ let sum = 0; for(let i = 1; i <= 100; ++i) { sum += i; } test(sum); }", 5050 },
