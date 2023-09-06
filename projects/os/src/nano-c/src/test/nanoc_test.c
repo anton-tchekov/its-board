@@ -187,6 +187,8 @@ void nanoc_test_run(void)
 
 		{ "{let i = 5; i*=i;i*=2;i+=7;test(i);}", 57},
 
+		{ "{ let v = test(0); test(v); }", 0 },
+
 		/* Loops */
 		{ "{let i=0,q=0; while(i < 100) { ++i; q += i; } test(q); }", 5050 },
 
@@ -217,6 +219,36 @@ void nanoc_test_run(void)
 		{ "{let i = 0, n = 0; while(i < 50) { if(i%3==0){++i;continue;} ++n;++i;} test(n); }", 33},
 		{ "{let counter = 100; while(counter > 5) { --counter; } test(counter);}", 5 },
 
+		/* Scope */
+		{ "{ { let i = 0; } { let i = 5; } test(0); }\n", 0 },
+
+		/* For Loops - TDD!*/
+		{ "{ let sum = 0; for(let i = 1; i <= 100; ++i) { sum += i; } test(sum); }", 5050 },
+		{ "{ let b = 0; for(let i = 0, j = 10; i < j; ++i, --j) { b += j; } test(b); }", 40 },
+		{ "{let cnt; for(cnt = 0; cnt < 10; ) { cnt += 3; } test(cnt);}", 12},
+		{ "{ let i = 0; for(; i < 77; ) { ++i; } test(i); }", 77 },
+		{ "{ let cnt = 0; for(let neg = -5; neg >= -20; --neg) { ++cnt; } test(cnt); }", 16 },
+		{ "{let i; for(i = 0; ; ++i) { if(i*i == 121) {break;} } test(i);}", 11 },
+		{ "{ let counter = 0; for(;;) { if(counter >= 10) { break; } ++counter; continue; } test(counter); }", 10 },
+		{ "{ let sum = 0; for(let i = 0; i < 10; ++i) { if(i == 7) { continue; } sum += i; } test(sum); }", 38 },
+		{ "{ let q=0; for(let x = 0; x < 7; ++x) { for(let y = 0; y < 16; ++y) { q += x*y; } } test(q); }", 2520 },
+		{
+			"{\n"
+			"    let end = 79, i = 0, found = 0;\n"
+			"    for(found = 0, i = 0; i < end && !found; ++i) {\n"
+			"        if(i == 51) {\n"
+			"            found = 1;\n"
+			"        }\n"
+			"    }\n"
+			"    test(i);\n"
+			"}\n",
+			52
+		},
+
+		/* Comma statements */
+		{ "{ let foo, bar; foo = 6, bar = foo + 1; test(bar); }", 7 },
+		{ "{ let foo, bar; foo = 1, ++foo, bar = foo; test(bar); }", 2 },
+		{ "{ let i = 1, j = 4; ++i, ++j; test(i + j); }", 7 },
 	};
 
 	static const char *tofail[] =
@@ -235,6 +267,7 @@ void nanoc_test_run(void)
 		"test(5+);",
 		"test(90;",
 		"test(1)",
+		"test(1,2,);",
 		"{if[1) {} }",
 		"{if(1 {} }",
 		"{if() {} }",
@@ -254,6 +287,18 @@ void nanoc_test_run(void)
 		"{ let a, c; a = 0 c = 6; }",
 		"{ let a, c; a = 0; c = 6 }",
 		"{ let a += 1; }",
+		"{ let i = 6, a = 7; a = i i = a; }",
+		"{ let i; i = 0,; }",
+		"{ let i; i = 0, ++i,; }",
+		"{ let i; i = 0, }",
+		"{ let i; i = 0, b; }",
+		"{ let i, ++i; }",
+		"{ let lol, lol; }",
+		"{ for(;) {} }",
+		"{ for(; ++i) {} }",
+		"{ for(; let i) {} }",
+		"{ for(let i = 0; let j; ++i) {} }",
+		"{for(let i = 0; ; ++i) { if(i*i == 121) {break;} } test(i);}",
 	};
 
 	size_t i;

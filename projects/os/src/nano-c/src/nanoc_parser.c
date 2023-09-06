@@ -46,6 +46,7 @@ void nanoc_parser_init(NanoC_Parser *parser, const char *source,
 
 u8r nanoc_block_inner(NanoC_Parser *parser)
 {
+	size_t var_cnt = nanoc_map_count(&parser->Variables);
 	NEXT();
 	while(TT(0) != NANOC_TT_R_BRACE)
 	{
@@ -53,6 +54,7 @@ u8r nanoc_block_inner(NanoC_Parser *parser)
 		NEXT();
 	}
 
+	nanoc_map_reset(&parser->Variables, var_cnt);
 	return NANOC_STATUS_SUCCESS;
 }
 
@@ -187,7 +189,7 @@ static u8r nanoc_identifier(NanoC_Parser *parser)
 	THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 }
 
-static u8r nanoc_let(NanoC_Parser *parser, u8r constant)
+u8r nanoc_let(NanoC_Parser *parser)
 {
 	NanoC_Token *token;
 	size_t idx;
@@ -229,55 +231,75 @@ static u8r nanoc_return(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
-static u8r nanoc_parser_inc_dec(NanoC_Parser *parser, size_t *idx)
+static u8r nanoc_parser_inc_dec(NanoC_Parser *parser, u8r instr)
 {
+	size_t idx;
 	NanoC_Token *token;
 	NEXT();
 	token = TOKEN(0);
 	if(!nanoc_map_find(&parser->Variables,
-		token->Ptr, token->Length, idx))
+		token->Ptr, token->Length, &idx))
 	{
 		THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
 	}
 
 	NEXT();
-	EXPECT(NANOC_TT_SEMICOLON, NANOC_ERROR_EXPECTED_SEMICOLON);
+	nanoc_output_emit2(&parser->Output, instr, idx);
 	return NANOC_STATUS_SUCCESS;
 }
 
-static u8r nanoc_dec(NanoC_Parser *parser)
+static inline u8r nanoc_dec(NanoC_Parser *parser)
 {
-	size_t idx;
-	PROPAGATE(nanoc_parser_inc_dec(parser, &idx));
-	nanoc_output_emit2(&parser->Output, NANOC_INSTR_DEC, idx);
-	return NANOC_STATUS_SUCCESS;
+	return nanoc_parser_inc_dec(parser, NANOC_INSTR_DEC);
 }
 
 static u8r nanoc_inc(NanoC_Parser *parser)
 {
-	size_t idx;
-	PROPAGATE(nanoc_parser_inc_dec(parser, &idx));
-	nanoc_output_emit2(&parser->Output, NANOC_INSTR_INC, idx);
-	return NANOC_STATUS_SUCCESS;
+	return nanoc_parser_inc_dec(parser, NANOC_INSTR_INC);
+}
+
+u8r nanoc_substmt(NanoC_Parser *parser, u8r end)
+{
+	u8r tt;
+	do
+	{
+		tt = TT(0);
+		switch(tt)
+		{
+		case NANOC_TT_IDENTIFIER: PROPAGATE(nanoc_identifier(parser)); break;
+		case NANOC_TT_DECREMENT:  PROPAGATE(nanoc_dec(parser));        break;
+		case NANOC_TT_INCREMENT:  PROPAGATE(nanoc_inc(parser));        break;
+		default: THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
+		}
+
+		tt = TT(0);
+		if(tt == end)
+		{
+			return NANOC_STATUS_SUCCESS;
+		}
+
+		NEXT();
+	}
+	while(tt == NANOC_TT_COMMA);
+	THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 }
 
 u8r nanoc_statement(NanoC_Parser *parser)
 {
 	switch(TT(0))
 	{
-	case NANOC_TT_CONST:      return nanoc_let(parser, 1);
-	case NANOC_TT_LET:        return nanoc_let(parser, 0);
-	case NANOC_TT_IDENTIFIER: return nanoc_identifier(parser);
 	case NANOC_TT_IF:         return nanoc_if(parser);
 	case NANOC_TT_WHILE:      return nanoc_while(parser);
 	case NANOC_TT_DO:         return nanoc_do_while(parser);
 	case NANOC_TT_LOOP:       return nanoc_loop(parser);
+	case NANOC_TT_FOR:        return nanoc_for(parser);
 	case NANOC_TT_BREAK:      return nanoc_break(parser);
 	case NANOC_TT_CONTINUE:   return nanoc_continue(parser);
 	case NANOC_TT_RETURN:     return nanoc_return(parser);
 	case NANOC_TT_L_BRACE:    return nanoc_block_inner(parser);
-	case NANOC_TT_DECREMENT:  return nanoc_dec(parser);
-	case NANOC_TT_INCREMENT:  return nanoc_inc(parser);
+	case NANOC_TT_LET:        return nanoc_let(parser);
+	default:
+		return nanoc_substmt(parser, NANOC_TT_SEMICOLON);
 	}
 
 	return NANOC_ERROR_UNEXPECTED_TOKEN;

@@ -27,7 +27,6 @@ static u8r keyword_detect(const char *ident, size_t len)
 		'b', 'r', 'e', 'a', 'k', NANOC_LUT_ST(NANOC_TT_BREAK),
 		'c', 'o', 'n', 't', 'i', 'n', 'u', 'e', NANOC_LUT_ST(NANOC_TT_CONTINUE),
 		'r', 'e', 't', 'u', 'r', 'n', NANOC_LUT_ST(NANOC_TT_RETURN),
-		'c', 'o', 'n', 's', 't', NANOC_LUT_ST(NANOC_TT_CONST),
 		'D', 'C', 'B', NANOC_LUT_ST(NANOC_TT_DCB),
 		'D', 'C', 'W', NANOC_LUT_ST(NANOC_TT_DCW),
 		'D', 'C', 'D', NANOC_LUT_ST(NANOC_TT_DCD),

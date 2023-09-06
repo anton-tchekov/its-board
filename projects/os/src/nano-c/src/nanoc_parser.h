@@ -65,5 +65,7 @@ void nanoc_parser_init(NanoC_Parser *parser, const char *source,
 u8r nanoc_fn_call(NanoC_Parser *parser);
 u8r nanoc_statement(NanoC_Parser *parser);
 u8r nanoc_block(NanoC_Parser *parser);
+u8r nanoc_substmt(NanoC_Parser *parser, u8r end);
+u8r nanoc_let(NanoC_Parser *parser);
 
 #endif /* __NANOC_PARSER_H__ */

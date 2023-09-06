@@ -117,8 +117,7 @@ static void and_or_addr_here(NanoC_Parser *parser, u8r prev_top)
 	while(i > prev_top)
 	{
 		--i;
-		nanoc_output_emit16_at(&parser->Output, parser->AndOrStack[i],
-			parser->Output.Pos);
+		nanoc_output_jump_here(&parser->Output, parser->AndOrStack[i]);
 	}
 
 	parser->AndOrTop = prev_top;

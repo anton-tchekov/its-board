@@ -42,25 +42,64 @@ u8r nanoc_loop(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
-#if 0
 u8r nanoc_for(NanoC_Parser *parser)
 {
+	size_t var_cnt = nanoc_map_count(&parser->Variables);
+	u16r idx_before, idx_branch = 0, idx_continue, idx_skip_inc = 0;
+	u8r prev_break = parser->BreakStack.Top;
+	u8r prev_continue = parser->ContinueStack.Top;
+	u8r tt;
 	NEXT();
 	EXPECT(NANOC_TT_L_PAREN, NANOC_ERROR_EXPECTED_L_PAREN);
 	NEXT();
-	PROPAGATE(nanoc_statement(parser));
-	NEXT();
-	PROPAGATE(nanoc_expression(parser));
+	tt = TT(0);
+	if(tt != NANOC_TT_SEMICOLON)
+	{
+		if(tt == NANOC_TT_LET)
+		{
+			PROPAGATE(nanoc_let(parser));
+		}
+		else
+		{
+			PROPAGATE(nanoc_substmt(parser, NANOC_TT_SEMICOLON));
+		}
+	}
 
 	NEXT();
-	PROPAGATE(nanoc_statement(parser));
+	idx_before = parser->Output.Pos;
+	idx_continue = idx_before;
+	if(TT(0) != NANOC_TT_SEMICOLON)
+	{
+		PROPAGATE(nanoc_expression(parser));
+		idx_branch = nanoc_output_unknown_jump(
+			&parser->Output, NANOC_INSTR_JZ);
+	}
 
+	idx_skip_inc = nanoc_output_unknown_jump(
+		&parser->Output, NANOC_INSTR_JMP);
+
+	EXPECT(NANOC_TT_SEMICOLON, NANOC_ERROR_EXPECTED_SEMICOLON);
+	NEXT();
+	if(TT(0) != NANOC_TT_R_PAREN)
+	{
+		idx_continue = parser->Output.Pos;
+		PROPAGATE(nanoc_substmt(parser, NANOC_TT_R_PAREN));
+		nanoc_output_jump(&parser->Output, NANOC_INSTR_JMP, idx_before);
+	}
+
+	nanoc_output_jump_here(&parser->Output, idx_skip_inc);
+	NEXT();
 	PROPAGATE(loop_nest(parser));
+	nanoc_output_jump(&parser->Output, NANOC_INSTR_JMP, idx_continue);
+	if(idx_branch)
+	{
+		nanoc_output_jump_here(&parser->Output, idx_branch);
+	}
 
-
+	break_continue_addr(parser, prev_break, prev_continue, idx_continue);
+	nanoc_map_reset(&parser->Variables, var_cnt);
 	return NANOC_STATUS_SUCCESS;
 }
-#endif
 
 u8r nanoc_while(NanoC_Parser *parser)
 {
