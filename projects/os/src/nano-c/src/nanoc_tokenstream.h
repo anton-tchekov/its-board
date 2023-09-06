@@ -10,7 +10,7 @@ typedef struct NANOC_TOKEN_STREAM
 {
 	NanoC_Lexer Lexer;
 	NanoC_Token Buffer[NANOC_TOKEN_BUFFER_SIZE];
-	u8r ReadIndex;
+	u8 ReadIndex;
 } NanoC_TokenStream;
 
 /**

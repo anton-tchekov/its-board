@@ -2,12 +2,12 @@
 #include "nanoc_util.h"
 #include <ctype.h>
 
-static NanoC_Bool is_identifer_start(u8r c)
+static NanoC_Bool is_identifer_start(NanoC_Char c)
 {
 	return isalpha(c) || c == '_';
 }
 
-static NanoC_Bool is_identifier_char(u8r c)
+static NanoC_Bool is_identifier_char(NanoC_Char c)
 {
 	return isalnum(c) || c == '_';
 }

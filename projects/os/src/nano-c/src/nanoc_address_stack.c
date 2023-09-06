@@ -1,7 +1,7 @@
 #include "nanoc_address_stack.h"
 
 void nanoc_address_stack_update(
-	NanoC_AddressStack *as, NanoC_Output *output, u8r prev, u16r addr)
+	NanoC_AddressStack *as, NanoC_Output *output, u8r prev, NanoC_Address addr)
 {
 	u8r top = as->Top;
 	u16 *stack = as->Stack;

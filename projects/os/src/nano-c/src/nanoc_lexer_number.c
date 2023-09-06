@@ -2,12 +2,12 @@
 #include "nanoc_util.h"
 #include <ctype.h>
 
-static NanoC_Bool is_binary(u8r c)
+static NanoC_Bool is_binary(NanoC_Char c)
 {
 	return c == '0' || c == '1';
 }
 
-static NanoC_Bool is_octal(u8r c)
+static NanoC_Bool is_octal(NanoC_Char c)
 {
 	return c >= '0' && c <= '7';
 }

@@ -70,6 +70,6 @@ enum
 	NANOC_ERROR_TOO_MANY_FN_ARGS
 };
 
-const char *nanoc_status_message(u8r status_code);
+const char *nanoc_status_message(NanoC_Status status_code);
 
 #endif /* __NANOC_ERROR_H__ */

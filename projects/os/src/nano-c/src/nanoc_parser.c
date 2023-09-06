@@ -8,8 +8,7 @@
 static NanoC_Status insert_var(
 	NanoC_Parser *parser, NanoC_Token *token, size_t *idx)
 {
-	u8r ret;
-
+	NanoC_Status ret;
 	if(token->Type != NANOC_TT_IDENTIFIER)
 	{
 		THROW(NANOC_ERROR_EXPECTED_IDENTIFIER);
@@ -136,7 +135,7 @@ static NanoC_Bool is_assign(NanoC_TokenType tt)
 
 #define ASSIGN_LUT(X) ((X) - NANOC_TT_ASSIGN_START)
 
-static u8r assign_instr(NanoC_TokenType tt)
+static NanoC_Opcode assign_instr(NanoC_TokenType tt)
 {
 	static const u8 lut[] =
 	{
@@ -157,7 +156,7 @@ static u8r assign_instr(NanoC_TokenType tt)
 	return lut[ASSIGN_LUT(tt)];
 }
 
-static u8r nanoc_action(NanoC_Parser *parser)
+static NanoC_Status nanoc_action(NanoC_Parser *parser)
 {
 	PROPAGATE(nanoc_fn_call(parser));
 	nanoc_output_emit(&parser->Output, NANOC_INSTR_POP);
@@ -166,10 +165,10 @@ static u8r nanoc_action(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
-static u8r nanoc_identifier(NanoC_Parser *parser)
+static NanoC_Status nanoc_identifier(NanoC_Parser *parser)
 {
 	NanoC_Token *token = TOKEN(0);
-	u8r tt = TT(1);
+	NanoC_TokenType tt = TT(1);
 	if(tt == NANOC_TT_L_PAREN)
 	{
 		return nanoc_action(parser);
@@ -190,7 +189,7 @@ static u8r nanoc_identifier(NanoC_Parser *parser)
 	THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 }
 
-u8r nanoc_let(NanoC_Parser *parser)
+NanoC_Status nanoc_let(NanoC_Parser *parser)
 {
 	NanoC_Token *token;
 	size_t idx;

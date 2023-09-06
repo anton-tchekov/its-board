@@ -1,7 +1,7 @@
 #ifndef __NANOC_TOKENTYPE_H__
 #define __NANOC_TOKENTYPE_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 
 enum
 {
@@ -89,7 +89,7 @@ enum
 
 #ifdef NANOC_DEBUG
 
-const char *nanoc_tokentype_tostring(u8r token_type);
+const char *nanoc_tokentype_tostring(NanoC_TokenType token_type);
 
 #endif /* NANOC_DEBUG */
 

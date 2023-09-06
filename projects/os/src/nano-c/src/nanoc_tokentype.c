@@ -3,7 +3,7 @@
 
 #ifdef NANOC_DEBUG
 
-const char *nanoc_tokentype_tostring(u8r token_type)
+const char *nanoc_tokentype_tostring(NanoC_TokenType token_type)
 {
 	const char *token_names[] =
 	{

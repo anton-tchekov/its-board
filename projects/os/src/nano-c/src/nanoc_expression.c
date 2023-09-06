@@ -124,7 +124,7 @@ static void and_or_addr_here(NanoC_Parser *parser, u8r prev_top)
 }
 
 static void nanoc_expression_operator(NanoC_Parser *parser,
-	u8r local_top, u8r ao_top, u8r tt)
+	u8r local_top, u8r ao_top, NanoC_TokenType tt)
 {
 	u8r prec = precedence_get(tt);
 
@@ -193,7 +193,7 @@ static u8r token_class(u8r tt)
 	return token_class;
 }
 
-u8r nanoc_expression(NanoC_Parser *parser)
+NanoC_Status nanoc_expression(NanoC_Parser *parser)
 {
 	NanoC_Token *cur_token;
 	u8r local_top = parser->OpTop;
