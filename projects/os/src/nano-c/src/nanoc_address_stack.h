@@ -16,7 +16,8 @@ static inline void nanoc_address_stack_init(NanoC_AddressStack *as, u16 *stack)
 	as->Stack = stack;
 }
 
-static inline void nanoc_address_stack_push(NanoC_AddressStack *as, u16r addr)
+static inline void nanoc_address_stack_push(
+	NanoC_AddressStack *as, NanoC_Address addr)
 {
 	as->Stack[as->Top++] = addr;
 }

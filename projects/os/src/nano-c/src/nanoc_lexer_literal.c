@@ -19,7 +19,7 @@ static i32 _escape_sequence(const char *p, size_t *out_len)
 	};
 
 	const u8 *t;
-	u8r c = *p;
+	NanoC_Char c = *p;
 	if(c == 'x' && isxdigit(p[1]) && isxdigit(p[2]))
 	{
 		*out_len = 3;
@@ -38,10 +38,10 @@ static i32 _escape_sequence(const char *p, size_t *out_len)
 	return -1;
 }
 
-u8r nanoc_lexer_char(NanoC_Lexer *lexer, NanoC_Token *token)
+NanoC_Bool nanoc_lexer_char(NanoC_Lexer *lexer, NanoC_Token *token)
 {
 	const char *p;
-	u8r c;
+	NanoC_Char c;
 	i32 v;
 
 	p = lexer->Ptr;
@@ -87,7 +87,7 @@ u8r nanoc_lexer_char(NanoC_Lexer *lexer, NanoC_Token *token)
 	return 1;
 }
 
-u8r nanoc_lexer_string(NanoC_Lexer *lexer, NanoC_Token *token)
+NanoC_Bool nanoc_lexer_string(NanoC_Lexer *lexer, NanoC_Token *token)
 {
 	const char *p;
 	int c, v;

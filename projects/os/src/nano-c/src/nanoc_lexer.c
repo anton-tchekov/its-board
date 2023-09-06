@@ -16,7 +16,7 @@ static void nanoc_lexer_read(NanoC_Lexer *lexer)
 	}
 }
 
-u8r nanoc_lexer_advance(NanoC_Lexer *lexer)
+NanoC_Char nanoc_lexer_advance(NanoC_Lexer *lexer)
 {
 	if(lexer->Current == '\0')
 	{
@@ -39,8 +39,7 @@ u8r nanoc_lexer_advance(NanoC_Lexer *lexer)
 
 static void nanoc_lexer_multi_line_comment(NanoC_Lexer *lexer)
 {
-	u8r c;
-
+	NanoC_Char c;
 	nanoc_lexer_advance(lexer);
 	c = nanoc_lexer_advance(lexer);
 	while(c)
@@ -66,12 +65,12 @@ static void nanoc_lexer_single_line_comment(NanoC_Lexer *lexer)
 	nanoc_lexer_advance(lexer);
 }
 
-static u8r nanoc_lexer_skip(NanoC_Lexer *lexer)
+static NanoC_Bool nanoc_lexer_skip(NanoC_Lexer *lexer)
 {
-	u8r cur = lexer->Current;
+	NanoC_Char cur = lexer->Current;
 	if(cur == '/')
 	{
-		u8r next = lexer->Ptr[1];
+		NanoC_Char next = lexer->Ptr[1];
 		if(next == '*')
 		{
 			nanoc_lexer_multi_line_comment(lexer);

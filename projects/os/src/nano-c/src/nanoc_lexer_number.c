@@ -30,7 +30,7 @@ static u32 lexer_binary(NanoC_Lexer *lexer)
 static u32 lexer_hex(NanoC_Lexer *lexer)
 {
 	u32 n = 0;
-	u8r c;
+	NanoC_Char c;
 	nanoc_lexer_advance(lexer);
 	c = nanoc_lexer_advance(lexer);
 	while(isxdigit(c))
@@ -45,7 +45,7 @@ static u32 lexer_hex(NanoC_Lexer *lexer)
 static u32 lexer_octal(NanoC_Lexer *lexer)
 {
 	u32 n = 0;
-	u8r c = nanoc_lexer_advance(lexer);
+	NanoC_Char c = nanoc_lexer_advance(lexer);
 	while(is_octal(c))
 	{
 		n = 8 * n + (c - '0');
@@ -58,7 +58,7 @@ static u32 lexer_octal(NanoC_Lexer *lexer)
 static i32 lexer_decimal(NanoC_Lexer *lexer)
 {
 	i32 n = 0;
-	u8r c = lexer->Current;
+	NanoC_Char c = lexer->Current;
 	while(isdigit(c))
 	{
 		n = 10 * n + (c - '0');
@@ -68,10 +68,10 @@ static i32 lexer_decimal(NanoC_Lexer *lexer)
 	return n;
 }
 
-u8r nanoc_lexer_number(NanoC_Lexer *lexer, NanoC_Token *token)
+NanoC_Bool nanoc_lexer_number(NanoC_Lexer *lexer, NanoC_Token *token)
 {
 	i32 n;
-	u8r c = lexer->Current;
+	NanoC_Char c = lexer->Current;
 	if(!isdigit(c))
 	{
 		return 0;

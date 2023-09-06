@@ -9,12 +9,14 @@ static void map_elem_set(NanoC_MapElement *elem, const char *key, size_t len)
 	elem->Length = len;
 }
 
-static u8r map_elem_equals(NanoC_MapElement *elem, const char *key, size_t len)
+static NanoC_Bool map_elem_equals(
+	NanoC_MapElement *elem, const char *key, size_t len)
 {
 	return (len == elem->Length) && !strncmp(elem->Key, key, len);
 }
 
-u8r nanoc_map_find(NanoC_Map *map, const char *key, size_t len, size_t *idx)
+NanoC_Bool nanoc_map_find(
+	NanoC_Map *map, const char *key, size_t len, size_t *idx)
 {
 	size_t i;
 	for(i = 0; i < map->Count; ++i)

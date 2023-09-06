@@ -198,7 +198,7 @@ u8r nanoc_expression(NanoC_Parser *parser)
 	NanoC_Token *cur_token;
 	u8r local_top = parser->OpTop;
 	u8r aoprev_top = parser->AndOrTop;
-	u8r tt = NANOC_TT_NULL;
+	NanoC_TokenType tt = NANOC_TT_NULL;
 	u8r prev_class;
 
 	for(;;)

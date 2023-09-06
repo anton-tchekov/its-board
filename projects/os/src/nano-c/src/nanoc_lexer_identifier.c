@@ -51,9 +51,7 @@ static NanoC_TokenType keyword_detect(const char *ident, size_t len)
 
 NanoC_Status nanoc_lexer_identifier(NanoC_Lexer *lexer, NanoC_Token *token)
 {
-	u8r c;
-
-	c = lexer->Current;
+	NanoC_Char c = lexer->Current;
 	if(!is_identifer_start(c))
 	{
 		return 0;
