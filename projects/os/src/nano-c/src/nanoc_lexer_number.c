@@ -15,7 +15,7 @@ static NanoC_Bool is_octal(u8r c)
 static u32 lexer_binary(NanoC_Lexer *lexer)
 {
 	u32 n = 0;
-	u8r c;
+	NanoC_Char c;
 	nanoc_lexer_advance(lexer);
 	c = nanoc_lexer_advance(lexer);
 	while(is_binary(c))

@@ -75,7 +75,7 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 	{
 		for(;;)
 		{
-			u8r tt;
+			NanoC_TokenType tt;
 			PROPAGATE(nanoc_expression(parser));
 			++arg_cnt;
 			if(arg_cnt >= NANOC_MAX_FN_ARGS)

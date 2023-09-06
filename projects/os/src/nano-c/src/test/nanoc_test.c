@@ -200,7 +200,8 @@ void nanoc_test_run(void)
 
 		/* Break and continue! */
 		{ "{let i=0;while(i<10){if(i==5){break;}++i;} test(i);}", 5 },
-		{ "{let i,n=14512891;while(i<=n/2){if(n%i==0){test(i);break;}++i;}}", 2371 },
+		{ "{let i=2,n=14512891;while(i<=n/2){if(n%i==0){test(i);break;}++i;}}", 2371 },
+
 		{
 			"{\n"
 			"\tlet count = 0, i = 2;\n"
