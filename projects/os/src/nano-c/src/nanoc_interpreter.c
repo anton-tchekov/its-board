@@ -7,13 +7,13 @@
 #define CHECK_UNDERFLOW(N) \
 	if(op < (N)) \
 	{ \
-		return NANOC_INTERPRETER_STACK_UNDERFLOW; \
+		return NANOC_ERROR_STACK_UNDERFLOW; \
 	}
 
 #define CHECK_OVERFLOW(N) \
 	if(op > NANOC_OP_STACK_SIZE - (N)) \
 	{ \
-		return NANOC_INTERPRETER_STACK_OVERFLOW; \
+		return NANOC_ERROR_STACK_OVERFLOW; \
 	}
 
 #define BINARY_OP(C) \
@@ -36,7 +36,7 @@
 		B = op_stack[op]; \
 		if(B == 0) \
 		{ \
-			return NANOC_INTERPRETER_DIVISION_BY_ZERO; \
+			return NANOC_ERROR_DIVISION_BY_ZERO; \
 		} \
 		op_stack[op - 1] = (C); \
 		ip += 1; \
@@ -66,7 +66,7 @@ u8r nanoc_interpreter_run(const u8 *program, NanoC_Builtins *builtins)
 		switch(program[ip])
 		{
 		case NANOC_INSTR_HALT:
-			return NANOC_INTERPRETER_SUCCESS;
+			return NANOC_STATUS_SUCCESS;
 
 		case NANOC_INSTR_PUSHI8:
 			CHECK_OVERFLOW(1);
@@ -241,26 +241,10 @@ u8r nanoc_interpreter_run(const u8 *program, NanoC_Builtins *builtins)
 		case NANOC_INSTR_U_MINUS: UNARY_OP(-A);          break;
 
 		default:
-			return NANOC_INTERPRETER_INVALID_INSTRUCTION;
+			return NANOC_ERROR_INVALID_INSTRUCTION;
 		}
 	}
 
 	nanoc_unreachable();
-	return NANOC_INTERPRETER_SUCCESS;
+	return NANOC_STATUS_SUCCESS;
 }
-
-const char *nanoc_interpreter_status_message(u8r status_code)
-{
-	static const char *err_msgs[] =
-	{
-		"SUCCESS",
-		"STACK_UNDERFLOW",
-		"STACK_OVERFLOW",
-		"DIVISION_BY_ZERO",
-		"INVALID_INSTRUCTION"
-	};
-
-	nanoc_assert(status_code < ARRLEN(err_msgs));
-	return err_msgs[status_code];
-}
-

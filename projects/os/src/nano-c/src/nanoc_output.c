@@ -57,7 +57,8 @@ void nanoc_output_pushi(NanoC_Output *output, u32 value)
 	}
 }
 
-NanoC_Address nanoc_output_unknown_jump(NanoC_Output *output, u8r instr)
+NanoC_Address nanoc_output_unknown_jump(
+	NanoC_Output *output, NanoC_Opcode instr)
 {
 	NanoC_Address idx;
 	nanoc_output_emit(output, instr);
@@ -66,7 +67,8 @@ NanoC_Address nanoc_output_unknown_jump(NanoC_Output *output, u8r instr)
 	return idx;
 }
 
-void nanoc_output_jump(NanoC_Output *output, u8r instr, NanoC_Address addr)
+void nanoc_output_jump(
+	NanoC_Output *output, NanoC_Opcode instr, NanoC_Address addr)
 {
 	nanoc_output_emit(output, instr);
 	nanoc_output_emit16(output, addr);

@@ -110,7 +110,8 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
-static NanoC_Status nanoc_assign(NanoC_Parser *parser, u8r op, size_t idx)
+static NanoC_Status nanoc_assign(
+	NanoC_Parser *parser, NanoC_Opcode op, size_t idx)
 {
 	NEXT();
 	if(op)

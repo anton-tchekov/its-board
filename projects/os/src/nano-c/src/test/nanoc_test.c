@@ -47,8 +47,7 @@ static int test_positive_run(const char *source, int expected)
 	ret = nanoc_interpreter_run(parser.Output.Buffer, &builtins);
 	if(ret)
 	{
-		printf("Interpreter error: %s\n",
-			nanoc_interpreter_status_message(ret));
+		printf("Interpreter error: %s\n", nanoc_status_message(ret));
 		return 0;
 	}
 

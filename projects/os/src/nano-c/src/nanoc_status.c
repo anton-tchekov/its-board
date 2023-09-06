@@ -5,7 +5,7 @@
 #ifdef NANOC_DEBUG
 
 void nanoc_log(
-	const char *file, const char *func, int line, u8r status_code)
+	const char *file, const char *func, int line, NanoC_Status status_code)
 {
 	fprintf(stderr, "%s:%d (%s) - %s\n",
 		file, line, func, nanoc_status_message(status_code));
@@ -13,7 +13,7 @@ void nanoc_log(
 
 #endif /* NANOC_DEBUG */
 
-const char *nanoc_status_message(u8r status_code)
+const char *nanoc_status_message(NanoC_Status status_code)
 {
 	static const char *err_msgs[] =
 	{
@@ -28,11 +28,14 @@ const char *nanoc_status_message(u8r status_code)
 		"BREAK_NOT_WITHIN_LOOP_OR_SWITCH",
 		"CONTINUE_NOT_WITHIN_LOOP",
 		"VARIABLE_REDEFINITION",
+		"STACK_UNDERFLOW",
 		"STACK_OVERFLOW",
 		"DUPLICATE_MAP_ELEMENT",
 		"TOO_MANY_VARIABLES",
 		"UNDEFINED_VARIABLE",
-		"TOO_MANY_FN_ARGS"
+		"TOO_MANY_FN_ARGS",
+		"DIVISION_BY_ZERO",
+		"INVALID_INSTRUCTION"
 	};
 
 	nanoc_assert(status_code < ARRLEN(err_msgs));

@@ -21,8 +21,13 @@ void nanoc_output_emit32(NanoC_Output *output, u32r val);
 void nanoc_output_emit16_at(NanoC_Output *output, u32r loc, NanoC_Address val);
 
 void nanoc_output_pushi(NanoC_Output *output, u32 value);
-NanoC_Address nanoc_output_unknown_jump(NanoC_Output *output, u8r instr);
-void nanoc_output_jump(NanoC_Output *output, u8r instr, NanoC_Address addr);
+
+NanoC_Address nanoc_output_unknown_jump(
+	NanoC_Output *output, NanoC_Opcode instr);
+
+void nanoc_output_jump(
+	NanoC_Output *output, NanoC_Opcode instr, NanoC_Address addr);
+
 void nanoc_output_jump_here(NanoC_Output *output, NanoC_Address addr);
 
 #endif /* __NANOC_OUTPUT_H__ */

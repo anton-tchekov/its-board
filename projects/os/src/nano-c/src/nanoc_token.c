@@ -7,7 +7,7 @@
 #include "nanoc_terminal.h"
 #include <stdio.h>
 
-size_t _print_handle_tab(u8r c, size_t count)
+size_t _print_handle_tab(NanoC_Char c, size_t count)
 {
 	if(c == '\t')
 	{
