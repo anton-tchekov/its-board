@@ -133,22 +133,22 @@ static void shell_key(int key, int c)
 
 	static const KeyBind keybinds[] =
 	{
-		{ KEY_LEFT,              line_key_left        },
-		{ MOD_SHIFT | KEY_LEFT,  line_key_shift_left  },
-		{ KEY_RIGHT,             line_key_right       },
-		{ MOD_SHIFT | KEY_RIGHT, line_key_shift_right },
-		{ KEY_UP,                key_up               },
-		{ KEY_DOWN,              key_down             },
-		{ KEY_BACKSPACE,         line_key_backspace   },
-		{ KEY_DELETE,            line_key_delete      },
-		{ MOD_CTRL | KEY_A,      line_key_ctrl_a      },
-		{ MOD_CTRL | KEY_C,      line_key_ctrl_c      },
-		{ MOD_CTRL | KEY_X,      line_key_ctrl_x      },
-		{ MOD_CTRL | KEY_V,      line_key_ctrl_v      },
-		{ KEY_HOME,              line_key_home        },
-		{ MOD_SHIFT | KEY_HOME,  line_key_shift_home  },
-		{ KEY_END,               line_key_end         },
-		{ MOD_SHIFT | KEY_END,   line_key_shift_end   },
+		{ KEY_LEFT,              line_key_left            },
+		{ MOD_SHIFT | KEY_LEFT,  line_key_shift_left      },
+		{ KEY_RIGHT,             line_key_right           },
+		{ MOD_SHIFT | KEY_RIGHT, line_key_shift_right     },
+		{ KEY_UP,                key_up                   },
+		{ KEY_DOWN,              key_down                 },
+		{ KEY_BACKSPACE,         line_key_backspace       },
+		{ KEY_DELETE,            line_key_delete          },
+		{ MOD_CTRL | KEY_A,      line_key_ctrl_a          },
+		{ MOD_CTRL | KEY_C,      line_key_ctrl_c          },
+		{ MOD_CTRL | KEY_X,      line_key_ctrl_x          },
+		{ MOD_CTRL | KEY_V,      line_key_ctrl_v          },
+		{ KEY_HOME,              line_key_ctrl_home       },
+		{ MOD_SHIFT | KEY_HOME,  line_key_ctrl_shift_home },
+		{ KEY_END,               line_key_ctrl_end        },
+		{ MOD_SHIFT | KEY_END,   line_key_ctrl_shift_end  },
 	};
 
 	Line *line = &this.Lines[this.Slot];

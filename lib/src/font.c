@@ -3,7 +3,7 @@
 
 void font_char(int x, int y, int c, int fg, int bg, const Font *font)
 {
-	if(c < 32 || c > 126)
+	if(c < 32)
 	{
 		c = 127;
 	}

@@ -4,6 +4,15 @@
 #include <stdint.h>
 #include "utf8.h"
 
+enum
+{
+	CHAR_VISIBLE_SPACE = 128,
+	CHAR_TAB_START     = 129,
+	CHAR_TAB_MIDDLE    = 130,
+	CHAR_TAB_END       = 131,
+	CHAR_TAB_BOTH      = 132,
+};
+
 typedef struct
 {
 	int Width;

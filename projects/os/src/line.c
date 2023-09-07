@@ -1,11 +1,13 @@
 #include "line.h"
 #include "clipboard.h"
 #include <string.h>
+#include <ctype.h>
 
 void line_init(Line *line, char *buffer, int size)
 {
 	line->Size = size;
 	line->Length = 0;
+	line->SaveX = -1;
 	line->Cursor = 0;
 	line->Selection = 0;
 	line->Text = buffer;
@@ -63,104 +65,169 @@ static int max(int a, int b)
 	return a > b ? a : b;
 }
 
-#if 0
-static int cur_x_pos(Line *line)
+static int set_x_pos(const char *s, int pos, int target, int len)
 {
-	const char *start, *cur, *p;
-
-	start = line->Text;
-	cur = start + line->Cursor;
-	p = cur;
-	while(p > start)
+	int x = 0;
+	while(pos < len && x < target)
 	{
-		if(*p == '\n')
+		int c = s[pos];
+		if(c == '\n')
 		{
 			break;
 		}
+		if(c == '\t')
+		{
+			x += 4 - (x & 3);
+		}
+		else
+		{
+			++x;
+		}
 
-		--p;
+		++pos;
 	}
 
-	return cur - p;
+	return pos;
 }
 
-static int next_line_start(Line *line)
+static int get_x_pos(const char *s, int pos, int cur)
 {
-	int i = line->Cursor;
-	int len = line->Length;
-	const char *text = line->Text;
-
-	for(; i < len; ++i)
+	int x = 0;
+	while(pos < cur)
 	{
-		if(text[i] == '\n')
+		int c = s[pos];
+		if(c == '\t')
 		{
-			++i;
-			break;
+			x += 4 - (x & 3);
 		}
+		else
+		{
+			++x;
+		}
+
+		++pos;
 	}
 
-	line->Cursor = i;
+	return x;
 }
 
-static int prev_line_start(Line *line)
+static int cur_line_start(const char *s, int pos)
 {
-	int x;
-	int i = line->Cursor;
-	const char *text = line->Text;
-
-	for(; i >= 0; --i)
+	while(pos > 0)
 	{
-		if(text[i] == '\n')
+		--pos;
+		if(s[pos] == '\n')
 		{
-			--i;
-			break;
+			return pos + 1;
 		}
 	}
 
-	for(; i >= 0; --i)
-	{
-		if(text[i] == '\n')
-		{
-			++i;
-			break;
-		}
-	}
-
-	line->Cursor = i;
+	return pos;
 }
-#endif
+
+static int cur_line_home(const char *s, int pos)
+{
+	int start = cur_line_start(s, pos);
+	int i = start;
+	int c;
+	while(((c = s[i]) == ' ') || (c == '\t')) { ++i; }
+	return (pos == i) ? start : i;
+}
+
+static int cur_line_end(const char *s, int pos, int len)
+{
+	while(pos < len)
+	{
+		if(s[pos] == '\n')
+		{
+			break;
+		}
+
+		++pos;
+	}
+
+	return pos;
+}
+
+static int next_line_start(const char *s, int pos, int len)
+{
+	while(pos < len)
+	{
+		if(s[pos] == '\n')
+		{
+			++pos;
+			break;
+		}
+
+		++pos;
+	}
+
+	return pos;
+}
+
+static int get_target(Line *line, int pos, int cur)
+{
+	if(line->SaveX < 0)
+	{
+		line->SaveX = get_x_pos(line->Text, pos, cur);
+	}
+
+	return line->SaveX;
+}
+
+static void next_line_pos(Line *line, int pos)
+{
+	int cls = cur_line_start(line->Text, pos);
+	int nls = next_line_start(line->Text, pos, line->Length);
+	int target = get_target(line, cls, pos);
+	if(nls == line->Length)
+	{
+		line->Cursor = line->Length;
+		line->SaveX = -1;
+	}
+	else
+	{
+		line->Cursor = set_x_pos(line->Text, nls, target, line->Length);
+	}
+}
+
+static void prev_line_pos(Line *line, int pos)
+{
+	int cls = cur_line_start(line->Text, pos);
+	int pls = (cls > 0) ? cur_line_start(line->Text, cls - 1) : 0;
+	int target = get_target(line, cls, pos);
+	if(cls == 0)
+	{
+		line->Cursor = 0;
+		line->SaveX = -1;
+	}
+	else
+	{
+		line->Cursor = set_x_pos(line->Text, pls, target, line->Length);
+	}
+}
 
 /* --- PUBLIC --- */
 void line_key_up(Line *line)
 {
-#if 0
-	line->Cursor = min(line->Cursor, line->Selection);
-	prev_line_start(line);
+	prev_line_pos(line, min(line->Cursor, line->Selection));
 	line->Selection = line->Cursor;
-#endif
 }
 
 void line_key_shift_up(Line *line)
 {
-#if 0
-	prev_line_start(line);
-#endif
+	prev_line_pos(line, line->Cursor);
 }
 
 void line_key_down(Line *line)
 {
-#if 0
-	line->Cursor = max(line->Cursor, line->Selection);
-	next_line_start(line);
+	next_line_pos(line, max(line->Cursor, line->Selection));
 	line->Selection = line->Cursor;
-#endif
 }
 
 void line_key_shift_down(Line *line)
 {
-#if 0
-	next_line_start(line);
-#endif
+	next_line_pos(line, line->Cursor);
 }
 
 void line_key_left(Line *line)
@@ -178,6 +245,8 @@ void line_key_left(Line *line)
 		line->Cursor = min(line->Cursor, line->Selection);
 		line->Selection = line->Cursor;
 	}
+
+	line->SaveX = -1;
 }
 
 void line_key_shift_left(Line *line)
@@ -186,6 +255,8 @@ void line_key_shift_left(Line *line)
 	{
 		--line->Cursor;
 	}
+
+	line->SaveX = -1;
 }
 
 void line_key_right(Line *line)
@@ -203,6 +274,8 @@ void line_key_right(Line *line)
 		line->Cursor = max(line->Cursor, line->Selection);
 		line->Selection = line->Cursor;
 	}
+
+	line->SaveX = -1;
 }
 
 void line_key_shift_right(Line *line)
@@ -211,6 +284,8 @@ void line_key_shift_right(Line *line)
 	{
 		++line->Cursor;
 	}
+
+	line->SaveX = -1;
 }
 
 void line_key_backspace(Line *line)
@@ -230,6 +305,8 @@ void line_key_backspace(Line *line)
 	{
 		selection_delete(line);
 	}
+
+	line->SaveX = -1;
 }
 
 void line_key_delete(Line *line)
@@ -247,12 +324,15 @@ void line_key_delete(Line *line)
 	{
 		selection_delete(line);
 	}
+
+	line->SaveX = -1;
 }
 
 void line_key_ctrl_a(Line *line)
 {
 	line->Selection = 0;
 	line->Cursor = line->Length;
+	line->SaveX = -1;
 }
 
 void line_key_ctrl_c(Line *line)
@@ -266,6 +346,7 @@ void line_key_ctrl_x(Line *line)
 {
 	line_key_ctrl_c(line);
 	selection_delete(line);
+	line->SaveX = -1;
 }
 
 void line_key_ctrl_v(Line *line)
@@ -273,28 +354,59 @@ void line_key_ctrl_v(Line *line)
 	int len;
 	const char *text = clipboard_get(&len);
 	selection_replace(line, text, len);
+	line->SaveX = -1;
 }
 
 void line_key_home(Line *line)
 {
-	line->Cursor = 0;
+	line->Cursor = cur_line_home(line->Text, line->Cursor);
 	line->Selection = line->Cursor;
+	line->SaveX = -1;
 }
 
 void line_key_shift_home(Line *line)
 {
-	line->Cursor = 0;
+	line->Cursor = cur_line_home(line->Text, line->Cursor);
+	line->SaveX = -1;
 }
 
 void line_key_end(Line *line)
 {
-	line->Cursor = line->Length;
+	line->Cursor = cur_line_end(line->Text, line->Cursor, line->Length);
 	line->Selection = line->Cursor;
+	line->SaveX = -1;
 }
 
 void line_key_shift_end(Line *line)
 {
+	line->Cursor = cur_line_end(line->Text, line->Cursor, line->Length);
+	line->SaveX = -1;
+}
+
+void line_key_ctrl_home(Line *line)
+{
+	line->Cursor = 0;
+	line->Selection = line->Cursor;
+	line->SaveX = -1;
+}
+
+void line_key_ctrl_shift_home(Line *line)
+{
+	line->Cursor = 0;
+	line->SaveX = -1;
+}
+
+void line_key_ctrl_end(Line *line)
+{
 	line->Cursor = line->Length;
+	line->Selection = line->Cursor;
+	line->SaveX = -1;
+}
+
+void line_key_ctrl_shift_end(Line *line)
+{
+	line->Cursor = line->Length;
+	line->SaveX = -1;
 }
 
 void line_key_insert(Line *line, int c)
@@ -316,4 +428,6 @@ void line_key_insert(Line *line, int c)
 		char s[1] = { c };
 		selection_replace(line, s, 1);
 	}
+
+	line->SaveX = -1;
 }
