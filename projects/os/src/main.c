@@ -16,6 +16,7 @@
 #include "ps2.h"
 #include "terminal.h"
 #include "shell.h"
+#include "editor.h"
 
 /**
  * @brief Main function

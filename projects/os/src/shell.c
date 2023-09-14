@@ -8,13 +8,10 @@
 #include "ps2.h"
 #include "command.h"
 #include "editor.h"
-#include "styles.h"
 
 #define COMMAND_MAX_LENGTH  57
 #define COMMAND_BUFFER_SIZE 60
 #define COMMAND_LINES        4
-
-#define CLEAR                 TERMINAL_CHAR(' ', NORMAL)
 
 typedef struct
 {
@@ -35,7 +32,7 @@ static void cls(void)
 	{
 		for(x = 0; x < TERMINAL_W; ++x)
 		{
-			terminal_set(x, y, CLEAR);
+			terminal_set(x, y, ' ' | TERMINAL_FG_WHITE | TERMINAL_BG_BLACK);
 		}
 	}
 }
@@ -45,7 +42,7 @@ static void shell_output_reset(void)
 {
 	this.X = 0;
 	this.Y = 1;
-	this.FG = TERMINAL_WHITE;
+	this.FG = TERMINAL_FG_WHITE;
 }
 
 static void key_enter(Line *line)
@@ -57,19 +54,19 @@ static void key_enter(Line *line)
 }
 
 /* --- RENDER --- */
-static inline int get_char_at(Line *line, int i, int start, int end)
+static inline void put_char_at(Line *line, int i, int start, int end)
 {
-	int color = NORMAL;
+	int color = TERMINAL_FG_WHITE | TERMINAL_BG_BLACK;
 	int chr = ' ';
 
 	if(i >= start && i < end)
 	{
-		color = SELECTED;
+		color = TERMINAL_FG_BLACK | TERMINAL_BG_ORANGE;
 	}
 
 	if(i == line->Cursor)
 	{
-		color = CURSOR;
+		color = TERMINAL_FG_BLACK | TERMINAL_BG_WHITE;
 	}
 
 	if(i < line->Length)
@@ -77,32 +74,32 @@ static inline int get_char_at(Line *line, int i, int start, int end)
 		chr = line->Text[i];
 	}
 
-	return TERMINAL_CHAR(chr, color);
+	terminal_set(i + 2, 0, chr | color);
 }
 
 static void command_render(void)
 {
-	static const uint8_t _colors[COMMAND_LINES] =
+	static const uint16_t _colors[COMMAND_LINES] =
 	{
-		TERMINAL_BRIGHT_WHITE,
-		TERMINAL_BRIGHT_RED,
-		TERMINAL_BRIGHT_GREEN,
-		TERMINAL_BRIGHT_BLUE
+		TERMINAL_FG_WHITE,
+		TERMINAL_FG_RED,
+		TERMINAL_FG_GREEN,
+		TERMINAL_FG_BLUE
 	};
 
 	Line *line = &this.Lines[this.Slot];
 	int i, start, end;
-	int color = TERMINAL_COLOR(_colors[this.Slot], TERMINAL_BLACK);
+	int color = _colors[this.Slot] | TERMINAL_BG_BLACK;
 	line_selection_get(line, &start, &end);
-	terminal_set(0, 0, TERMINAL_CHAR('>', color));
-	terminal_set(1, 0, TERMINAL_CHAR(' ', NORMAL));
+	terminal_set(0, 0, '>' | color);
+	terminal_set(1, 0, ' ' | TERMINAL_FG_WHITE | TERMINAL_BG_BLACK);
 	for(i = 0; i < COMMAND_MAX_LENGTH + 1; ++i)
 	{
-		terminal_set(i + 2, 0, get_char_at(line, i, start, end));
+		put_char_at(line, i, start, end);
 	}
 }
 
-static void key_up(Line *line)
+static void key_up(void)
 {
 	if(this.Slot == 0)
 	{
@@ -110,69 +107,50 @@ static void key_up(Line *line)
 	}
 
 	--this.Slot;
-	(void)line;
 }
 
-static void key_down(Line *line)
+static void key_down(void)
 {
 	++this.Slot;
 	if(this.Slot >= COMMAND_LINES)
 	{
 		this.Slot = 0;
 	}
-	(void)line;
 }
 
 static void shell_key(int key, int c)
 {
-	typedef struct KEYBIND
-	{
-		int Key;
-		void (*Action)(Line *);
-	} KeyBind;
-
-	static const KeyBind keybinds[] =
-	{
-		{ KEY_LEFT,              line_key_left            },
-		{ MOD_SHIFT | KEY_LEFT,  line_key_shift_left      },
-		{ KEY_RIGHT,             line_key_right           },
-		{ MOD_SHIFT | KEY_RIGHT, line_key_shift_right     },
-		{ KEY_UP,                key_up                   },
-		{ KEY_DOWN,              key_down                 },
-		{ KEY_BACKSPACE,         line_key_backspace       },
-		{ KEY_DELETE,            line_key_delete          },
-		{ MOD_CTRL | KEY_A,      line_key_ctrl_a          },
-		{ MOD_CTRL | KEY_C,      line_key_ctrl_c          },
-		{ MOD_CTRL | KEY_X,      line_key_ctrl_x          },
-		{ MOD_CTRL | KEY_V,      line_key_ctrl_v          },
-		{ KEY_HOME,              line_key_ctrl_home       },
-		{ MOD_SHIFT | KEY_HOME,  line_key_ctrl_shift_home },
-		{ KEY_END,               line_key_ctrl_end        },
-		{ MOD_SHIFT | KEY_END,   line_key_ctrl_shift_end  },
-	};
-
 	Line *line = &this.Lines[this.Slot];
-	const KeyBind *kb = keybinds;
-	const KeyBind *end = kb + ARRLEN(keybinds);
-	for(; kb < end; ++kb)
+	switch(key)
 	{
-		if(key == kb->Key)
+	case KEY_LEFT:              line_left(line);            break;
+	case MOD_SHIFT | KEY_LEFT:  line_shift_left(line);      break;
+	case KEY_RIGHT:             line_right(line);           break;
+	case MOD_SHIFT | KEY_RIGHT: line_shift_right(line);     break;
+	case KEY_UP:                key_up();                       break;
+	case KEY_DOWN:              key_down();                     break;
+	case KEY_BACKSPACE:         line_backspace(line);       break;
+	case KEY_DELETE:            line_delete(line);          break;
+	case MOD_CTRL | KEY_A:      line_ctrl_a(line);          break;
+	case MOD_CTRL | KEY_C:      line_ctrl_c(line);          break;
+	case MOD_CTRL | KEY_X:      line_ctrl_x(line);          break;
+	case MOD_CTRL | KEY_V:      line_ctrl_v(line);          break;
+	case KEY_HOME:              line_ctrl_home(line);       break;
+	case MOD_SHIFT | KEY_HOME:  line_ctrl_shift_home(line); break;
+	case KEY_END:               line_ctrl_end(line);        break;
+	case MOD_SHIFT | KEY_END:   line_ctrl_shift_end(line);  break;
+	default:
+		if(c == '\n')
 		{
-			kb->Action(line);
-			goto render;
+			key_enter(line);
 		}
+		else if(isprint(c))
+		{
+			line_insert(line, c);
+		}
+		break;
 	}
 
-	if(c == '\n')
-	{
-		key_enter(line);
-	}
-	else if(isprint(c))
-	{
-		line_key_insert(line, c);
-	}
-
-render:
 	command_render();
 }
 
@@ -228,8 +206,7 @@ void shell_char(int c)
 	{
 		if(this.Y < TERMINAL_H)
 		{
-			int color = TERMINAL_COLOR(this.FG, TERMINAL_BLACK);
-			terminal_set(this.X, this.Y, TERMINAL_CHAR(c, color));
+			terminal_set(this.X, this.Y, c | this.FG | TERMINAL_BG_BLACK);
 			++this.X;
 			if(this.X >= TERMINAL_W)
 			{

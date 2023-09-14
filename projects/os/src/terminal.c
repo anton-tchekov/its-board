@@ -10,46 +10,25 @@
 
 #define TERMINAL_EX_CHAR(V)         ((V) & 0xFF)
 #define TERMINAL_EX_FG(V)           (((V) >> 8) & 0x0F)
-#define TERMINAL_EX_BG(V)           ((V) >> 12)
-#define TERMINAL_EX_BOLD(V)         ((V) & 0x800)
+#define TERMINAL_EX_BG(V)           (((V) >> 12) & 0x07)
+#define TERMINAL_EX_BOLD(V)         ((V) & 0x8000)
 
-#define CT_BLACK              0x0000
-#define CT_RED                0xA800
-#define CT_GREEN              0x0540
-#define CT_YELLOW             0xFC00
-#define CT_BLUE               0x0015
-#define CT_MAGENTA            0xA815
-#define CT_CYAN               0x0555
-#define CT_WHITE              0xFFFF
-
-#define CT_BRIGHT_BLACK       0x52AA
-#define CT_BRIGHT_RED         0xFAAA
-#define CT_BRIGHT_GREEN       0x57EA
-#define CT_BRIGHT_YELLOW      0xFFEA
-#define CT_BRIGHT_BLUE        0x52BF
-#define CT_BRIGHT_MAGENTA     0xFABF
-#define CT_BRIGHT_CYAN        0x57FF
-#define CT_BRIGHT_WHITE       0xFFFF
-
-static const uint16_t _color_table[] =
+static const uint16_t _color_table_bg[] =
 {
-	CT_BLACK,
-	CT_RED,
-	CT_GREEN,
-	CT_YELLOW,
-	CT_BLUE,
-	CT_MAGENTA,
-	CT_CYAN,
-	CT_WHITE,
+	0x0000, /* TERMINAL_BG_BLACK   */
+	0xFFFF, /* TERMINAL_BG_WHITE   */
+	0xFC00, /* TERMINAL_BG_ORANGE  */
+	0x226F, /* TERMINAL_BG_BLUE    */
+};
 
-	CT_BRIGHT_BLACK,
-	CT_BRIGHT_RED,
-	CT_BRIGHT_GREEN,
-	CT_BRIGHT_YELLOW,
-	CT_BRIGHT_BLUE,
-	CT_BRIGHT_MAGENTA,
-	CT_BRIGHT_CYAN,
-	CT_BRIGHT_WHITE
+static const uint16_t _color_table_fg[] =
+{
+	0x0000, /* TERMINAL_FG_BLACK       */
+	0xFFFF, /* TERMINAL_FG_WHITE       */
+	0xFAAA, /* TERMINAL_FG_RED         */
+	0x57EA, /* TERMINAL_FG_GREEN       */
+	0x52BF, /* TERMINAL_FG_BLUE        */
+	0x4228, /* TTERMINAL_FG_LIGHT_GRAY */
 };
 
 static uint16_t _terminal_buf[TERMINAL_W * TERMINAL_H];
@@ -60,8 +39,8 @@ static inline void _terminal_render(int x, int y, int v)
 		x * TERMINAL_CHAR_W,
 		y * TERMINAL_CHAR_H,
 		TERMINAL_EX_CHAR(v),
-		_color_table[TERMINAL_EX_FG(v)],
-		_color_table[TERMINAL_EX_BG(v)],
+		_color_table_fg[TERMINAL_EX_FG(v)],
+		_color_table_bg[TERMINAL_EX_BG(v)],
 		TERMINAL_EX_BOLD(v) ? Terminus16_Bold : Terminus16);
 }
 

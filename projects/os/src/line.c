@@ -65,7 +65,12 @@ static int max(int a, int b)
 	return a > b ? a : b;
 }
 
-static int set_x_pos(const char *s, int pos, int target, int len)
+static int next_tab_stop(int x, int tabsize)
+{
+	return x + tabsize - (x & (tabsize - 1));
+}
+
+static int set_x_pos(const char *s, int pos, int target, int len, int tabsize)
 {
 	int x = 0;
 	while(pos < len && x < target)
@@ -77,7 +82,7 @@ static int set_x_pos(const char *s, int pos, int target, int len)
 		}
 		if(c == '\t')
 		{
-			x += 4 - (x & 3);
+			x = next_tab_stop(x, tabsize);
 		}
 		else
 		{
@@ -90,7 +95,7 @@ static int set_x_pos(const char *s, int pos, int target, int len)
 	return pos;
 }
 
-static int get_x_pos(const char *s, int pos, int cur)
+static int get_x_pos(const char *s, int pos, int cur, int tabsize)
 {
 	int x = 0;
 	while(pos < cur)
@@ -98,7 +103,7 @@ static int get_x_pos(const char *s, int pos, int cur)
 		int c = s[pos];
 		if(c == '\t')
 		{
-			x += 4 - (x & 3);
+			x = next_tab_stop(x, tabsize);
 		}
 		else
 		{
@@ -165,37 +170,38 @@ static int next_line_start(const char *s, int pos, int len)
 	return pos;
 }
 
-static int get_target(Line *line, int pos, int cur)
+static int get_target(Line *line, int pos, int cur, int tabsize)
 {
 	if(line->SaveX < 0)
 	{
-		line->SaveX = get_x_pos(line->Text, pos, cur);
+		line->SaveX = get_x_pos(line->Text, pos, cur, tabsize);
 	}
 
 	return line->SaveX;
 }
 
-static void next_line_pos(Line *line, int pos)
+static void next_line_pos(Line *line, int pos, int tabsize)
 {
 	int cls = cur_line_start(line->Text, pos);
 	int nls = next_line_start(line->Text, pos, line->Length);
-	int target = get_target(line, cls, pos);
-	if(nls == line->Length)
+	int target = get_target(line, cls, pos, tabsize);
+	if(cls == cur_line_start(line->Text, line->Length))
 	{
 		line->Cursor = line->Length;
 		line->SaveX = -1;
 	}
 	else
 	{
-		line->Cursor = set_x_pos(line->Text, nls, target, line->Length);
+		line->Cursor = set_x_pos(
+			line->Text, nls, target, line->Length, tabsize);
 	}
 }
 
-static void prev_line_pos(Line *line, int pos)
+static void prev_line_pos(Line *line, int pos, int tabsize)
 {
 	int cls = cur_line_start(line->Text, pos);
 	int pls = (cls > 0) ? cur_line_start(line->Text, cls - 1) : 0;
-	int target = get_target(line, cls, pos);
+	int target = get_target(line, cls, pos, tabsize);
 	if(cls == 0)
 	{
 		line->Cursor = 0;
@@ -203,34 +209,35 @@ static void prev_line_pos(Line *line, int pos)
 	}
 	else
 	{
-		line->Cursor = set_x_pos(line->Text, pls, target, line->Length);
+		line->Cursor = set_x_pos(
+			line->Text, pls, target, line->Length, tabsize);
 	}
 }
 
 /* --- PUBLIC --- */
-void line_key_up(Line *line)
+void line_up(Line *line, int tabsize)
 {
-	prev_line_pos(line, min(line->Cursor, line->Selection));
+	prev_line_pos(line, min(line->Cursor, line->Selection), tabsize);
 	line->Selection = line->Cursor;
 }
 
-void line_key_shift_up(Line *line)
+void line_shift_up(Line *line, int tabsize)
 {
-	prev_line_pos(line, line->Cursor);
+	prev_line_pos(line, line->Cursor, tabsize);
 }
 
-void line_key_down(Line *line)
+void line_down(Line *line, int tabsize)
 {
-	next_line_pos(line, max(line->Cursor, line->Selection));
+	next_line_pos(line, max(line->Cursor, line->Selection), tabsize);
 	line->Selection = line->Cursor;
 }
 
-void line_key_shift_down(Line *line)
+void line_shift_down(Line *line, int tabsize)
 {
-	next_line_pos(line, line->Cursor);
+	next_line_pos(line, line->Cursor, tabsize);
 }
 
-void line_key_left(Line *line)
+void line_left(Line *line)
 {
 	if(line->Cursor == line->Selection)
 	{
@@ -249,7 +256,7 @@ void line_key_left(Line *line)
 	line->SaveX = -1;
 }
 
-void line_key_shift_left(Line *line)
+void line_shift_left(Line *line)
 {
 	if(line->Cursor > 0)
 	{
@@ -259,7 +266,7 @@ void line_key_shift_left(Line *line)
 	line->SaveX = -1;
 }
 
-void line_key_right(Line *line)
+void line_right(Line *line)
 {
 	if(line->Cursor == line->Selection)
 	{
@@ -278,7 +285,7 @@ void line_key_right(Line *line)
 	line->SaveX = -1;
 }
 
-void line_key_shift_right(Line *line)
+void line_shift_right(Line *line)
 {
 	if(line->Cursor < line->Length)
 	{
@@ -288,7 +295,7 @@ void line_key_shift_right(Line *line)
 	line->SaveX = -1;
 }
 
-void line_key_backspace(Line *line)
+void line_backspace(Line *line)
 {
 	if(line->Selection == line->Cursor)
 	{
@@ -309,7 +316,7 @@ void line_key_backspace(Line *line)
 	line->SaveX = -1;
 }
 
-void line_key_delete(Line *line)
+void line_delete(Line *line)
 {
 	if(line->Selection == line->Cursor)
 	{
@@ -328,28 +335,28 @@ void line_key_delete(Line *line)
 	line->SaveX = -1;
 }
 
-void line_key_ctrl_a(Line *line)
+void line_ctrl_a(Line *line)
 {
 	line->Selection = 0;
 	line->Cursor = line->Length;
 	line->SaveX = -1;
 }
 
-void line_key_ctrl_c(Line *line)
+void line_ctrl_c(Line *line)
 {
 	int start, end;
 	line_selection_get(line, &start, &end);
 	clipboard_save(line->Text + start, end - start);
 }
 
-void line_key_ctrl_x(Line *line)
+void line_ctrl_x(Line *line)
 {
-	line_key_ctrl_c(line);
+	line_ctrl_c(line);
 	selection_delete(line);
 	line->SaveX = -1;
 }
 
-void line_key_ctrl_v(Line *line)
+void line_ctrl_v(Line *line)
 {
 	int len;
 	const char *text = clipboard_get(&len);
@@ -357,59 +364,59 @@ void line_key_ctrl_v(Line *line)
 	line->SaveX = -1;
 }
 
-void line_key_home(Line *line)
+void line_home(Line *line)
 {
 	line->Cursor = cur_line_home(line->Text, line->Cursor);
 	line->Selection = line->Cursor;
 	line->SaveX = -1;
 }
 
-void line_key_shift_home(Line *line)
+void line_shift_home(Line *line)
 {
 	line->Cursor = cur_line_home(line->Text, line->Cursor);
 	line->SaveX = -1;
 }
 
-void line_key_end(Line *line)
+void line_end(Line *line)
 {
 	line->Cursor = cur_line_end(line->Text, line->Cursor, line->Length);
 	line->Selection = line->Cursor;
 	line->SaveX = -1;
 }
 
-void line_key_shift_end(Line *line)
+void line_shift_end(Line *line)
 {
 	line->Cursor = cur_line_end(line->Text, line->Cursor, line->Length);
 	line->SaveX = -1;
 }
 
-void line_key_ctrl_home(Line *line)
+void line_ctrl_home(Line *line)
 {
 	line->Cursor = 0;
 	line->Selection = line->Cursor;
 	line->SaveX = -1;
 }
 
-void line_key_ctrl_shift_home(Line *line)
+void line_ctrl_shift_home(Line *line)
 {
 	line->Cursor = 0;
 	line->SaveX = -1;
 }
 
-void line_key_ctrl_end(Line *line)
+void line_ctrl_end(Line *line)
 {
 	line->Cursor = line->Length;
 	line->Selection = line->Cursor;
 	line->SaveX = -1;
 }
 
-void line_key_ctrl_shift_end(Line *line)
+void line_ctrl_shift_end(Line *line)
 {
 	line->Cursor = line->Length;
 	line->SaveX = -1;
 }
 
-void line_key_insert(Line *line, int c)
+void line_insert(Line *line, int c)
 {
 	if(line->Selection == line->Cursor)
 	{

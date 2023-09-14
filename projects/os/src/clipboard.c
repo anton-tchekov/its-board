@@ -12,13 +12,12 @@ const char *clipboard_get(int *len)
 
 int clipboard_save(const char *text, int len)
 {
-	int success = 0;
-	if(len <= CLIPBOARD_MAX_LENGTH)
+	if(len > CLIPBOARD_MAX_LENGTH)
 	{
-		_clipboard_len = len;
-		memcpy(_clipboard_text, text, len);
-		success = 1;
+		return 0;
 	}
 
-	return success;
+	_clipboard_len = len;
+	memcpy(_clipboard_text, text, len);
+	return 1;
 }
