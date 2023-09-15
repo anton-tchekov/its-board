@@ -4,9 +4,10 @@
 #include "keyboard.h"
 #include "util.h"
 #include "font.h"
+#include "ctype_ext.h"
+#include "nanoc_lexer_identifier.h"
 
 #include <stddef.h>
-#include <ctype.h>
 #include <string.h>
 
 static char _buf[1024];
@@ -137,119 +138,127 @@ static void editor_blit(uint16_t *buf)
 	}
 }
 
-static int is_identifer_start(int c)
+static int syntax_color(const char *line, int len, int i, int *fg)
 {
-	return isalpha(c) || c == '_';
-}
+	int c = line[i];
+	int next = (i + 1 < len) ? line[i + 1] : '\0';
+	int color = TERMINAL_FG_WHITE;
 
-static int is_identifier_char(int c)
-{
-	return isalnum(c) || c == '_';
-}
-
-static int is_opening_bracket(int c)
-{
-	return c == '(' || c == '[' || c == '{';
-}
-
-static int is_closing_bracket(int c)
-{
-	return c == ')' || c == ']' || c == '}';
-}
-
-static int syntax_color(int c)
-{
-	/*
-	if(!keyword_remain && !isalnum(text[i - 1]))
+	if((c == '/') && (next == '/'))
 	{
-		i32 word_len;
+		color = TERMINAL_FG_GREEN;
+		for(; i < len && line[i] != '\n'; ++i) {}
+	}
+	else if((c == '/') && (next == '*'))
+	{
+		color = TERMINAL_FG_GREEN;
+		for(; i < len && (line[i] != '*' || line[i + 1] != '/'); ++i) {}
+	}
+	else if(c == '\"' || c == '\'')
+	{
+		int save = c;
+		int esc = 0;
 
-		for(j = i; j < len; ++j)
+		color = TERMINAL_FG_ORANGE;
+		for(++i; i < len; ++i)
 		{
-			if(!isalnum(text[j]))
+			c = line[i];
+			if(esc)
+			{
+				esc = 0;
+			}
+			else if(c == '\\')
+			{
+				esc = 1;
+			}
+			else if(c == save)
 			{
 				break;
 			}
 		}
 
-		if(is_opening_bracket(text[j]))
-		{
-
-		}
-
-		word_len = j - i;
-		if(keyword_detect(&text[i], word_len))
-		{
-			keyword_remain = word_len;
-			color = COLOR_BLUE;
-		}
+		++i;
 	}
-
-	if(is_opening_bracket(c))
+	else if(c == '(' || c == ')')
 	{
-		color = _get_bracket_color(brackets);
-		++brackets;
+		color = TERMINAL_FG_BLUE;
+		++i;
 	}
-	else if(is_closing_bracket(c))
+	else if(c == '[' || c == ']')
 	{
-		--brackets;
-		color = _get_bracket_color(brackets);
+		color = TERMINAL_FG_MAGENTA;
+		++i;
+	}
+	else if(c == '{' || c == '}')
+	{
+		color = TERMINAL_FG_YELLOW;
+		++i;
+	}
+	else if(is_identifer_start(c))
+	{
+		int start = i;
+		for(; i < len && (is_identifier_char(c = line[i])); ++i) {}
+
+		NanoC_TokenType tt = nanoc_keyword_detect(line + start, i - start);
+		if(tt == NANOC_TT_LET)
+		{
+			color = TERMINAL_FG_BLUE;
+		}
+		else if(tt != NANOC_TT_IDENTIFIER)
+		{
+			color = TERMINAL_FG_MAGENTA;
+		}
+		else if(c == '(')
+		{
+			color = TERMINAL_FG_LIGHT_YELLOW;
+		}
+		else if(c == '[')
+		{
+			color = TERMINAL_FG_LIGHT_BLUE;
+		}
 	}
 	else if(isdigit(c))
 	{
-		color = COLOR_LIME;
+		if(c == '0')
+		{
+			++i;
+			c = line[i];
+			if(c == 'x' || c == 'X')
+			{
+				/* Hex */
+			}
+			else if(c == 'b' || c == 'B')
+			{
+				/* Binary */
+			}
+			else
+			{
+				/* Octal */
+			}
+		}
+		else
+		{
+			/* Decimal */
+			color = TERMINAL_FG_LIGHT_GREEN;
+			for(; i < len && isdigit(c = line[i]); ++i) {}
+		}
 	}
-
-	if(keyword_remain)
+	else
 	{
-		--keyword_remain;
-		color = COLOR_BLUE;
+		++i;
 	}
 
-	if(c == '\'' && text[i - 1] != '\\' && !in_string)
-	{
-		color = COLOR_ORANGE;
-		in_char = !in_char;
-	}
-
-	if(c == '"' && text[i - 1] != '\\' && !in_char)
-	{
-		color = COLOR_ORANGE;
-		in_string = !in_string;
-	}
-
-	if(c == '/' && text[i + 1] == '*')
-	{
-		color = COLOR_GREEN;
-		in_comment = true;
-	}
-
-	if(c == '/' && text[i - 1] == '*')
-	{
-		color = COLOR_GREEN;
-		in_comment = false;
-	}
-
-	if(in_comment)
-	{
-		color = COLOR_GREEN;
-	}
-	else if(in_char || in_string)
-	{
-		color = COLOR_ORANGE;
-	}
-	else if()
-
-	return color;
-	*/
-
-	return 0;
+	*fg = color;
+	return i;
 }
 
 static void editor_render(void)
 {
 	uint16_t temp[TERMINAL_W * TERMINAL_H];
 	int i, x, y, c, len, start, end, fg, bg;
+	int syntax_end, syntax_fg;
+
+	syntax_end = 0;
 
 	line_selection_get(&line, &start, &end);
 	memset(temp, 0, sizeof(temp));
@@ -265,7 +274,19 @@ static void editor_render(void)
 			linenumber(temp, y);
 		}
 
-		fg = TERMINAL_FG_WHITE;
+		if(_syntax)
+		{
+			if(i >= syntax_end)
+			{
+				syntax_end = syntax_color(_buf, len, i, &syntax_fg);
+			}
+
+			fg = syntax_fg;
+		}
+		else
+		{
+			fg = TERMINAL_FG_WHITE;
+		}
 
 		c = _buf[i];
 		if(i == line.Cursor)

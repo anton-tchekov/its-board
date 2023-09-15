@@ -23,12 +23,18 @@ static const uint16_t _color_table_bg[] =
 
 static const uint16_t _color_table_fg[] =
 {
-	0x0000, /* TERMINAL_FG_BLACK       */
-	0xFFFF, /* TERMINAL_FG_WHITE       */
-	0xFAAA, /* TERMINAL_FG_RED         */
-	0x57EA, /* TERMINAL_FG_GREEN       */
-	0x52BF, /* TERMINAL_FG_BLUE        */
-	0x4228, /* TTERMINAL_FG_LIGHT_GRAY */
+	0x0000, /* TERMINAL_FG_BLACK        */
+	0xFFFF, /* TERMINAL_FG_WHITE        */
+	0xFAAA, /* TERMINAL_FG_RED          */
+	0x57EA, /* TERMINAL_FG_GREEN        */
+	0x52BF, /* TERMINAL_FG_BLUE         */
+	0x632C, /* TERMINAL_FG_LIGHT_GRAY   */
+	0xDB9A, /* TERMINAL_FG_MAGENTA      */
+	0xFEA0, /* TERMINAL_FG_YELLOW       */
+	0xDEF5, /* TERMINAL_FG_LIGHT_YELLOW */
+	0x9EFF, /* TERMINAL_FG_LIGHT_BLUE   */
+	0xB675, /* TERMINAL_FG_LIGHT_GREEN  */
+	0xCC8F, /* TERMINAL_FG_ORANGE       */
 };
 
 static uint16_t _terminal_buf[TERMINAL_W * TERMINAL_H];

@@ -1,16 +1,6 @@
 #include "nanoc_lexer_number.h"
 #include "nanoc_util.h"
-#include <ctype.h>
-
-static NanoC_Bool is_binary(NanoC_Char c)
-{
-	return c == '0' || c == '1';
-}
-
-static NanoC_Bool is_octal(NanoC_Char c)
-{
-	return c >= '0' && c <= '7';
-}
+#include "ctype_ext.h"
 
 static u32 lexer_binary(NanoC_Lexer *lexer)
 {

@@ -1,18 +1,8 @@
 #include "nanoc_lexer_identifier.h"
 #include "nanoc_util.h"
-#include <ctype.h>
+#include "ctype_ext.h"
 
-static NanoC_Bool is_identifer_start(NanoC_Char c)
-{
-	return isalpha(c) || c == '_';
-}
-
-static NanoC_Bool is_identifier_char(NanoC_Char c)
-{
-	return isalnum(c) || c == '_';
-}
-
-static NanoC_TokenType keyword_detect(const char *ident, size_t len)
+NanoC_TokenType nanoc_keyword_detect(const char *ident, size_t len)
 {
 	static const u8 keywords[] =
 	{
@@ -63,6 +53,6 @@ NanoC_Status nanoc_lexer_identifier(NanoC_Lexer *lexer, NanoC_Token *token)
 	}
 	while(is_identifier_char(c));
 	token->Length = lexer->Ptr - token->Ptr;
-	token->Type = keyword_detect(token->Ptr, token->Length);
+	token->Type = nanoc_keyword_detect(token->Ptr, token->Length);
 	return 1;
 }
