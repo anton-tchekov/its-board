@@ -190,7 +190,7 @@ static NanoC_Status nanoc_identifier(NanoC_Parser *parser)
 	THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 }
 
-NanoC_Status nanoc_let(NanoC_Parser *parser)
+NanoC_Status nanoc_int(NanoC_Parser *parser)
 {
 	NanoC_Token *token;
 	size_t idx;
@@ -299,7 +299,7 @@ NanoC_Status nanoc_statement(NanoC_Parser *parser)
 	case NANOC_TT_CONTINUE:   return nanoc_continue(parser);
 	case NANOC_TT_RETURN:     return nanoc_return(parser);
 	case NANOC_TT_L_BRACE:    return nanoc_block_inner(parser);
-	case NANOC_TT_LET:        return nanoc_let(parser);
+	case NANOC_TT_INT:        return nanoc_int(parser);
 	default:
 		return nanoc_substmt(parser, NANOC_TT_SEMICOLON);
 	}

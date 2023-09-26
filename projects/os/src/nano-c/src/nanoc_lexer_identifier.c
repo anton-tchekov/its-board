@@ -12,7 +12,7 @@ NanoC_TokenType nanoc_keyword_detect(const char *ident, size_t len)
 		'w', 'h', 'i', 'l', 'e', NANOC_LUT_ST(NANOC_TT_WHILE),
 		'f', 'o', 'r', NANOC_LUT_ST(NANOC_TT_FOR),
 		'l', 'o', 'o', 'p', NANOC_LUT_ST(NANOC_TT_LOOP),
-		'l', 'e', 't', NANOC_LUT_ST(NANOC_TT_LET),
+		'i', 'n', 't', NANOC_LUT_ST(NANOC_TT_INT),
 		'f', 'n', NANOC_LUT_ST(NANOC_TT_FN),
 		'b', 'r', 'e', 'a', 'k', NANOC_LUT_ST(NANOC_TT_BREAK),
 		'c', 'o', 'n', 't', 'i', 'n', 'u', 'e', NANOC_LUT_ST(NANOC_TT_CONTINUE),

@@ -7,6 +7,7 @@
  */
 
 #include "init.h"
+#include "spi_ll.h"
 #include "stm32f4xx_hal.h"
 #include "panic.h"
 
@@ -333,6 +334,8 @@ void its_board_init(void)
 	GPIOE->OSPEEDR = 0xFFFF;
 	GPIOF->OSPEEDR = 0xFFFF;
 	GPIOG->OSPEEDR = 0x0FFF;
+
+	spi_ll_init();
 
 	init_bss();
 }

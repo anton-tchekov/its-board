@@ -58,9 +58,9 @@ NanoC_Status nanoc_for(NanoC_Parser *parser)
 	tt = TT(0);
 	if(tt != NANOC_TT_SEMICOLON)
 	{
-		if(tt == NANOC_TT_LET)
+		if(tt == NANOC_TT_INT)
 		{
-			PROPAGATE(nanoc_let(parser));
+			PROPAGATE(nanoc_int(parser));
 		}
 		else
 		{

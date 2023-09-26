@@ -67,6 +67,6 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser);
 NanoC_Status nanoc_statement(NanoC_Parser *parser);
 NanoC_Status nanoc_block(NanoC_Parser *parser);
 NanoC_Status nanoc_substmt(NanoC_Parser *parser, NanoC_TokenType end);
-NanoC_Status nanoc_let(NanoC_Parser *parser);
+NanoC_Status nanoc_int(NanoC_Parser *parser);
 
 #endif /* __NANOC_PARSER_H__ */

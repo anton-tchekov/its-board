@@ -6,21 +6,9 @@
  */
 
 #include "lcd.h"
+#include "lcd_ll.h"
+#include "spi_ll.h"
 #include "delay.h"
-#include "stm32f4xx_hal.h"
-
-#define LCD_RST_0         GPIOF->BSRR |= (1 << (12 + 16))
-#define LCD_RST_1         GPIOF->BSRR |= (1 << 12)
-
-#define LCD_DC_0          GPIOF->BSRR |= (1 << (13 + 16))
-#define LCD_DC_1          GPIOF->BSRR |= (1 <<  13)
-
-#define LCD_CS_0          GPIOD->BSRR |= (1 << (14 + 16))
-#define LCD_CS_1          GPIOD->BSRR |= (1 << 14)
-
-#define GPIO_MODE_AF      0x02
-#define GPIO_SPEED_50MHZ  0x02
-#define GPIO_PUPD_DOWN    0x02
 
 static int _width, _height;
 
@@ -131,26 +119,17 @@ static const uint8_t _lcd_init_cmds[] =
 	0x55
 };
 
-int lcd_byte(int byte)
-{
-	while(!(SPI1->SR & SPI_SR_TXE)) {}
-	SPI1->DR = byte;
-	while(!(SPI1->SR & SPI_SR_RXNE)) {}
-	while(SPI1->SR & SPI_SR_BSY) {}
-	return SPI1->DR;
-}
-
 static void lcd_param0(void)
 {
-	LCD_DC_1;
-	LCD_CS_0;
-	lcd_byte(0);
+	lcd_dc_1();
+	lcd_cs_0();
+	spi_ll_xchg(0);
 }
 
 static void lcd_param1(int param)
 {
-	lcd_byte(param);
-	LCD_CS_1;
+	spi_ll_xchg(param);
+	lcd_cs_1();
 }
 
 void lcd_param(int param)
@@ -161,25 +140,25 @@ void lcd_param(int param)
 
 void lcd_cmd(int cmd)
 {
-	LCD_DC_0;
-	LCD_CS_0;
-	lcd_byte(cmd);
-	LCD_CS_1;
+	lcd_dc_0();
+	lcd_cs_0();
+	spi_ll_xchg(cmd);
+	lcd_cs_1();
 }
 
 void lcd_emit(int color)
 {
-	lcd_byte(color >> 8);
-	lcd_byte(color & 0xFF);
+	spi_ll_xchg(color >> 8);
+	spi_ll_xchg(color & 0xFF);
 }
 
 void lcd_reset(void)
 {
-	LCD_RST_1;
+	lcd_rst_1();
 	delay_ms(500);
-	LCD_RST_0;
+	lcd_rst_0();
 	delay_ms(500);
-	LCD_RST_1;
+	lcd_rst_1();
 	delay_ms(500);
 }
 
@@ -255,10 +234,6 @@ void lcd_set_orientation(int orientation)
 	lcd_param(a);
 }
 
-void lcd_set_backlight(int value)
-{
-}
-
 void lcd_window_start(int x, int y, int w, int h)
 {
 	int ex = x + w - 1;
@@ -277,13 +252,13 @@ void lcd_window_start(int x, int y, int w, int h)
 	lcd_param(ey & 0xFF);
 
 	lcd_cmd(0x2C);
-	LCD_DC_1;
-	LCD_CS_0;
+	lcd_dc_1();
+	lcd_cs_0();
 }
 
 void lcd_window_end(void)
 {
-	LCD_CS_1;
+	lcd_cs_1();
 }
 
 void lcd_rect(int x, int y, int w, int h, int color)
@@ -295,8 +270,8 @@ void lcd_rect(int x, int y, int w, int h, int color)
 	lcd_window_start(x, y, w, h);
 	while(count--)
 	{
-		lcd_byte(color_hi);
-		lcd_byte(color_lo);
+		spi_ll_xchg(color_hi);
+		spi_ll_xchg(color_lo);
 	}
 
 	lcd_window_end();
@@ -319,45 +294,9 @@ void lcd_callback(int x, int y, int w, int h, void *handle,
 	lcd_window_end();
 }
 
-static void lcd_gpio_init(void)
+void lcd_init(int orientation, int color)
 {
-	RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
-	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-
-	GPIOA->MODER |=
-		(GPIO_MODE_AF << (5 * 2)) |
-		(GPIO_MODE_AF << (6 * 2)) |
-		(GPIO_MODE_AF << (7 * 2));
-
-	GPIOA->OSPEEDR |=
-		(GPIO_SPEED_50MHZ << (5 * 2)) |
-		(GPIO_SPEED_50MHZ << (6 * 2)) |
-		(GPIO_SPEED_50MHZ << (7 * 2));
-
-	GPIOA->PUPDR |= (GPIO_PUPD_DOWN << (5 * 2));
-
-	GPIOA->AFR[0] |=
-		(GPIO_AF5_SPI1 << (5 * 4)) |
-		(GPIO_AF5_SPI1 << (6 * 4)) |
-		(GPIO_AF5_SPI1 << (7 * 4));
-}
-
-static void lcd_spi_init(uint32_t baudrate)
-{
-	baudrate &= SPI_CR1_BR_Msk;
-	SPI1->CR1 &= ~(1 <<  6);
-	SPI1->CR1 = (1 << 9) | (1 << 8) | baudrate | (1 << 2);
-	SPI1->CR2 = 0;
-	SPI1->I2SCFGR &= ~SPI_I2SCFGR_I2SMOD;
-	SPI1->CR1 |= (1 << 6);
-}
-
-void lcd_init(int orientation, int backlight, int color)
-{
-	lcd_gpio_init();
-	lcd_spi_init(SPI_BAUDRATEPRESCALER_16);
 	lcd_reset();
-	lcd_set_backlight(backlight);
 	lcd_cmd_list(_lcd_init_cmds, sizeof(_lcd_init_cmds));
 	lcd_set_orientation(orientation);
 	delay_ms(200);

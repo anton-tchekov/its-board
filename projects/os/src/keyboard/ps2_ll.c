@@ -1,3 +1,10 @@
+/**
+ * @file    ps2_ll.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-09-24
+ */
+
 #include "ps2_ll.h"
 #include "ps2.h"
 #include "stm32f4xx_hal.h"

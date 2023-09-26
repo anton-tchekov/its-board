@@ -146,13 +146,24 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 
 	if((c == '/') && (next == '/'))
 	{
-		color = TERMINAL_FG_GREEN;
+		color = TERMINAL_FG_DARK_GREEN;
 		for(; i < len && line[i] != '\n'; ++i) {}
 	}
 	else if((c == '/') && (next == '*'))
 	{
-		color = TERMINAL_FG_GREEN;
-		for(; i < len && (line[i] != '*' || line[i + 1] != '/'); ++i) {}
+		color = TERMINAL_FG_DARK_GREEN;
+		++i;
+		while(i < len)
+		{
+			if(line[++i] == '*')
+			{
+				if(line[++i] == '/')
+				{
+					++i;
+					break;
+				}
+			}
+		}
 	}
 	else if(c == '\"' || c == '\'')
 	{
@@ -200,9 +211,9 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 		for(; i < len && (is_identifier_char(c = line[i])); ++i) {}
 
 		NanoC_TokenType tt = nanoc_keyword_detect(line + start, i - start);
-		if(tt == NANOC_TT_LET)
+		if(tt == NANOC_TT_INT)
 		{
-			color = TERMINAL_FG_BLUE;
+			color = TERMINAL_FG_DARK_BLUE;
 		}
 		else if(tt != NANOC_TT_IDENTIFIER)
 		{
@@ -219,6 +230,7 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 	}
 	else if(isdigit(c))
 	{
+		color = TERMINAL_FG_LIGHT_GREEN;
 		if(c == '0')
 		{
 			++i;
@@ -226,21 +238,23 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 			if(c == 'x' || c == 'X')
 			{
 				/* Hex */
+				for(++i; i < len && isxdigit(line[i]); ++i) {}
 			}
 			else if(c == 'b' || c == 'B')
 			{
 				/* Binary */
+				for(++i; i < len && is_binary(line[i]); ++i) {}
 			}
 			else
 			{
 				/* Octal */
+				for(; i < len && is_octal(line[i]); ++i) {}
 			}
 		}
 		else
 		{
 			/* Decimal */
-			color = TERMINAL_FG_LIGHT_GREEN;
-			for(; i < len && isdigit(c = line[i]); ++i) {}
+			for(; i < len && isdigit(line[i]); ++i) {}
 		}
 	}
 	else
@@ -256,14 +270,13 @@ static void editor_render(void)
 {
 	uint16_t temp[TERMINAL_W * TERMINAL_H];
 	int i, x, y, c, len, start, end, fg, bg;
-	int syntax_end, syntax_fg;
-
-	syntax_end = 0;
+	int syntax_fg, syntax_end;
 
 	line_selection_get(&line, &start, &end);
 	memset(temp, 0, sizeof(temp));
 	x = 0;
 	y = 0;
+	syntax_end = 0;
 	len = line.Length;
 	_buf[len++] = '\n';
 

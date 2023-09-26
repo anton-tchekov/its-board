@@ -44,6 +44,7 @@ static void nanoc_lexer_multi_line_comment(NanoC_Lexer *lexer)
 	c = nanoc_lexer_advance(lexer);
 	while(c)
 	{
+		/* TODO: Bug! - TDD */
 		c = nanoc_lexer_advance(lexer);
 		if(c == '*')
 		{

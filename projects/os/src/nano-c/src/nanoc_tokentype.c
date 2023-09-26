@@ -21,7 +21,7 @@ const char *nanoc_tokentype_tostring(NanoC_TokenType token_type)
 		[ NANOC_TT_WHILE ]          = "TT_WHILE",
 		[ NANOC_TT_FOR ]            = "TT_FOR",
 		[ NANOC_TT_LOOP ]           = "TT_LOOP",
-		[ NANOC_TT_LET ]            = "TT_LET",
+		[ NANOC_TT_INT ]            = "TT_INT",
 		[ NANOC_TT_FN ]             = "TT_FN",
 		[ NANOC_TT_BREAK ]          = "TT_BREAK",
 		[ NANOC_TT_CONTINUE ]       = "TT_CONTINUE",

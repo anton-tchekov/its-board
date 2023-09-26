@@ -32,9 +32,11 @@ static const uint16_t _color_table_fg[] =
 	0xDB9A, /* TERMINAL_FG_MAGENTA      */
 	0xFEA0, /* TERMINAL_FG_YELLOW       */
 	0xDEF5, /* TERMINAL_FG_LIGHT_YELLOW */
-	0x9EFF, /* TERMINAL_FG_LIGHT_BLUE   */
+	0x14FF, /* TERMINAL_FG_LIGHT_BLUE   */
 	0xB675, /* TERMINAL_FG_LIGHT_GREEN  */
 	0xCC8F, /* TERMINAL_FG_ORANGE       */
+	0x6CCA, /* TERMINAL_FG_DARK_GREEN   */
+	0x54FA, /* TERMINAL_FG_DARK_BLUE    */
 };
 
 static uint16_t _terminal_buf[TERMINAL_W * TERMINAL_H];

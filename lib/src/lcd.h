@@ -3,7 +3,7 @@
  * @author  Anton Tchekov
  * @version 0.1
  * @date    2023-07-20
- * @brief   LCD Routines
+ * @brief   LCD routines
  */
 
 #ifndef __LCD_H__
@@ -37,16 +37,14 @@ enum LCD_Orientation
 	D2U_R2L
 };
 
-int lcd_byte(int byte);
 void lcd_param(int param);
 void lcd_cmd(int cmd);
 void lcd_emit(int color);
 
-void lcd_init(int orientation, int backlight, int color);
+void lcd_init(int orientation, int color);
 void lcd_reset(void);
 int lcd_color(int r, int g, int b);
 
-void lcd_set_backlight(int value);
 void lcd_set_orientation(int orientation);
 
 void lcd_window_start(int x, int y, int w, int h);
