@@ -85,8 +85,6 @@ static void compile(const char *src, int length)
 		functions
 	};
 
-	shell_print("Compiling ... ");
-
 	nanoc_parser_init(&parser, src, output_buf, sizeof(output_buf));
 	status = nanoc_statement(&parser);
 	if(status)
@@ -99,8 +97,6 @@ static void compile(const char *src, int length)
 
 	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
 
-	shell_print("DONE\nRunning ... ");
-
 	status = nanoc_interpreter_run(parser.Output.Buffer, &builtins);
 	if(status)
 	{
@@ -112,14 +108,10 @@ static void compile(const char *src, int length)
 		return;
 	}
 
-	shell_print("DONE\n");
+	shell_print("\n\nREADY.\n");
 }
 
 void command_run(const char *cmd, int len)
 {
-	shell_print("Command to be ran:\n");
-	shell_print(cmd);
-	shell_print("\n\n");
-
 	compile(cmd, len);
 }

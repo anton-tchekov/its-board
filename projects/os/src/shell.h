@@ -2,7 +2,9 @@
 #define __SHELL_H__
 
 void shell_init(void);
-void shell_update(void);
+void shell_open(void);
+void shell_key(int key, int c);
+
 void shell_print(const char *s);
 void shell_char(int c);
 void shell_fg(int color);

@@ -118,7 +118,7 @@ static void key_down(void)
 	}
 }
 
-static void shell_key(int key, int c)
+void shell_key(int key, int c)
 {
 	Line *line = &this.Lines[this.Slot];
 	switch(key)
@@ -158,32 +158,17 @@ static void shell_key(int key, int c)
 void shell_init(void)
 {
 	int i;
-
-	shell_output_reset();
-	command_render();
-
 	for(i = 0; i < COMMAND_LINES; ++i)
 	{
 		line_init(&this.Lines[i], _bufs[i], COMMAND_MAX_LENGTH);
 	}
 }
 
-void shell_update(void)
+void shell_open(void)
 {
-	KeyEvent event;
-	if(!ps2_read(&event))
-	{
-		return;
-	}
-
-	if(event.State == KEYSTATE_RELEASED)
-	{
-		return;
-	}
-
-	editor_key(event.Key, event.Codepoint);
-
-	//shell_key(event.Key, event.Codepoint);
+	command_render();
+	cls();
+	shell_output_reset();
 }
 
 void shell_print(const char *s)

@@ -144,24 +144,20 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 	int next = (i + 1 < len) ? line[i + 1] : '\0';
 	int color = TERMINAL_FG_WHITE;
 
-	if((c == '/') && (next == '/'))
+	if(c == '/' && next == '/')
 	{
 		color = TERMINAL_FG_DARK_GREEN;
 		for(; i < len && line[i] != '\n'; ++i) {}
 	}
-	else if((c == '/') && (next == '*'))
+	else if(c == '/' && next == '*')
 	{
 		color = TERMINAL_FG_DARK_GREEN;
-		++i;
-		while(i < len)
+		for(i += 2; i < len; ++i)
 		{
-			if(line[++i] == '*')
+			if(line[i] == '*' && line[i + 1] == '/')
 			{
-				if(line[++i] == '/')
-				{
-					++i;
-					break;
-				}
+				i += 2;
+				break;
 			}
 		}
 	}
@@ -207,10 +203,11 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 	}
 	else if(is_identifer_start(c))
 	{
+		NanoC_TokenType tt;
 		int start = i;
-		for(; i < len && (is_identifier_char(c = line[i])); ++i) {}
+		for(; i < len && is_identifier_char(c = line[i]); ++i) {}
 
-		NanoC_TokenType tt = nanoc_keyword_detect(line + start, i - start);
+		tt = nanoc_keyword_detect(line + start, i - start);
 		if(tt == NANOC_TT_INT)
 		{
 			color = TERMINAL_FG_DARK_BLUE;
@@ -228,34 +225,32 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 			color = TERMINAL_FG_LIGHT_BLUE;
 		}
 	}
-	else if(isdigit(c))
+	else if(c == '0')
 	{
 		color = TERMINAL_FG_LIGHT_GREEN;
-		if(c == '0')
+		++i;
+		c = line[i];
+		if(c == 'x' || c == 'X')
 		{
-			++i;
-			c = line[i];
-			if(c == 'x' || c == 'X')
-			{
-				/* Hex */
-				for(++i; i < len && isxdigit(line[i]); ++i) {}
-			}
-			else if(c == 'b' || c == 'B')
-			{
-				/* Binary */
-				for(++i; i < len && is_binary(line[i]); ++i) {}
-			}
-			else
-			{
-				/* Octal */
-				for(; i < len && is_octal(line[i]); ++i) {}
-			}
+			/* Hex */
+			for(++i; i < len && isxdigit(line[i]); ++i) {}
+		}
+		else if(c == 'b' || c == 'B')
+		{
+			/* Binary */
+			for(++i; i < len && is_binary(line[i]); ++i) {}
 		}
 		else
 		{
-			/* Decimal */
-			for(; i < len && isdigit(line[i]); ++i) {}
+			/* Octal */
+			for(; i < len && is_octal(line[i]); ++i) {}
 		}
+	}
+	else if(c >= '1' && c <= '9')
+	{
+		/* Decimal */
+		color = TERMINAL_FG_LIGHT_GREEN;
+		for(; i < len && isdigit(line[i]); ++i) {}
 	}
 	else
 	{
@@ -342,13 +337,17 @@ static void editor_render(void)
 	editor_blit(temp);
 }
 
-void editor_open(const char *filename)
+void editor_open(void)
+{
+	editor_render();
+}
+
+void editor_init(void)
 {
 	_tab_size = 4;
 	_show_space = 1;
 	_syntax = 0;
 	line_init(&line, _buf, 1024);
-	editor_render();
 }
 
 void editor_key(int key, int c)
