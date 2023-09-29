@@ -8,6 +8,10 @@
 #define OFFSET_X 10
 #define OFFSET_Y  1
 
+#define NORMAL     TERMINAL_FG_WHITE | TERMINAL_BG_BLACK
+#define RED        TERMINAL_FG_RED | TERMINAL_BG_BLACK
+#define INVERTED   TERMINAL_BG_WHITE | TERMINAL_FG_BLACK
+
 enum
 {
 	LOGIN_STATE_ERROR,
@@ -43,49 +47,33 @@ void login_init(void)
 {
 	_lm.State = LOGIN_STATE_INPUT;
 	_lm.Length = 0;
-	println(0, OFFSET_Y, TERMINAL_FG_WHITE | TERMINAL_BG_BLACK,
-		"Password:");
-	terminal_set(OFFSET_X, OFFSET_Y,
-		' ' | TERMINAL_BG_WHITE | TERMINAL_FG_BLACK);
-	println(0, OFFSET_Y + 1, TERMINAL_FG_WHITE | TERMINAL_BG_BLACK,
-		"");
+	println(0, OFFSET_Y, NORMAL, "Password:");
+	terminal_set(OFFSET_X, OFFSET_Y, ' ' | INVERTED);
+	println(0, OFFSET_Y + 1, NORMAL, "");
 }
 
 static void login_char(LoginManager *lm, int c)
 {
-	if(lm->Length >= sizeof(lm->Input))
-	{
-		return;
-	}
+	if(lm->Length >= sizeof(lm->Input)) { return; }
 
 	lm->Input[lm->Length] = c;
-	terminal_set(OFFSET_X + lm->Length, OFFSET_Y,
-		'*' | TERMINAL_FG_WHITE | TERMINAL_BG_BLACK);
+	terminal_set(OFFSET_X + lm->Length, OFFSET_Y, '*' | NORMAL);
 	++lm->Length;
-	terminal_set(OFFSET_X + lm->Length, OFFSET_Y,
-		' ' | TERMINAL_FG_BLACK | TERMINAL_BG_WHITE);
+	terminal_set(OFFSET_X + lm->Length, OFFSET_Y, ' ' | INVERTED);
 }
 
 static void login_backspace(LoginManager *lm)
 {
-	if(lm->Length == 0)
-	{
-		return;
-	}
+	if(lm->Length == 0) { return; }
 
-	terminal_set(OFFSET_X + lm->Length, OFFSET_Y,
-		' ' | TERMINAL_BG_BLACK | TERMINAL_FG_WHITE);
+	terminal_set(OFFSET_X + lm->Length, OFFSET_Y, ' ' | NORMAL);
 	--lm->Length;
-	terminal_set(OFFSET_X + lm->Length, OFFSET_Y,
-		' ' | TERMINAL_FG_BLACK | TERMINAL_BG_WHITE);
+	terminal_set(OFFSET_X + lm->Length, OFFSET_Y, ' ' | INVERTED);
 }
 
 static void login_enter(LoginManager *lm)
 {
-	if(lm->Length == 0)
-	{
-		return;
-	}
+	if(lm->Length == 0) { return; }
 
 	if(!strncmp(lm->Input, _password, lm->Length))
 	{
@@ -94,11 +82,8 @@ static void login_enter(LoginManager *lm)
 	else
 	{
 		lm->State = LOGIN_STATE_ERROR;
-		println(0, OFFSET_Y, TERMINAL_FG_RED | TERMINAL_BG_BLACK,
-			"[ Wrong Password ]");
-
-		println(0, OFFSET_Y + 1, TERMINAL_FG_WHITE | TERMINAL_BG_BLACK,
-			"Press any key to retry");
+		println(0, OFFSET_Y, RED, "[ Wrong Password ]");
+		println(0, OFFSET_Y + 1, NORMAL, "Press any key to retry");
 	}
 }
 
