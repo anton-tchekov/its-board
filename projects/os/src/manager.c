@@ -3,9 +3,25 @@
 #include "terminal.h"
 #include <string.h>
 
+#define HELP_Y            (TERMINAL_H - 1)
+#define HELP_START        (TERMINAL_W / 2 - sizeof(help) / 2)
+#define HELP_END          (HELP_START + sizeof(help) - 1)
+#define FILES_Y_END       (TERMINAL_H - 2)
+
 #define FILE_OFFSET      1
 #define EXT_OFFSET      14
 #define MAX_ENTRIES       (TERMINAL_H - 3)
+
+#define NORMAL            TERMINAL_FG_WHITE | TERMINAL_BG_BLACK
+#define INVERTED          TERMINAL_BG_WHITE | TERMINAL_FG_BLACK
+
+typedef struct
+{
+	uint32_t Size;
+	uint8_t Type;
+	char Name[8];
+	char Ext[3];
+} DirEnt;
 
 typedef struct
 {
@@ -13,10 +29,11 @@ typedef struct
 	int Count;
 	int Offset;
 	char Path[64];
+	DirEnt Entries[256];
 } Side;
 
 static Side _sides[2];
-static int _side;
+static u8r _side;
 
 static void printc(int x, int y, int c)
 {
@@ -28,124 +45,219 @@ static void prints(int x, int y, const char *s)
 	int c;
 	while((c = *s++))
 	{
-		terminal_set(x++, y, c | TERMINAL_FG_WHITE | TERMINAL_BG_BLACK);
+		printc(x++, y, c);
 	}
 }
 
 void manager_init(void)
 {
-	strcpy(_sides[0].Path, "/");
-	strcpy(_sides[1].Path, "/");
+	strcpy(_sides[0].Path, "/USR/BIN/EDITOR");
+	strcpy(_sides[1].Path, "/HOME/ANTON/DOWNLOAD/FILEMGR");
+
+	_sides[1].Count = 2;
+	_sides[1].Entries[0].Size = 0;
+	_sides[1].Entries[0].Type = 1;
+	strcpy(_sides[1].Entries[0].Name, "..");
+	strcpy(_sides[1].Entries[0].Ext, "");
+
+	_sides[1].Entries[1].Size = 0;
+	_sides[1].Entries[1].Type = 0;
+	strcpy(_sides[1].Entries[1].Name, "TEST");
+	strcpy(_sides[1].Entries[1].Ext, "BIN");
+
+	_sides[0].Count = 21;
+
+	_sides[0].Entries[0].Size = 0;
+	_sides[0].Entries[0].Type = 1;
+	strcpy(_sides[0].Entries[0].Name, "..");
+	strcpy(_sides[0].Entries[0].Ext, "");
+
+	_sides[0].Entries[1].Size = 0;
+	_sides[0].Entries[1].Type = 1;
+	strcpy(_sides[0].Entries[1].Name, "SYSTEM");
+	strcpy(_sides[0].Entries[1].Ext, "");
+
+	_sides[0].Entries[2].Size = 0;
+	_sides[0].Entries[2].Type = 1;
+	strcpy(_sides[0].Entries[2].Name, "PROJECTS");
+	strcpy(_sides[0].Entries[2].Ext, "");
+
+	_sides[0].Entries[3].Size = 0;
+	_sides[0].Entries[3].Type = 1;
+	strcpy(_sides[0].Entries[3].Name, "DOWNLOAD");
+	strcpy(_sides[0].Entries[3].Ext, "");
+
+	_sides[0].Entries[4].Size = 0;
+	_sides[0].Entries[4].Type = 1;
+	strcpy(_sides[0].Entries[4].Name, "DOCS");
+	strcpy(_sides[0].Entries[4].Ext, "");
+
+	_sides[0].Entries[5].Size = 0;
+	_sides[0].Entries[5].Type = 1;
+	strcpy(_sides[0].Entries[5].Name, "IMAGES");
+	strcpy(_sides[0].Entries[5].Ext, "");
+
+	_sides[0].Entries[6].Size = 0;
+	_sides[0].Entries[6].Type = 1;
+	strcpy(_sides[0].Entries[6].Name, "VIDEOS");
+	strcpy(_sides[0].Entries[6].Ext, "");
+
+	_sides[0].Entries[7].Size = 0;
+	_sides[0].Entries[7].Type = 0;
+	strcpy(_sides[0].Entries[7].Name, "PASSWD");
+	strcpy(_sides[0].Entries[7].Ext, "TXT");
+
+	_sides[0].Entries[8].Size = 0;
+	_sides[0].Entries[8].Type = 0;
+	strcpy(_sides[0].Entries[8].Name, "MAIN");
+	strcpy(_sides[0].Entries[8].Ext, "C");
+
+	_sides[0].Entries[9].Size = 0;
+	_sides[0].Entries[9].Type = 0;
+	strcpy(_sides[0].Entries[9].Name, "SYNTAX");
+	strcpy(_sides[0].Entries[9].Ext, "ASM");
+
+	_sides[0].Entries[10].Size = 0;
+	_sides[0].Entries[10].Type = 0;
+	strcpy(_sides[0].Entries[10].Name, "A");
+	strcpy(_sides[0].Entries[10].Ext, "OUT");
+
+	_sides[0].Entries[11].Size = 0;
+	_sides[0].Entries[11].Type = 1;
+	strcpy(_sides[0].Entries[11].Name, "BOOKS");
+	strcpy(_sides[0].Entries[11].Ext, "");
+
+	_sides[0].Entries[12].Size = 0;
+	_sides[0].Entries[12].Type = 1;
+	strcpy(_sides[0].Entries[12].Name, "STUDIUM");
+	strcpy(_sides[0].Entries[12].Ext, "");
+
+	_sides[0].Entries[13].Size = 0;
+	_sides[0].Entries[13].Type = 0;
+	strcpy(_sides[0].Entries[13].Name, "KOTLIN");
+	strcpy(_sides[0].Entries[13].Ext, "TXT");
+
+	_sides[0].Entries[14].Size = 0;
+	_sides[0].Entries[14].Type = 0;
+	strcpy(_sides[0].Entries[14].Name, "OUT");
+	strcpy(_sides[0].Entries[14].Ext, "PNG");
+
+	_sides[0].Entries[15].Size = 0;
+	_sides[0].Entries[15].Type = 1;
+	strcpy(_sides[0].Entries[15].Name, "SCHULE");
+	strcpy(_sides[0].Entries[15].Ext, "");
+
+	_sides[0].Entries[16].Size = 0;
+	_sides[0].Entries[16].Type = 1;
+	strcpy(_sides[0].Entries[16].Name, "SOFTWARE");
+	strcpy(_sides[0].Entries[16].Ext, "");
+
+	_sides[0].Entries[17].Size = 0;
+	_sides[0].Entries[17].Type = 1;
+	strcpy(_sides[0].Entries[17].Name, "SCRIPTS");
+	strcpy(_sides[0].Entries[17].Ext, "");
+
+	_sides[0].Entries[18].Size = 0;
+	_sides[0].Entries[18].Type = 1;
+	strcpy(_sides[0].Entries[18].Name, "MUSIC");
+	strcpy(_sides[0].Entries[18].Ext, "");
+
+	_sides[0].Entries[19].Size = 0;
+	_sides[0].Entries[19].Type = 1;
+	strcpy(_sides[0].Entries[19].Name, "CURRENT");
+	strcpy(_sides[0].Entries[19].Ext, "");
+
+	_sides[0].Entries[20].Size = 0;
+	_sides[0].Entries[20].Type = 1;
+	strcpy(_sides[0].Entries[20].Name, "ATFS");
+	strcpy(_sides[0].Entries[20].Ext, "");
 }
 
-static void manager_status_side(u8r side)
+static void _render_path(u8r which)
 {
-#if 0
-	uint8_t i, n;
-	char c, *s, buf[16];
+	Side *side = &_sides[which];
+	size_t len = strlen(side->Path);
+	const char *s = side->Path;
+	u8r x = which * (TERMINAL_W / 2) + 2;
+	int c;
 
-	vga_color(TERMINAL_FG_WHITE | TERMINAL_BG_BLACK);
-	vga_position(_off_xs[side] + 3, 0);
-
-	/* Top Line */
-	for(i = 3, s = _paths[side]; (c = *s); ++s, ++i)
+	printc(x++, 0, ' ');
+	if(len <= (TERMINAL_W / 2 - 6))
 	{
-		uart_tx(c);
-	}
+		u8r end = x + (TERMINAL_W / 2 - 4);
 
-	uart_tx(' ');
-	for(; i < SCREEN_WIDTH / 2 - 3; ++i)
+		while((c = *s++))
+		{
+			printc(x++, 0, c);
+		}
+
+		printc(x++, 0, ' ');
+		while(x < end)
+		{
+			printc(x++, 0, '-');
+		}
+	}
+	else
 	{
-		uart_tx('-');
+		printc(x++, 0, '.');
+		printc(x++, 0, '.');
+
+		s = s + len - (TERMINAL_W / 2 - 8);
+		while((c = *s++))
+		{
+			printc(x++, 0, c);
+		}
+
+		printc(x, 0, ' ');
 	}
-
-	/* Bottom Line */
-	n = snprintf(buf, sizeof(buf), "%d", _counts[side]);
-
-	vga_position(_off_xs[side] + 2, SCREEN_HEIGHT - 2);
-	for(i = 2; i < SCREEN_WIDTH / 2 - 4 - n; ++i)
-	{
-		uart_tx('-');
-	}
-
-	uart_tx(' ');
-	uart_tx_str(buf);
-#endif
 }
 
-static void _render_side(u8r side)
+static void _render_files(u8r which)
 {
-#if 0
-	char buf[FILE_BYTES];
-	int16_t i;
-	uint8_t j, u, x;
+	Side *side = &_sides[which];
+	u8r j;
+	u8r x;
+	u8r x_start = which * (TERMINAL_W / 2) + 1;
+	u8r x_end = x_start + (TERMINAL_W / 2 - 2);
+	u8r y = 1;
+	int i = side->Offset;
+	int c;
+	int color;
 
-	vga_color(FG_WHITE | BG_BLACK);
-	vga_clear(_off_xs[side] + 1, 1, SCREEN_WIDTH / 2 - 2, MAX_ENTRIES);
-
-	for(u = 1, i = _offsets[side]; i < _offsets[side] + MAX_ENTRIES; ++i, ++u)
+	for(; i < side->Count && y < FILES_Y_END; ++i, ++y)
 	{
-		x = 1;
-		if(i >= _counts[side])
+		DirEnt *ent = &side->Entries[i];
+		x = x_start;
+		color = (which == _side && i == side->Selected) ? INVERTED : NORMAL;
+		terminal_set(x++, y, (ent->Type ? '/' : ' ') | color);
+		for(j = 0; j < 8 && (c = ent->Name[j]); ++j)
 		{
-			break;
+			terminal_set(x++, y, c | color);
 		}
 
-		if(side == _side && i == side->Selected)
+		if(!ent->Type)
 		{
-			vga_color(FG_BLACK | BG_WHITE);
-		}
-		else
-		{
-			vga_color(FG_WHITE | BG_BLACK);
-		}
-
-		vga_position(_off_xs[side] + FILE_OFFSET, u);
-		uart_tx(' ');
-		xram_read(_xram_offs[side] + (u32)i * FILE_BYTES, buf, FILE_BYTES);
-
-		for(j = 1; j < 9 && buf[j] && buf[j] != '.'; ++j, ++x)
-		{
-			uart_tx(buf[j]);
-		}
-
-		if(buf[0] == 'D')
-		{
-			uart_tx('/');
-			++x;
-		}
-
-		while(x < EXT_OFFSET)
-		{
-			uart_tx(' ');
-			++x;
-		}
-
-		if(buf[0] == 'D')
-		{
-			uart_tx_str("DIR");
-			x += 3;
-		}
-
-		if(buf[j])
-		{
-			++j;
-			for(; j < 13 && buf[j]; ++j, ++x)
+			terminal_set(x++, y, '.' | color);
+			for(j = 0; j < 3 && (c = ent->Ext[j]); ++j)
 			{
-				uart_tx(buf[j]);
+				terminal_set(x++, y, c | color);
 			}
 		}
 
-		if(side == _side)
+		while(x < x_end)
 		{
-			while(x < 38)
-			{
-				uart_tx(' ');
-				++x;
-			}
+			terminal_set(x++, y, ' ' | color);
 		}
 	}
-#endif
+
+	/* Clear rest */
+	for(; y < FILES_Y_END; ++y)
+	{
+		for(x = x_start; x < x_end; ++x)
+		{
+			printc(x, y, ' ');
+		}
+	}
 }
 
 static void _help_line(void)
@@ -153,7 +265,10 @@ static void _help_line(void)
 	static const char help[] =
 		"F5 Copy | F6 Move/Rename | F7 MkDir | F8 Delete";
 
-	prints(TERMINAL_W / 2 - sizeof(help) / 2, TERMINAL_H - 1, help);
+	u8r i;
+	for(i = 0; i < HELP_START; ++i) { printc(i, HELP_Y, ' '); }
+	prints(HELP_START, HELP_Y, help);
+	for(i = HELP_END; i < TERMINAL_W; ++i) { printc(i, HELP_Y, ' '); }
 }
 
 static void _border_vertical(void)
@@ -170,43 +285,33 @@ static void _border_vertical(void)
 
 static void _border_horizontal(void)
 {
+	u8r i;
+
+	/* Top */
 	prints(0, 0, "+-");
-	prints(0, TERMINAL_H - 2, "+-");
-
+	_render_path(0);
 	prints(TERMINAL_W / 2 - 2, 0, "-++-");
-	prints(TERMINAL_W / 2 - 2, TERMINAL_H - 2, "-++-");
-
+	_render_path(1);
 	prints(TERMINAL_W - 2, 0, "-+");
-	prints(TERMINAL_W - 2, TERMINAL_H - 2, "-+");
-}
 
-static void _render_filler(void)
-{
-	_border_horizontal();
-	_border_vertical();
-	_help_line();
+	/* Bottom */
+	printc(0, TERMINAL_H - 2, '+');
+	prints(TERMINAL_W / 2 - 1, TERMINAL_H - 2, "++");
+	printc(TERMINAL_W - 1, TERMINAL_H - 2, '+');
+	for(i = 0; i < TERMINAL_W / 2 - 2; ++i)
+	{
+		printc(i + 1, TERMINAL_H - 2, '-');
+		printc(TERMINAL_W / 2 + i + 1, TERMINAL_H - 2, '-');
+	}
 }
 
 void manager_open(void)
 {
-#if 0
-	if((_counts[0] = folder_list(_paths[0], _xram_offs[0])) < 0)
-	{
-		return;
-	}
-
-	if((_counts[1] = folder_list(_paths[1], _xram_offs[1])) < 0)
-	{
-		return;
-	}
-
-	manager_list_side(0);
-	manager_list_side(1);
-	manager_status_side(0);
-	manager_status_side(1);
-#endif
-
-	_render_filler();
+	_border_horizontal();
+	_border_vertical();
+	_render_files(0);
+	_render_files(1);
+	_help_line();
 }
 
 static void manager_home(void)
@@ -214,108 +319,113 @@ static void manager_home(void)
 	Side *side = &_sides[_side];
 	side->Selected = 0;
 	side->Offset = 0;
-	_render_side(_side);
+	_render_files(_side);
 }
 
 static void manager_end(void)
 {
 	Side *side = &_sides[_side];
 	side->Selected = side->Count - 1;
-	side->Offset = side->Selected - MAX_ENTRIES - 1;
+	side->Offset = side->Count - MAX_ENTRIES;
 	if(side->Offset < 0)
 	{
 		side->Offset = 0;
 	}
 
-	_render_side(_side);
+	_render_files(_side);
 }
 
 static void manager_up(void)
 {
 	Side *side = &_sides[_side];
-	--side->Selected;
-	if(side->Selected < 0)
+	if(side->Selected == 0)
 	{
-		side->Selected = 0;
+		return;
 	}
 
+	--side->Selected;
 	if(side->Selected < side->Offset)
 	{
-		side->Offset = side->Selected;
+		--side->Offset;
 	}
 
-	_render_side(_side);
+	_render_files(_side);
 }
 
 static void manager_down(void)
 {
 	Side *side = &_sides[_side];
-	++side->Selected;
-	if(side->Selected > side->Count - 1)
-	{
-		side->Selected = side->Count - 1;
-	}
-
-	if(side->Selected > side->Offset + MAX_ENTRIES - 1)
-	{
-		side->Offset = side->Offset + MAX_ENTRIES - 1;
-	}
-
-	_render_side(_side);
-}
-
-#if 0
-static void manager_enter(void)
-{
-	uint8_t len = strlen(_paths[_side]);
-	if(len < 2)
+	if(side->Selected == side->Count - 1)
 	{
 		return;
 	}
 
-	char *p = _paths[_side] + len - 2;
-
-	for(; *p != '/'; --p) ;
-	++p;
-	*p = '\0';
-
-	side->Count = folder_list(_paths[_side], _xram_offs[_side]);
-	manager_status_side(_side);
-	manager_list_side(_side);
-
-	char buf[FILE_BYTES], *p;
-	xram_read(_xram_offs[_side] + (u32)side->Selected * FILE_BYTES, buf, FILE_BYTES);
-	if(buf[0] != 'D')
+	++side->Selected;
+	if(side->Selected >= side->Offset + MAX_ENTRIES)
 	{
-		break;
+		++side->Offset;
 	}
 
-	p = _paths[_side] + strlen(_paths[_side]);
-	strcpy(p, buf + 1);
-	strcat(p, "/");
-
-	side->Count = folder_list(_paths[_side], _xram_offs[_side]);
-	manager_status_side(_side);
-	manager_list_side(_side);
+	_render_files(_side);
 }
-#endif
+
+static void _parent_dir(Side *side, u8r len)
+{
+	char *p = side->Path + len - 2;
+	for(; *p != '/'; --p) {}
+	*p = '\0';
+}
+
+static void _open_dir(Side *side, DirEnt *ent, u8r len)
+{
+	char *p = side->Path + len;
+	*p++ = '/';
+	strcpy(p, ent->Name);
+}
+
+static void _open_file(void)
+{
+
+}
+
+static void manager_enter(void)
+{
+	Side *side = &_sides[_side];
+	u8r len = strlen(side->Path);
+	DirEnt *ent = &side->Entries[side->Selected];
+	if(len > 1 && side->Selected == 0)
+	{
+		_parent_dir(side, len);
+	}
+	else if(ent->Type)
+	{
+		_open_dir(side, ent, len);
+	}
+	else
+	{
+		_open_file();
+	}
+
+	_render_path(_side);
+	_render_files(_side);
+}
 
 static void manager_tab(void)
 {
 	_side = !_side;
-	_render_side(0);
-	_render_side(1);
+	_render_files(0);
+	_render_files(1);
 }
 
 void manager_key(int key, int c)
 {
 	switch(key)
 	{
-	case KEY_HOME:  manager_home();  break;
-	case KEY_END:   manager_end();   break;
-	case KEY_UP:    manager_up();    break;
-	case KEY_DOWN:  manager_down();  break;
-	//case KEY_ENTER: manager_enter(); break;
-	case KEY_TAB:   manager_tab();   break;
+	case KEY_HOME:   manager_home();  break;
+	case KEY_END:    manager_end();   break;
+	case KEY_UP:     manager_up();    break;
+	case KEY_DOWN:   manager_down();  break;
+	case KEY_RETURN: manager_enter(); break;
+	case KEY_TAB:    manager_tab();   break;
 	}
 }
