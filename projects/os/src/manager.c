@@ -3,23 +3,17 @@
 #include "terminal.h"
 #include <string.h>
 
-#define FILE_OFFSET  1
-#define EXT_OFFSET  14
-
-#define MAX_ENTRIES       (SCREEN_HEIGHT - 3)
-
-//terminal_set(x, y, buf[i]);
+#define FILE_OFFSET      1
+#define EXT_OFFSET      14
+#define MAX_ENTRIES       (TERMINAL_H - 3)
 
 typedef struct
 {
-	i16 OffsetX;
-	i16 Selected;
-	i16 Count;
-	i16 Offset;
+	int Selected;
+	int Count;
+	int Offset;
 	char Path[64];
 } Side;
-
-// static uint8_t _off_xs[2] = { 0, SCREEN_WIDTH / 2 };
 
 static Side _sides[2];
 static int _side;
@@ -79,7 +73,7 @@ static void manager_status_side(u8r side)
 #endif
 }
 
-static void manager_list_side(u8r side)
+static void _render_side(u8r side)
 {
 #if 0
 	char buf[FILE_BYTES];
@@ -97,7 +91,7 @@ static void manager_list_side(u8r side)
 			break;
 		}
 
-		if(side == _side && i == _sels[_side])
+		if(side == _side && i == side->Selected)
 		{
 			vga_color(FG_BLACK | BG_WHITE);
 		}
@@ -186,7 +180,7 @@ static void _border_horizontal(void)
 	prints(TERMINAL_W - 2, TERMINAL_H - 2, "-+");
 }
 
-static void _filler(void)
+static void _render_filler(void)
 {
 	_border_horizontal();
 	_border_vertical();
@@ -206,24 +200,21 @@ void manager_open(void)
 		return;
 	}
 
-	manager_help_line();
-	manager_sides();
 	manager_list_side(0);
 	manager_list_side(1);
 	manager_status_side(0);
 	manager_status_side(1);
 #endif
 
-	_filler();
+	_render_filler();
 }
 
-#if 0
 static void manager_home(void)
 {
 	Side *side = &_sides[_side];
 	side->Selected = 0;
 	side->Offset = 0;
-	manager_list_side(_side);
+	_render_side(_side);
 }
 
 static void manager_end(void)
@@ -236,41 +227,44 @@ static void manager_end(void)
 		side->Offset = 0;
 	}
 
-	manager_list_side(_side);
+	_render_side(_side);
 }
 
 static void manager_up(void)
 {
-	--_sels[_side];
-	if(_sels[_side] < 0)
+	Side *side = &_sides[_side];
+	--side->Selected;
+	if(side->Selected < 0)
 	{
-		_sels[_side] = 0;
+		side->Selected = 0;
 	}
 
-	if(_sels[_side] < _offsets[_side])
+	if(side->Selected < side->Offset)
 	{
-		_offsets[_side] = _sels[_side];
+		side->Offset = side->Selected;
 	}
 
-	manager_list_side(_side);
+	_render_side(_side);
 }
 
 static void manager_down(void)
 {
-	++_sels[_side];
-	if(_sels[_side] > _counts[_side] - 1)
+	Side *side = &_sides[_side];
+	++side->Selected;
+	if(side->Selected > side->Count - 1)
 	{
-		_sels[_side] = _counts[_side] - 1;
+		side->Selected = side->Count - 1;
 	}
 
-	if(_sels[_side] > _offsets[_side] + MAX_ENTRIES - 1)
+	if(side->Selected > side->Offset + MAX_ENTRIES - 1)
 	{
-		_offsets[_side] = _offsets[_side] + MAX_ENTRIES - 1;
+		side->Offset = side->Offset + MAX_ENTRIES - 1;
 	}
 
-	manager_list_side(_side);
+	_render_side(_side);
 }
 
+#if 0
 static void manager_enter(void)
 {
 	uint8_t len = strlen(_paths[_side]);
@@ -285,15 +279,12 @@ static void manager_enter(void)
 	++p;
 	*p = '\0';
 
-	_counts[_side] = folder_list(_paths[_side], _xram_offs[_side]);
+	side->Count = folder_list(_paths[_side], _xram_offs[_side]);
 	manager_status_side(_side);
 	manager_list_side(_side);
 
-
-
-
 	char buf[FILE_BYTES], *p;
-	xram_read(_xram_offs[_side] + (u32)_sels[_side] * FILE_BYTES, buf, FILE_BYTES);
+	xram_read(_xram_offs[_side] + (u32)side->Selected * FILE_BYTES, buf, FILE_BYTES);
 	if(buf[0] != 'D')
 	{
 		break;
@@ -303,30 +294,28 @@ static void manager_enter(void)
 	strcpy(p, buf + 1);
 	strcat(p, "/");
 
-	_counts[_side] = folder_list(_paths[_side], _xram_offs[_side]);
+	side->Count = folder_list(_paths[_side], _xram_offs[_side]);
 	manager_status_side(_side);
 	manager_list_side(_side);
 }
+#endif
 
 static void manager_tab(void)
 {
 	_side = !_side;
-	manager_list_side(0);
-	manager_list_side(1);
+	_render_side(0);
+	_render_side(1);
 }
-#endif
 
 void manager_key(int key, int c)
 {
-	#if 0
 	switch(key)
 	{
 	case KEY_HOME:  manager_home();  break;
 	case KEY_END:   manager_end();   break;
 	case KEY_UP:    manager_up();    break;
 	case KEY_DOWN:  manager_down();  break;
-	case KEY_ENTER: manager_enter(); break;
+	//case KEY_ENTER: manager_enter(); break;
 	case KEY_TAB:   manager_tab();   break;
 	}
-	#endif
 }
