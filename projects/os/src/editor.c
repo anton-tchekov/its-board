@@ -344,6 +344,7 @@ void editor_open(void)
 
 void editor_init(void)
 {
+	_page_x = -5;
 	_tab_size = 4;
 	_show_space = 1;
 	_syntax = 0;
