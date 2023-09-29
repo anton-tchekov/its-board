@@ -29,6 +29,18 @@ char *strcpy(char *dst, const char *src)
 	return save;
 }
 
+char *strncpy(char *dest, const char *src, size_t count)
+{
+	size_t i;
+	int c;
+	for(i = 0; i < count && (c = src[i]); ++i)
+	{
+		dest[i] = c;
+	}
+
+	return dest;
+}
+
 int strcmp(const char *str1, const char *str2)
 {
 	while(*str1 == *str2)

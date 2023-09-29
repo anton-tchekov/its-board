@@ -15,6 +15,13 @@
 #define NORMAL            TERMINAL_FG_WHITE | TERMINAL_BG_BLACK
 #define INVERTED          TERMINAL_BG_WHITE | TERMINAL_FG_BLACK
 
+#define MAX_FILENAME_LEN  8
+#define MAX_EXTENSION_LEN 3
+#define MAX_SAFE_PATH_LEN 240
+
+/* TODO: Fix the stupid bugs resulting from non-terminated strings,
+	so much work for saving a byte :-( */
+
 typedef struct
 {
 	uint32_t Size;
@@ -230,7 +237,7 @@ static void _render_files(u8r which)
 		x = x_start;
 		color = (which == _side && i == side->Selected) ? INVERTED : NORMAL;
 		terminal_set(x++, y, (ent->Type ? '/' : ' ') | color);
-		for(j = 0; j < 8 && (c = ent->Name[j]); ++j)
+		for(j = 0; j < MAX_FILENAME_LEN && (c = ent->Name[j]); ++j)
 		{
 			terminal_set(x++, y, c | color);
 		}
@@ -238,7 +245,7 @@ static void _render_files(u8r which)
 		if(!ent->Type)
 		{
 			terminal_set(x++, y, '.' | color);
-			for(j = 0; j < 3 && (c = ent->Ext[j]); ++j)
+			for(j = 0; j < MAX_EXTENSION_LEN && (c = ent->Ext[j]); ++j)
 			{
 				terminal_set(x++, y, c | color);
 			}
@@ -373,14 +380,23 @@ static void _parent_dir(Side *side, u8r len)
 {
 	char *p = side->Path + len - 2;
 	for(; *p != '/'; --p) {}
+	if(p == side->Path)
+	{
+		*p++ = '/';
+	}
+
 	*p = '\0';
 }
 
 static void _open_dir(Side *side, DirEnt *ent, u8r len)
 {
 	char *p = side->Path + len;
-	*p++ = '/';
-	strcpy(p, ent->Name);
+	if(len > 1)
+	{
+		*p++ = '/';
+	}
+
+	strncpy(p, ent->Name, MAX_FILENAME_LEN);
 }
 
 static void _open_file(void)
@@ -393,13 +409,17 @@ static void manager_enter(void)
 	Side *side = &_sides[_side];
 	u8r len = strlen(side->Path);
 	DirEnt *ent = &side->Entries[side->Selected];
-	if(len > 1 && side->Selected == 0)
+	if(ent->Type)
 	{
-		_parent_dir(side, len);
-	}
-	else if(ent->Type)
-	{
-		_open_dir(side, ent, len);
+		if(side->Selected == 0 && len > 1)
+		{
+			_parent_dir(side, len);
+		}
+		else if((len + strnlen(ent->Name, MAX_FILENAME_LEN))
+			< (sizeof(side->Path) - 1))
+		{
+			_open_dir(side, ent, len);
+		}
 	}
 	else
 	{
