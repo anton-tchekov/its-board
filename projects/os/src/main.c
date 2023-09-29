@@ -16,27 +16,50 @@
 #include "ps2.h"
 #include "terminal.h"
 #include "shell.h"
+#include "login.h"
 #include "editor.h"
+#include "mode.h"
 
-enum
+static int _mode = MODE_LOGIN;
+
+void mode_set(int mode)
 {
-	MODE_SHELL,
-	MODE_EDITOR,
-};
+	_mode = mode;
+	switch(_mode)
+	{
+	case MODE_SHELL:
+		shell_open();
+		break;
 
-static int mode = MODE_SHELL;
+	case MODE_EDITOR:
+		editor_open();
+		break;
+
+	case MODE_MANAGER:
+		manager_open();
+		break;
+	}
+}
 
 static void mode_key(int key, int c)
 {
-	switch(mode)
+	switch(_mode)
 	{
-		case MODE_SHELL:
-			shell_key(key, c);
-			break;
+	case MODE_LOGIN:
+		login_key(key, c);
+		break;
 
-		case MODE_EDITOR:
-			editor_key(key, c);
-			break;
+	case MODE_SHELL:
+		shell_key(key, c);
+		break;
+
+	case MODE_EDITOR:
+		editor_key(key, c);
+		break;
+
+	case MODE_MANAGER:
+		manager_key(key, c);
+		break;
 	}
 }
 
@@ -57,19 +80,21 @@ static void os_update(void)
 
 	switch(event.Key)
 	{
-		case MOD_OS | KEY_1:
-			mode = MODE_SHELL;
-			shell_open();
-			break;
+	case MOD_OS | KEY_1:
+		mode_set(MODE_SHELL);
+		break;
 
-		case MOD_OS | KEY_2:
-			mode = MODE_EDITOR;
-			editor_open();
-			break;
+	case MOD_OS | KEY_2:
+		mode_set(MODE_EDITOR);
+		break;
 
-		default:
-			mode_key(event.Key, event.Codepoint);
-			break;
+	case MOD_OS | KEY_3:
+		mode_set(MODE_MANAGER);
+		break;
+
+	default:
+		mode_key(event.Key, event.Codepoint);
+		break;
 	}
 }
 
@@ -84,10 +109,11 @@ int main(void)
 	lcd_init(D2U_L2R, COLOR_BLACK);
 	ps2_init();
 
+	login_init();
 	shell_init();
 	editor_init();
+	manager_init();
 
-	shell_open();
 	for(;;)
 	{
 		os_update();
