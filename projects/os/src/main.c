@@ -18,6 +18,7 @@
 #include "shell.h"
 #include "login.h"
 #include "editor.h"
+#include "manager.h"
 #include "mode.h"
 
 static int _mode = MODE_LOGIN;
@@ -27,6 +28,10 @@ void mode_set(int mode)
 	_mode = mode;
 	switch(_mode)
 	{
+	case MODE_LOGIN:
+		login_open();
+		break;
+
 	case MODE_SHELL:
 		shell_open();
 		break;
@@ -80,6 +85,10 @@ static void os_update(void)
 
 	switch(event.Key)
 	{
+	case MOD_OS | KEY_0:
+		mode_set(MODE_LOGIN);
+		break;
+
 	case MOD_OS | KEY_1:
 		mode_set(MODE_SHELL);
 		break;

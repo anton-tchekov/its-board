@@ -42,5 +42,6 @@ enum TERMINAL_BG
 };
 
 void terminal_set(int x, int y, int v);
+void terminal_clear(void);
 
 #endif /* __TERMINAL_H__ */

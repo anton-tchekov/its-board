@@ -9,4 +9,6 @@ enum
 	MODE_MANAGER,
 };
 
+void mode_set(int mode);
+
 #endif /* __MODE_H__ */

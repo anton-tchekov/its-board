@@ -1,9 +1,10 @@
+#include "login.h"
+#include "terminal.h"
+#include "mode.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <ctype.h>
-#include "terminal.h"
-#include "mode.h"
 
 #define OFFSET_X 10
 #define OFFSET_Y  1
@@ -41,6 +42,12 @@ static void println(int x, int y, int style, const char *s)
 	{
 		terminal_set(x, y, ' ' | style);
 	}
+}
+
+void login_open(void)
+{
+	terminal_clear();
+	login_init();
 }
 
 void login_init(void)

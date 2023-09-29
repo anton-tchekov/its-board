@@ -61,3 +61,15 @@ void terminal_set(int x, int y, int v)
 		_terminal_render(x, y, v);
 	}
 }
+
+void terminal_clear(void)
+{
+	int x, y;
+	for(y = 0; y < TERMINAL_H; ++y)
+	{
+		for(x = 0; x < TERMINAL_W; ++x)
+		{
+			terminal_set(x, y, ' ' | TERMINAL_FG_WHITE | TERMINAL_BG_BLACK);
+		}
+	}
+}
