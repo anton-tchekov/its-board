@@ -137,3 +137,24 @@ void *memset(void *ptr, int value, size_t count)
 
 	return ptr;
 }
+
+int memcmp(const void *ptr1, const void *ptr2, size_t count)
+{
+	size_t i;
+	const uint8_t *p1, *p2;
+
+	p1 = (const uint8_t *)ptr1;
+	p2 = (const uint8_t *)ptr2;
+	for(i = 0; i < count; ++i)
+	{
+		if(*p1 != *p2)
+		{
+			return *p1 - *p2;
+		}
+
+		++p1;
+		++p2;
+	}
+
+	return 0;
+}

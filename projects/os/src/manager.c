@@ -17,7 +17,6 @@
 
 #define MAX_FILENAME_LEN  8
 #define MAX_EXTENSION_LEN 3
-#define MAX_SAFE_PATH_LEN 240
 
 /* TODO: Fix the stupid bugs resulting from non-terminated strings,
 	so much work for saving a byte :-( */
