@@ -1,3 +1,10 @@
+/**
+ * @file    clipboard.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ */
+
 #include "clipboard.h"
 #include <string.h>
 
@@ -14,10 +21,10 @@ int clipboard_save(const char *text, int len)
 {
 	if(len > CLIPBOARD_MAX_LENGTH)
 	{
-		return 0;
+		return 1;
 	}
 
 	_clipboard_len = len;
 	memcpy(_clipboard_text, text, len);
-	return 1;
+	return 0;
 }

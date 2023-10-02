@@ -1,3 +1,11 @@
+/**
+ * @file    login.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ * @brief   Login app
+ */
+
 #ifndef __LOGIN_H__
 #define __LOGIN_H__
 

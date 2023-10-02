@@ -1,3 +1,10 @@
+/**
+ * @file    line.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ */
+
 #include "line.h"
 #include "clipboard.h"
 #include <string.h>

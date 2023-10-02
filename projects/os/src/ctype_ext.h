@@ -1,3 +1,11 @@
+/**
+ * @file    ctype_ext.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ * @brief   Extended ctype functionality
+ */
+
 #ifndef __CTYPE_EXT_H__
 #define __CTYPE_EXT_H__
 

@@ -1,3 +1,11 @@
+/**
+ * @file    line.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ * @brief   Multiline edit data structure
+ */
+
 #ifndef __LINE_H__
 #define __LINE_H__
 
