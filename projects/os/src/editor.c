@@ -6,6 +6,7 @@
 #include "font.h"
 #include "ctype_ext.h"
 #include "nanoc_lexer_identifier.h"
+#include "ff.h"
 
 #include <stddef.h>
 #include <string.h>
@@ -348,7 +349,55 @@ void editor_init(void)
 	_tab_size = 4;
 	_show_space = 1;
 	_syntax = 0;
-	line_init(&line, _buf, 1024);
+	line_init(&line, _buf, sizeof(_buf));
+}
+
+void editor_save(void)
+{
+
+}
+
+static int check_text(const char *str, size_t len)
+{
+	const char *end = str + len;
+	while(str < end)
+	{
+		int c = *str++;
+		if(!isprint(c) && c != '\t' && c != '\n')
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int editor_load(const char *path)
+{
+	FIL fp;
+	u32 read = 0;
+	if(f_open(&fp, path, FA_READ))
+	{
+		return 1;
+	}
+
+	if(f_read(&fp, _buf, sizeof(_buf), &read))
+	{
+		return 1;
+	}
+
+	if(f_close(&fp))
+	{
+		return 1;
+	}
+
+	if(check_text(_buf, read))
+	{
+		return 1;
+	}
+
+	editor_open();
+	return 0;
 }
 
 void editor_key(int key, int c)
@@ -381,6 +430,8 @@ void editor_key(int key, int c)
 	case MOD_CTRL | KEY_T:      toggle_tab_size();                 break;
 	case MOD_CTRL | KEY_J:      toggle_show_space();               break;
 	case MOD_CTRL | KEY_K:      toggle_syntax_color();             break;
+
+	case MOD_CTRL | KEY_S:      editor_save();                     break;
 
 	case MOD_CTRL | KEY_HOME:             line_ctrl_home(&line);       break;
 	case MOD_CTRL | MOD_SHIFT | KEY_HOME: line_ctrl_shift_home(&line); break;

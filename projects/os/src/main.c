@@ -3,81 +3,24 @@
  * @author  Anton Tchekov
  * @version 0.1
  * @date    2023-07-21
- * @brief   Template Project
+ * @brief   OS main function
  */
 
 #include "init.h"
 #include "timer.h"
-#include "delay.h"
 #include "lcd.h"
-#include "font.h"
-#include "fonts/Terminus16.h"
-#include "fonts/Terminus16_Bold.h"
 #include "ps2.h"
+
 #include "terminal.h"
-#include "shell.h"
+#include "mode.h"
+
 #include "login.h"
+#include "shell.h"
 #include "editor.h"
 #include "manager.h"
-#include "mode.h"
 #include "test.h"
 
-static int _mode = MODE_LOGIN;
-
-void mode_set(int mode)
-{
-	_mode = mode;
-	switch(_mode)
-	{
-	case MODE_LOGIN:
-		login_open();
-		break;
-
-	case MODE_SHELL:
-		shell_open();
-		break;
-
-	case MODE_EDITOR:
-		editor_open();
-		break;
-
-	case MODE_MANAGER:
-		manager_open();
-		break;
-	
-	case MODE_TEST:
-		test_open();
-		break;
-	}
-}
-
-static void mode_key(int key, int c)
-{
-	switch(_mode)
-	{
-	case MODE_LOGIN:
-		login_key(key, c);
-		break;
-
-	case MODE_SHELL:
-		shell_key(key, c);
-		break;
-
-	case MODE_EDITOR:
-		editor_key(key, c);
-		break;
-
-	case MODE_TEST:
-		test_key(key, c);
-		break;
-
-	case MODE_MANAGER:
-		manager_key(key, c);
-		break;
-	}
-}
-
-static void os_update(void)
+static void os_key(void)
 {
 	/* TODO: Replace fake multitasking with
 		real multitasking and remove polling */
@@ -94,26 +37,11 @@ static void os_update(void)
 
 	switch(event.Key)
 	{
-	case MOD_OS | KEY_0:
-		mode_set(MODE_LOGIN);
-		break;
-
-	case MOD_OS | KEY_1:
-		mode_set(MODE_SHELL);
-		break;
-
-	case MOD_OS | KEY_2:
-		mode_set(MODE_EDITOR);
-		break;
-
-	case MOD_OS | KEY_3:
-		mode_set(MODE_MANAGER);
-		break;
-
-	case MOD_OS | KEY_7:
-		mode_set(MODE_TEST);
-		break;
-
+	case MOD_OS | KEY_0: mode_set(MODE_LOGIN);   break;
+	case MOD_OS | KEY_1: mode_set(MODE_SHELL);   break;
+	case MOD_OS | KEY_2: mode_set(MODE_EDITOR);  break;
+	case MOD_OS | KEY_3: mode_set(MODE_MANAGER); break;
+	case MOD_OS | KEY_7: mode_set(MODE_TEST);    break;
 	default:
 		mode_key(event.Key, event.Codepoint);
 		break;
@@ -138,7 +66,7 @@ int main(void)
 
 	for(;;)
 	{
-		os_update();
+		os_key();
 	}
 
 	return 0;

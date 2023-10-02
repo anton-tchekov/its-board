@@ -1,6 +1,14 @@
+/**
+ * @file    manager.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ */
+
 #include "manager.h"
 #include "keyboard.h"
 #include "terminal.h"
+#include "mode.h"
 #include <string.h>
 
 #define HELP_Y            (TERMINAL_H - 1)
@@ -17,9 +25,6 @@
 
 #define MAX_FILENAME_LEN  8
 #define MAX_EXTENSION_LEN 3
-
-/* TODO: Fix the stupid bugs resulting from non-terminated strings,
-	so much work for saving a byte :-( */
 
 typedef struct
 {
@@ -39,7 +44,7 @@ typedef struct
 } Side;
 
 static Side _sides[2];
-static u8r _side;
+static u8 _side;
 
 static void printc(int x, int y, int c)
 {
@@ -410,7 +415,9 @@ static void _open_dir(Side *side, DirEnt *ent, u8r len)
 
 static void _open_file(void)
 {
-
+#if 0
+	editor_load("SOME PATH?");
+#endif
 }
 
 static void manager_enter(void)
@@ -446,15 +453,99 @@ static void manager_tab(void)
 	_render_files(1);
 }
 
+#if 0
+static char *cursel(void)
+{
+	return "1 file";
+}
+
+static void manager_select(void)
+{
+}
+
+static void manager_copy(void)
+{
+}
+
+static void manager_move(void)
+{
+}
+
+static void fs_fail_alert(void)
+{
+	alert("Failed to create directory:\n"
+		"%s\n",
+		fatfs_status_str(ret));
+}
+
+static void create_dir_callback(int yes, const char *name)
+{
+	if(yes)
+	{
+		int ret = f_mkdir(name);
+		if(ret)
+		{
+			fs_fail_alert(ret);
+			return;
+		}
+	}
+
+	mode_set(MODE_MANAGER);
+}
+
+static void manager_new_dir(void)
+{
+	prompt("Create Dir:", create_dir_callback);
+}
+
+static int delete_sel(void)
+{
+	return 1;
+}
+
+static void delete_dir_callback(int yes)
+{
+	if(yes)
+	{
+		int ret = delete_sel();
+		if(ret)
+		{
+			fs_fail_alert(ret);
+			return;
+		}
+	}
+
+	mode_set(MODE_MANAGER);
+}
+
+static void manager_delete(void)
+{
+	confirm("Delete %s?", delete_dir_callback);
+}
+
+static void manager_new_file(void)
+{
+	prompt("Create File:", new_file_callback);
+}
+#endif
+
 void manager_key(int key, int c)
 {
 	switch(key)
 	{
-	case KEY_HOME:   manager_home();  break;
-	case KEY_END:    manager_end();   break;
-	case KEY_UP:     manager_up();    break;
-	case KEY_DOWN:   manager_down();  break;
-	case KEY_RETURN: manager_enter(); break;
-	case KEY_TAB:    manager_tab();   break;
+	case KEY_HOME:         manager_home();     break;
+	case KEY_END:          manager_end();      break;
+	case KEY_UP:           manager_up();       break;
+	case KEY_DOWN:         manager_down();     break;
+	case KEY_RETURN:       manager_enter();    break;
+	case KEY_TAB:          manager_tab();      break;
+#if 0
+	case KEY_INSERT:       manager_select();   break;
+	case KEY_F5:           manager_copy();     break;
+	case KEY_F6:           manager_move();     break;
+	case KEY_F7:           manager_new_dir();  break;
+	case KEY_F8:           manager_delete();   break;
+	case MOD_CTRL | KEY_N: manager_new_file(); break;
+#endif
 	}
 }
