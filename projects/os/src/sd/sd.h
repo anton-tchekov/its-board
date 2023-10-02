@@ -15,10 +15,10 @@
 typedef struct
 {
 	/** SD card serial number */
-	u32 _serial = 0;
+	u32 Serial;
 
 	/** SD card capacity in blocks */
-	u32 _capacity;
+	u32 Capacity;
 
 	/** SD card OEM name: 2 characters + null-terminator */
 	u8 OEM[3];
@@ -27,31 +27,31 @@ typedef struct
 	u8 ProductName[6];
 
 	/** SD manufacturer ID */
-	u8 Manufacturer = 0;
+	u8 Manufacturer;
 
 	/** SD card revision number as packed BCD */
-	u8 Revision = 0;
+	u8 Revision;
 
 	/** SD card manufacturing year after 2000 */
-	u8 _manufacturing_year = 0;
+	u8 ManufacturingYear;
 
 	/** SD card manufacturing month number */
-	u8 _manufacturing_month = 0;
+	u8 ManufacturingMonth;
 
 	/** SD card copy/original flag */
-	u8 _flag_copy;
+	u8 FlagCopy;
 
 	/** SD card write protected flag */
-	u8 _flag_write_protect;
+	u8 FlagWriteProtect;
 
 	/** SD card temporarily write protected flag */
-	u8 _flag_write_protect_temp;
+	u8 FlagTemporaryWriteProtect;
 
 	/** SD card format ID */
-	u8 _format;
+	u8 Format;
 
 	/** SD card type: SD1 / SD2 / SDHC */
-	u8 _card_type;
+	u8 CardType;
 } SD;
 
 enum
@@ -71,7 +71,7 @@ typedef u8r SD_Status;
  */
 static inline u32r sd_size(SD *sd)
 {
-	return sd->_capacity;
+	return sd->Capacity;
 }
 
 /**

@@ -34,10 +34,28 @@ void spi_ll_init(void)
 		(GPIO_AF5_SPI1 << (6 * 4)) |
 		(GPIO_AF5_SPI1 << (7 * 4));
 
-	SPI1->CR1 &= ~(1 <<  6);
+	
+	spi_ll_fast();
+
+}
+
+void spi_ll_fast(void)
+{
+	SPI1->CR1 &= ~(1 << 6);
 	SPI1->CR1 = (1 << 9) | (1 << 8) | (1 << 2) |
 		(SPI_BAUDRATEPRESCALER_16 & SPI_CR1_BR_Msk);
+	
+	SPI1->CR2 = 0;
+	SPI1->I2SCFGR &= ~SPI_I2SCFGR_I2SMOD;
+	SPI1->CR1 |= (1 << 6);
+}
 
+void spi_ll_slow(void)
+{
+	SPI1->CR1 &= ~(1 << 6);
+	SPI1->CR1 = (1 << 9) | (1 << 8) | (1 << 2) |
+		(SPI_BAUDRATEPRESCALER_256 & SPI_CR1_BR_Msk);
+	
 	SPI1->CR2 = 0;
 	SPI1->I2SCFGR &= ~SPI_I2SCFGR_I2SMOD;
 	SPI1->CR1 |= (1 << 6);

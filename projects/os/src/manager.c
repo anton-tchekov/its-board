@@ -389,13 +389,23 @@ static void _parent_dir(Side *side, u8r len)
 
 static void _open_dir(Side *side, DirEnt *ent, u8r len)
 {
+	char *s = ent->Name;
 	char *p = side->Path + len;
+	int c;
+	u8r i;
+
 	if(len > 1)
 	{
 		*p++ = '/';
 	}
 
-	strncpy(p, ent->Name, MAX_FILENAME_LEN);
+	i = 0;
+	while(i < MAX_FILENAME_LEN && (c = s[i++]))
+	{
+		*p++ = c;
+	}
+
+	*p = '\0';
 }
 
 static void _open_file(void)

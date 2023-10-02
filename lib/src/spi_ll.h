@@ -11,5 +11,7 @@
 
 void spi_ll_init(void);
 int spi_ll_xchg(int val);
+void spi_ll_fast(void);
+void spi_ll_slow(void);
 
 #endif /* __SPI_LL_H__ */

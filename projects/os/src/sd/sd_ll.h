@@ -9,16 +9,19 @@
 #ifndef __SD_LL_H__
 #define __SD_LL_H__
 
-#define LCD_SD_CS       ?
+#include "stm32f4xx_hal.h"
 
-static inline void lcd_sd_cs_0(void)
+#define SD_LL_CS_BSRR   GPIOE->BSRR
+#define SD_LL_CS      11
+
+static inline void sd_ll_select(void)
 {
-	GPIOD->BSRR |= (1 << (LCD_SD_CS + 16));
+	SD_LL_CS_BSRR |= (1 << (SD_LL_CS + 16));
 }
 
-static inline void lcd_sd_cs_1(void)
+static inline void sd_ll_deselect(void)
 {
-	GPIOD->BSRR |= (1 << LCD_SD_CS);
+	SD_LL_CS_BSRR |= (1 << SD_LL_CS);
 }
 
 #endif /* __SD_LL_H__ */

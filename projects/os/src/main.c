@@ -20,6 +20,7 @@
 #include "editor.h"
 #include "manager.h"
 #include "mode.h"
+#include "test.h"
 
 static int _mode = MODE_LOGIN;
 
@@ -43,6 +44,10 @@ void mode_set(int mode)
 	case MODE_MANAGER:
 		manager_open();
 		break;
+	
+	case MODE_TEST:
+		test_open();
+		break;
 	}
 }
 
@@ -60,6 +65,10 @@ static void mode_key(int key, int c)
 
 	case MODE_EDITOR:
 		editor_key(key, c);
+		break;
+
+	case MODE_TEST:
+		test_key(key, c);
 		break;
 
 	case MODE_MANAGER:
@@ -99,6 +108,10 @@ static void os_update(void)
 
 	case MOD_OS | KEY_3:
 		mode_set(MODE_MANAGER);
+		break;
+
+	case MOD_OS | KEY_7:
+		mode_set(MODE_TEST);
 		break;
 
 	default:

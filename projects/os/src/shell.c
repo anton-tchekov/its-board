@@ -25,7 +25,7 @@ static char _bufs[COMMAND_LINES][COMMAND_BUFFER_SIZE];
 static Shell this;
 
 /* --- UTILS --- */
-static void cls(void)
+void shell_cls(void)
 {
 	int x, y;
 	for(y = 1; y < TERMINAL_H; ++y)
@@ -35,20 +35,16 @@ static void cls(void)
 			terminal_set(x, y, ' ' | TERMINAL_FG_WHITE | TERMINAL_BG_BLACK);
 		}
 	}
-}
 
-/* --- PRIVATE --- */
-static void shell_output_reset(void)
-{
 	this.X = 0;
 	this.Y = 1;
 	this.FG = TERMINAL_FG_WHITE;
 }
 
+/* --- PRIVATE --- */
 static void key_enter(Line *line)
 {
-	cls();
-	shell_output_reset();
+	shell_cls();
 	line->Text[line->Length] = '\0';
 	command_run(line->Text, line->Length);
 }
@@ -167,8 +163,7 @@ void shell_init(void)
 void shell_open(void)
 {
 	command_render();
-	cls();
-	shell_output_reset();
+	shell_cls();
 }
 
 void shell_print(const char *s)

@@ -7,6 +7,7 @@ enum
 	MODE_SHELL,
 	MODE_EDITOR,
 	MODE_MANAGER,
+	MODE_TEST
 };
 
 void mode_set(int mode);
