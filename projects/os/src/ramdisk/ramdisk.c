@@ -1,7 +1,7 @@
 #include "ramdisk.h"
 #include <string.h>
 
-u8 ramdisk[512 * 128];
+static u8 ramdisk[512 * 192];
 
 void ramdisk_write(const u8 *buf, size_t sector, size_t count)
 {

@@ -124,11 +124,11 @@ DRESULT disk_ioctl (
 		switch(cmd)
 		{
 			case GET_SECTOR_COUNT:
-				*(LBA_t *)buff = 128;
+				*(LBA_t *)buff = 192;
 				break;
 
-			case GET_BLOCK_SIZE
-				*(DWORD *)buff = 512;
+			case GET_BLOCK_SIZE:
+				*(DWORD *)buff = 1;
 				break;
 		}
 		return RES_OK;
