@@ -1,3 +1,11 @@
+/**
+ * @file    util.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ * @brief   Utility functions
+ */
+
 #ifndef __UTIL_H__
 #define __UTIL_H__
 

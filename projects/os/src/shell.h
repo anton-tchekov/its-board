@@ -1,3 +1,11 @@
+/**
+ * @file    shell.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ * @brief   OS Shell
+ */
+
 #ifndef __SHELL_H__
 #define __SHELL_H__
 

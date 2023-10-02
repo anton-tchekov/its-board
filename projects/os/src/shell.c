@@ -123,8 +123,8 @@ void shell_key(int key, int c)
 	case MOD_SHIFT | KEY_LEFT:  line_shift_left(line);      break;
 	case KEY_RIGHT:             line_right(line);           break;
 	case MOD_SHIFT | KEY_RIGHT: line_shift_right(line);     break;
-	case KEY_UP:                key_up();                       break;
-	case KEY_DOWN:              key_down();                     break;
+	case KEY_UP:                key_up();                   break;
+	case KEY_DOWN:              key_down();                 break;
 	case KEY_BACKSPACE:         line_backspace(line);       break;
 	case KEY_DELETE:            line_delete(line);          break;
 	case MOD_CTRL | KEY_A:      line_ctrl_a(line);          break;
@@ -135,12 +135,9 @@ void shell_key(int key, int c)
 	case MOD_SHIFT | KEY_HOME:  line_ctrl_shift_home(line); break;
 	case KEY_END:               line_ctrl_end(line);        break;
 	case MOD_SHIFT | KEY_END:   line_ctrl_shift_end(line);  break;
+	case KEY_RETURN:            key_enter(line);            break;
 	default:
-		if(c == '\n')
-		{
-			key_enter(line);
-		}
-		else if(isprint(c))
+		if(isprint(c))
 		{
 			line_insert(line, c);
 		}

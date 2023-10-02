@@ -1,3 +1,10 @@
+/**
+ * @file    terminal.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ */
+
 #include "terminal.h"
 
 #include "lcd.h"

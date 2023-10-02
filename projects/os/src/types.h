@@ -1,3 +1,11 @@
+/**
+ * @file    types.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ * @brief   Shorthand types
+ */
+
 #ifndef __TYPES_H__
 #define __TYPES_H__
 

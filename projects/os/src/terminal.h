@@ -1,7 +1,18 @@
+/**
+ * @file    terminal.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ * @brief   Terminal
+ */
+
 #ifndef __TERMINAL_H__
 #define __TERMINAL_H__
 
+/** Terminal width in characters */
 #define TERMINAL_W                  60
+
+/** Terminal height in characters */
 #define TERMINAL_H                  20
 
 /* Bit 15 */
@@ -41,7 +52,18 @@ enum TERMINAL_BG
 	TERMINAL_BG_RESERVED_3    = 0x7000,
 };
 
+/**
+ * @brief Place a character at the specified position
+ *
+ * @param x X Position
+ * @param y Y-Position
+ * @param v Character (bitwise-or of ASCII character and FG/BG enums)
+ */
 void terminal_set(int x, int y, int v);
+
+/**
+ * @brief Clear the terminal with black background and white foreground
+ */
 void terminal_clear(void);
 
 #endif /* __TERMINAL_H__ */
