@@ -80,6 +80,22 @@ int strncmp(const char *p1, const char *p2, size_t count)
 	return 0;
 }
 
+const char *strchr(const char *str, int c)
+{
+	int d;
+	while((d = *str))
+	{
+		if(d == c)
+		{
+			return str;
+		}
+
+		++str;
+	}
+
+	return NULL;
+}
+
 void *memcpy(void *dest, const void *src, size_t count)
 {
 	uint8_t *d, *s, *end;
