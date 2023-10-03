@@ -11,14 +11,13 @@
 #include "nanoc_builtin.h"
 #include "nanoc_util.h"
 
+#include "builtins.h"
+
 #include "types.h"
 #include <stdio.h>
 #include <assert.h>
 
 static i32r output;
-
-static const char *builtin_names =
-	"";
 
 static i32r test(i32r a, i32 *p)
 {
@@ -39,7 +38,7 @@ static int test_positive_run(const char *source, int expected)
 	};
 
 	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf),
-		builtin_names);
+		&parser_builtins);
 	ret = nanoc_statement(&parser);
 	if(ret)
 	{
@@ -69,7 +68,7 @@ static int test_negative_run(const char *source)
 	NanoC_Parser parser;
 	u8 output_buf[1024];
 	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf),
-		builtin_names);
+		&parser_builtins);
 	return nanoc_statement(&parser);
 }
 
@@ -315,6 +314,7 @@ void nanoc_test_run(void)
 		"{ for(; int i) {} }",
 		"{ for(int i = 0; int j; ++i) {} }",
 		"{for(int i = 0; ; ++i) { if(i*i == 121) {break;} } test(i);}",
+		"test(bla())",
 	};
 
 	size_t i;

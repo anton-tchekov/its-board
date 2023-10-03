@@ -7,6 +7,7 @@
 #include "nanoc_address_stack.h"
 #include "nanoc_map.h"
 #include "nanoc_types.h"
+#include "nanoc_builtin.h"
 
 #define NANOC_VARIABLE_CAPACITY   32
 #define NANOC_OPERATOR_STACK_SIZE 32
@@ -53,16 +54,16 @@ typedef struct NANOC_PARSER
 	NanoC_AddressStack BreakStack;
 	NanoC_AddressStack ContinueStack;
 	NanoC_Map Variables;
+	const NanoC_ParserBuiltins *Builtins;
 	u16 FuncLocalsIdx;
 	u8 BreakNesting;
 	u8 ContinueNesting;
 	u8 AndOrTop;
 	u8 OpTop;
-	const char *Builtins;
 } NanoC_Parser;
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
-	u8 *output, size_t output_size, const char *builtins);
+	u8 *output, size_t output_size, const NanoC_ParserBuiltins *builtins);
 
 NanoC_Status nanoc_fn_call(NanoC_Parser *parser);
 NanoC_Status nanoc_statement(NanoC_Parser *parser);

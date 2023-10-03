@@ -12,8 +12,7 @@
 #include "nanoc_builtin.h"
 #include "nanoc_test.h"
 
-static const char *builtin_names =
-	"";
+#include "builtins.h"
 
 static i32 debug_print(i32r a, i32 *p)
 {
@@ -53,7 +52,7 @@ int main(int argc, char **argv)
 	}
 
 	nanoc_parser_init(&parser, content, output_buf, sizeof(output_buf),
-		builtin_names);
+		&parser_builtins);
 
 	nanoc_statement(&parser);
 	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);

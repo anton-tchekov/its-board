@@ -30,7 +30,7 @@ static NanoC_Status insert_var(
 }
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
-	u8 *output, size_t output_size, const char *builtins)
+	u8 *output, size_t output_size, const NanoC_ParserBuiltins *builtins)
 {
 	nanoc_tokenstream_init(&parser->TokenStream, source);
 	nanoc_output_init(&parser->Output, output, output_size);
@@ -65,10 +65,27 @@ NanoC_Status nanoc_block(NanoC_Parser *parser)
 	return nanoc_block_inner(parser);
 }
 
+static NanoC_Bool check_fn_args(u8r cnt, u8r expected,
+	NanoC_Bool is_variadic)
+{
+	return is_variadic ? (cnt >= expected) : (cnt == expected);
+}
+
 NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 {
 	u8r arg_cnt = 0;
-	u16r fn_id = -1;
+	NanoC_Token *token = TOKEN(0);
+	const NanoC_ParserBuiltin *builtin;
+	int builtin_id = nanoc_builtin_find(parser->Builtins,
+		token->Ptr, token->Length);
+
+	if(builtin_id < 0)
+	{
+		THROW(NANOC_ERROR_UNDEFINED_FN);
+	}
+
+	builtin = &parser->Builtins->Table[builtin_id];
+
 	NEXT();
 	NEXT();
 	if(TT(0) != NANOC_TT_R_PAREN)
@@ -99,15 +116,13 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 		}
 	}
 
-#if 0
-	if(arg_cnt != n->Parser.FN_Args[i])
+	if(!check_fn_args(arg_cnt, builtin->NumArgs, builtin->IsVariadic))
 	{
-		THROW(ERROR_FN_NUM_ARGS);
+		THROW(NANOC_ERROR_FN_NUM_ARGS);
 	}
-#endif
 
 	nanoc_output_emit2(&parser->Output, NANOC_INSTR_CALL, arg_cnt);
-	nanoc_output_emit16(&parser->Output, fn_id);
+	nanoc_output_emit16(&parser->Output, -builtin_id - 1);
 	return NANOC_STATUS_SUCCESS;
 }
 
