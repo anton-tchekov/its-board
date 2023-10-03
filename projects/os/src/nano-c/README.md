@@ -472,7 +472,7 @@ output address.
 The same technique is also utilized with function calls, when a function
 is used before the parser has seen it's implementation.
 
-**TODO**: At this point `optimizer.c` might be added to perform simple
+At this point `optimizer.c` might be added to perform simple
 optimizations like constant folding or inlining.
 
 Generating actual machine code could also be an interesting project,
@@ -493,15 +493,6 @@ two stacks and the parameter copying when calling a function.
 
 ## TODO
 
-- for loops
 - compile time constants
 - array constants data definitions
-- remove switch case, replace with function pointers
-- intexpr
-- let direct assign
-
-- Platform Inteface improvement
-	1. all static
-	2. graphics_image_xxx
-	3. replace memory banks flat memory
-	4. memory alloc and free
+- re-implement strings

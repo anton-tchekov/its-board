@@ -58,10 +58,11 @@ typedef struct NANOC_PARSER
 	u8 ContinueNesting;
 	u8 AndOrTop;
 	u8 OpTop;
+	const char *Builtins;
 } NanoC_Parser;
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
-	u8 *output, size_t output_size);
+	u8 *output, size_t output_size, const char *builtins);
 
 NanoC_Status nanoc_fn_call(NanoC_Parser *parser);
 NanoC_Status nanoc_statement(NanoC_Parser *parser);

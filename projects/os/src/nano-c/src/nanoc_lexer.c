@@ -41,21 +41,16 @@ static void nanoc_lexer_multi_line_comment(NanoC_Lexer *lexer)
 {
 	NanoC_Char c;
 	nanoc_lexer_advance(lexer);
-	c = nanoc_lexer_advance(lexer);
-	while(c)
+	for(;;)
 	{
-		/* TODO: Bug! - TDD */
 		c = nanoc_lexer_advance(lexer);
-		if(c == '*')
+		if(!c || (c == '*' && lexer->Ptr[1] == '/'))
 		{
-			c = nanoc_lexer_advance(lexer);
-			if(c == '/')
-			{
-				break;
-			}
+			break;
 		}
 	}
 
+	nanoc_lexer_advance(lexer);
 	nanoc_lexer_advance(lexer);
 }
 

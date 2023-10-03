@@ -17,6 +17,9 @@
 
 static i32r output;
 
+static const char *builtin_names =
+	"";
+
 static i32r test(i32r a, i32 *p)
 {
 	output = p[0];
@@ -35,11 +38,12 @@ static int test_positive_run(const char *source, int expected)
 		functions
 	};
 
-	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf));
+	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf),
+		builtin_names);
 	ret = nanoc_statement(&parser);
 	if(ret)
 	{
-		printf("parse error: %s\n", nanoc_status_message(ret));
+		printf("Parse error: %s\n", nanoc_status_message(ret));
 		return 0;
 	}
 
@@ -53,7 +57,7 @@ static int test_positive_run(const char *source, int expected)
 
 	if(output != expected)
 	{
-		printf("expected %d got %d\n", expected, output);
+		printf("Expected %d got %d\n", expected, output);
 		return 0;
 	}
 
@@ -64,7 +68,8 @@ static int test_negative_run(const char *source)
 {
 	NanoC_Parser parser;
 	u8 output_buf[1024];
-	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf));
+	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf),
+		builtin_names);
 	return nanoc_statement(&parser);
 }
 
@@ -116,8 +121,8 @@ void nanoc_test_run(void)
 		{ "test(0644);", 420 },
 		{ "test(0755);", 493 },
 		{ "test(0777);", 511 },
-		{ "{ let/* comment */i =/*comment*/79; test(i); }", 79 },
-		{ "{ let i = 0; // i = 10;\ni = 5; test(i); }", 5},
+		{ "{ int/* comment */i =/*comment*/79; test(i); }", 79 },
+		{ "{ int i = 0; // i = 10;\ni = 5; test(i); }", 5},
 
 		{ "test(2+(5*8)-9*(3-1)/6);", 39},
 		{ "test(7+1*9-0+43*89*3);", 11497},
@@ -129,16 +134,16 @@ void nanoc_test_run(void)
 
 		{ "test(0);", 0 },
 		{ "test(3 - 3);", 0 },
-		{ "{let x; x = 4; test(x - 4);}", 0 },
-		{ "{let x; x = 50; while(x) { x = x - 1; } test(x);}", 0 },
-		{ "{let x; x = 50; do { x = x - 1; } while(x); test(x); }", 0 },
-		{ "let x; x = 1; x = x * 10; x = x / 2; x = x % 3; test(x - 2);", 0 },
+		{ "{int x; x = 4; test(x - 4);}", 0 },
+		{ "{int x; x = 50; while(x) { x = x - 1; } test(x);}", 0 },
+		{ "{int x; x = 50; do { x = x - 1; } while(x); test(x); }", 0 },
+		{ "int x; x = 1; x = x * 10; x = x / 2; x = x % 3; test(x - 2);", 0 },
 		{ "test((2 + 2) * 2 - 8);", 0},
-		{ "{let x; x = 1; x = x | 4; test(x - 5); }", 0 },
-		{ "{let x; x = 1; x = x & 3; test(x - 1); }", 0 },
-		{ "{let x; x = 1; x = x ^ 3; test(x - 2); }", 0 },
+		{ "{int x; x = 1; x = x | 4; test(x - 5); }", 0 },
+		{ "{int x; x = 1; x = x & 3; test(x - 1); }", 0 },
+		{ "{int x; x = 1; x = x ^ 3; test(x - 2); }", 0 },
 
-		{ "{ let n = 2, t, c = 0, p;"
+		{ "{ int n = 2, t, c = 0, p;"
 		"while (n < 5000) {"
 			"t = 2;"
 			"p = 1;"
@@ -154,16 +159,16 @@ void nanoc_test_run(void)
 		"test(c); }", 669 },
 
 		/* 101 */
-		{ "{let c=0; do {} while(0); test(c); }", 0},
+		{ "{int c=0; do {} while(0); test(c); }", 0},
 
 		/* 102 */
-		{ "{let x, y = 0; x = 1; if ((x << 1) != 2) {y = 1;} test(y);}", 0 },
+		{ "{int x, y = 0; x = 1; if ((x << 1) != 2) {y = 1;} test(y);}", 0 },
 
 		/* 126 */
-		{ "{ let x; x = 3; x = !x; x = !x; x = ~x; x = -x; test(x); }", 2 },
+		{ "{ int x; x = 3; x = !x; x = !x; x = ~x; x = -x; test(x); }", 2 },
 
 		/* 127 */
-		{ "{ let x=0, c = 0;"
+		{ "{ int x=0, c = 0;"
 			"if(0) { x = 1; }"
 			"else if(0) { }"
 			"else {"
@@ -182,30 +187,30 @@ void nanoc_test_run(void)
 		{ "test(100 < 1);", 0 },
 
 		/* If */
-		{ "{let i=5; if(i == 5) { ++i; } test(i); }", 6 },
+		{ "{int i=5; if(i == 5) { ++i; } test(i); }", 6 },
 
-		{ "{let i = 5; i*=i;i*=2;i+=7;test(i);}", 57},
+		{ "{int i = 5; i*=i;i*=2;i+=7;test(i);}", 57},
 
-		{ "{ let v = test(0); test(v); }", 0 },
+		{ "{ int v = test(0); test(v); }", 0 },
 
 		/* Short circuit evaluation */
-		{ "{ let i = 0; test(1); let n = i && test(5); }", 1 },
-		{ "{ let i = 1; test(49); let n = i || test(9); }", 49 },
-		{ "{ let i = 1; test(12); let n = i && test(90); }", 90 },
-		{ "{ let i = 0; test(7); let n = i || test(9); }", 9 },
+		{ "{ int i = 0; test(1); int n = i && test(5); }", 1 },
+		{ "{ int i = 1; test(49); int n = i || test(9); }", 49 },
+		{ "{ int i = 1; test(12); int n = i && test(90); }", 90 },
+		{ "{ int i = 0; test(7); int n = i || test(9); }", 9 },
 
 		/* Loops */
-		{ "{let i=0,q=0; while(i < 100) { ++i; q += i; } test(q); }", 5050 },
+		{ "{int i=0,q=0; while(i < 100) { ++i; q += i; } test(q); }", 5050 },
 
 		/* Break and continue! */
-		{ "{let i=0;while(i<10){if(i==5){break;}++i;} test(i);}", 5 },
-		{ "{let i=2,n=14512891;while(i<=n/2){if(n%i==0){test(i);break;}++i;}}", 2371 },
+		{ "{int i=0;while(i<10){if(i==5){break;}++i;} test(i);}", 5 },
+		{ "{int i=2,n=14512891;while(i<=n/2){if(n%i==0){test(i);break;}++i;}}", 2371 },
 
 		{
 			"{\n"
-			"\tlet count = 0, i = 2;\n"
+			"\tint count = 0, i = 2;\n"
 			"\twhile(i < 10000) {\n"
-			"\t\tlet j = 2, isprime = 1;\n"
+			"\t\tint j = 2, isprime = 1;\n"
 			"\t\twhile(j <= i / 2) {\n"
 			"\t\t\tif(!(i % j)) {\n"
 			"\t\t\t\tisprime = 0;\n"
@@ -220,28 +225,28 @@ void nanoc_test_run(void)
 			"}\n",
 			1229 },
 
-		{ "{ let i = 42;do { ++i;break; ++i; } while(1); test(i); }", 43},
-		{ "{ let i = 0; loop { ++i; if(i == 10) {break;} } test(i); }", 10 },
-		{ "{let i = 0, n = 0; while(i < 50) { if(i%3==0){++i;continue;} ++n;++i;} test(n); }", 33},
-		{ "{let counter = 100; while(counter > 5) { --counter; } test(counter);}", 5 },
+		{ "{ int i = 42;do { ++i;break; ++i; } while(1); test(i); }", 43},
+		{ "{ int i = 0; loop { ++i; if(i == 10) {break;} } test(i); }", 10 },
+		{ "{int i = 0, n = 0; while(i < 50) { if(i%3==0){++i;continue;} ++n;++i;} test(n); }", 33},
+		{ "{int counter = 100; while(counter > 5) { --counter; } test(counter);}", 5 },
 
 		/* Scope */
-		{ "{ { let i = 0; } { let i = 5; } test(0); }\n", 0 },
-		{ "{ let i; { i = 7; { let var1 = 0; } } { let var1; ++i; } test(8); }\n", 8 },
+		{ "{ { int i = 0; } { int i = 5; } test(0); }\n", 0 },
+		{ "{ int i; { i = 7; { int var1 = 0; } } { int var1; ++i; } test(8); }\n", 8 },
 
 		/* For Loops - TDD!*/
-		{ "{ let sum = 0; for(let i = 1; i <= 100; ++i) { sum += i; } test(sum); }", 5050 },
-		{ "{ let b = 0; for(let i = 0, j = 10; i < j; ++i, --j) { b += j; } test(b); }", 40 },
-		{ "{let cnt; for(cnt = 0; cnt < 10; ) { cnt += 3; } test(cnt);}", 12},
-		{ "{ let i = 0; for(; i < 77; ) { ++i; } test(i); }", 77 },
-		{ "{ let cnt = 0; for(let neg = -5; neg >= -20; --neg) { ++cnt; } test(cnt); }", 16 },
-		{ "{let i; for(i = 0; ; ++i) { if(i*i == 121) {break;} } test(i);}", 11 },
-		{ "{ let counter = 0; for(;;) { if(counter >= 10) { break; } ++counter; continue; } test(counter); }", 10 },
-		{ "{ let sum = 0; for(let i = 0; i < 10; ++i) { if(i == 7) { continue; } sum += i; } test(sum); }", 38 },
-		{ "{ let q=0; for(let x = 0; x < 7; ++x) { for(let y = 0; y < 16; ++y) { q += x*y; } } test(q); }", 2520 },
+		{ "{ int sum = 0; for(int i = 1; i <= 100; ++i) { sum += i; } test(sum); }", 5050 },
+		{ "{ int b = 0; for(int i = 0, j = 10; i < j; ++i, --j) { b += j; } test(b); }", 40 },
+		{ "{int cnt; for(cnt = 0; cnt < 10; ) { cnt += 3; } test(cnt);}", 12},
+		{ "{ int i = 0; for(; i < 77; ) { ++i; } test(i); }", 77 },
+		{ "{ int cnt = 0; for(int neg = -5; neg >= -20; --neg) { ++cnt; } test(cnt); }", 16 },
+		{ "{int i; for(i = 0; ; ++i) { if(i*i == 121) {break;} } test(i);}", 11 },
+		{ "{ int counter = 0; for(;;) { if(counter >= 10) { break; } ++counter; continue; } test(counter); }", 10 },
+		{ "{ int sum = 0; for(int i = 0; i < 10; ++i) { if(i == 7) { continue; } sum += i; } test(sum); }", 38 },
+		{ "{ int q=0; for(int x = 0; x < 7; ++x) { for(int y = 0; y < 16; ++y) { q += x*y; } } test(q); }", 2520 },
 		{
 			"{\n"
-			"    let end = 79, i = 0, found = 0;\n"
+			"    int end = 79, i = 0, found = 0;\n"
 			"    for(found = 0, i = 0; i < end && !found; ++i) {\n"
 			"        if(i == 51) {\n"
 			"            found = 1;\n"
@@ -253,23 +258,27 @@ void nanoc_test_run(void)
 		},
 
 		/* Comma statements */
-		{ "{ let foo, bar; foo = 6, bar = foo + 1; test(bar); }", 7 },
-		{ "{ let foo, bar; foo = 1, ++foo, bar = foo; test(bar); }", 2 },
-		{ "{ let i = 1, j = 4; ++i, ++j; test(i + j); }", 7 },
+		{ "{ int foo, bar; foo = 6, bar = foo + 1; test(bar); }", 7 },
+		{ "{ int foo, bar; foo = 1, ++foo, bar = foo; test(bar); }", 2 },
+		{ "{ int i = 1, j = 4; ++i, ++j; test(i + j); }", 7 },
+
+		/* Comment bug */
+		{ "/**/test(1);", 1 },
+		{ "/****/test(5);", 5 },
 	};
 
 	static const char *tofail[] =
 	{
 		"test('\\xHG');",
 		"test('\\k');",
-		"let a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,\n"
+		"int a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,\n"
 			"aa,bb,cc,dd,ee,ff,gg,hh,ii,jj,kk,ll,mm,nn,oo;",
 		"test(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20);",
 		"{ le/* comment */t i; }",
-		"{ let i, i = 0; }",
+		"{ int i, i = 0; }",
 		"++bla;",
 		"?",
-		"{ let i = 0; if(i == 1) { let i = 6; } }",
+		"{ int i = 0; if(i == 1) { int i = 6; } }",
 		"test(bla); ",
 		"test(5+);",
 		"test(90;",
@@ -288,24 +297,24 @@ void nanoc_test_run(void)
 		"{while(0) { continue }}",
 		"blub; ",
 		"x = 0; ",
-		"let a = ; ",
-		"let b, a,; ",
-		"let b, a, c,",
-		"{ let a, c; a = 0 c = 6; }",
-		"{ let a, c; a = 0; c = 6 }",
-		"{ let a += 1; }",
-		"{ let i = 6, a = 7; a = i i = a; }",
-		"{ let i; i = 0,; }",
-		"{ let i; i = 0, ++i,; }",
-		"{ let i; i = 0, }",
-		"{ let i; i = 0, b; }",
-		"{ let i, ++i; }",
-		"{ let lol, lol; }",
+		"int a = ; ",
+		"int b, a,; ",
+		"int b, a, c,",
+		"{ int a, c; a = 0 c = 6; }",
+		"{ int a, c; a = 0; c = 6 }",
+		"{ int a += 1; }",
+		"{ int i = 6, a = 7; a = i i = a; }",
+		"{ int i; i = 0,; }",
+		"{ int i; i = 0, ++i,; }",
+		"{ int i; i = 0, }",
+		"{ int i; i = 0, b; }",
+		"{ int i, ++i; }",
+		"{ int lol, lol; }",
 		"{ for(;) {} }",
 		"{ for(; ++i) {} }",
-		"{ for(; let i) {} }",
-		"{ for(let i = 0; let j; ++i) {} }",
-		"{for(let i = 0; ; ++i) { if(i*i == 121) {break;} } test(i);}",
+		"{ for(; int i) {} }",
+		"{ for(int i = 0; int j; ++i) {} }",
+		"{for(int i = 0; ; ++i) { if(i*i == 121) {break;} } test(i);}",
 	};
 
 	size_t i;

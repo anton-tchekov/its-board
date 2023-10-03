@@ -12,6 +12,9 @@
 #include "nanoc_builtin.h"
 #include "nanoc_test.h"
 
+static const char *builtin_names =
+	"";
+
 static i32 debug_print(i32r a, i32 *p)
 {
 	printf("%d\n", p[0]);
@@ -49,7 +52,9 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	nanoc_parser_init(&parser, content, output_buf, sizeof(output_buf));
+	nanoc_parser_init(&parser, content, output_buf, sizeof(output_buf),
+		builtin_names);
+
 	nanoc_statement(&parser);
 	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
 	nanoc_disasm(parser.Output.Buffer, parser.Output.Pos);

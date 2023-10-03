@@ -30,12 +30,13 @@ static NanoC_Status insert_var(
 }
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
-	u8 *output, size_t output_size)
+	u8 *output, size_t output_size, const char *builtins)
 {
 	nanoc_tokenstream_init(&parser->TokenStream, source);
 	nanoc_output_init(&parser->Output, output, output_size);
 	nanoc_map_init(&parser->Variables, parser->VariableBuffer,
 		NANOC_VARIABLE_CAPACITY);
+	parser->Builtins = builtins;
 	parser->OpTop = 0;
 	parser->AndOrTop = 0;
 	parser->BreakNesting = 0;
