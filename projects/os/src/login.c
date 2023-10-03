@@ -91,7 +91,7 @@ static void login_enter(LoginManager *lm)
 
 	if(!strncmp(lm->Input, _password, lm->Length))
 	{
-		mode_set(MODE_SHELL);
+		mode_unlock();
 	}
 	else
 	{
@@ -122,4 +122,6 @@ void login_key(int key, int c)
 	{
 		login_init();
 	}
+
+	(void)key;
 }

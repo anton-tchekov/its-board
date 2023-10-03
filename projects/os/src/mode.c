@@ -49,6 +49,12 @@ void mode_set(int mode)
 	}
 }
 
+void mode_unlock(void)
+{
+	_mode = MODE_SHELL;
+	shell_open();
+}
+
 void mode_key(int key, int c)
 {
 	switch(_mode)

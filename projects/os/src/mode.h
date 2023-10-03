@@ -28,6 +28,11 @@ enum
 void mode_set(int mode);
 
 /**
+ * @brief Unlock the system
+ */
+void mode_unlock(void);
+
+/**
  * @brief Forward a key press to an app
  *
  * @param key Key code
