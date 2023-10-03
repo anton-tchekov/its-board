@@ -1,12 +1,22 @@
+/**
+ * @file    editor.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ */
+
 #include "editor.h"
 #include "line.h"
 #include "terminal.h"
 #include "keyboard.h"
 #include "util.h"
 #include "font.h"
+#include "mode.h"
+#include "overlay.h"
 #include "ctype_ext.h"
 #include "nanoc_lexer_identifier.h"
 #include "ff.h"
+#include "ffstatus.h"
 
 #include <stddef.h>
 #include <string.h>
@@ -17,6 +27,7 @@ static int _page_y, _page_x;
 static int _tab_size;
 static int _show_space;
 static int _syntax;
+static char _filename[60];
 
 static void _set(uint16_t *temp, int x, int y, int c)
 {
@@ -272,6 +283,7 @@ static void editor_render(void)
 	memset(temp, 0, sizeof(temp));
 	x = 0;
 	y = 0;
+	syntax_fg = 0;
 	syntax_end = 0;
 	len = line.Length;
 	_buf[len++] = '\n';
@@ -352,9 +364,52 @@ void editor_init(void)
 	line_init(&line, _buf, sizeof(_buf));
 }
 
+static void reset(void)
+{
+	mode_set(MODE_EDITOR);
+}
+
+static void editor_save_callback(int yes, char *path)
+{
+	FIL fp;
+	unsigned int written;
+	int result;
+
+	if(!yes)
+	{
+		reset();
+		return;
+	}
+
+	result = f_open(&fp, path, FA_CREATE_ALWAYS | FA_WRITE);
+	if(result)
+	{
+		alert(OVERLAY_ERROR, reset,
+			"Failed to open file for writing:\n"
+			"  %s\n"
+			"%s", path, f_status_str(result));
+		return;
+	}
+
+	result = f_write(&fp, line.Text, line.Length, &written);
+	if(result)
+	{
+		f_close(&fp);
+		alert(OVERLAY_ERROR, reset,
+			"Failed to write text buffer to file:\n"
+			"  %s\n"
+			"%s", path, f_status_str(result));
+		return;
+	}
+
+	f_close(&fp);
+	reset();
+}
+
 void editor_save(void)
 {
-
+	prompt(OVERLAY_NORMAL, editor_save_callback,
+		"Save As:", _filename);
 }
 
 static int check_text(const char *str, size_t len)
@@ -372,32 +427,49 @@ static int check_text(const char *str, size_t len)
 	return 0;
 }
 
-int editor_load(const char *path)
+static int iscfile(const char *path)
+{
+	size_t len = strlen(path);
+	return len > 2 && path[len - 1] == 'C' && path[len - 2] == '.';
+}
+
+void editor_load(const char *path)
 {
 	FIL fp;
-	u32 read = 0;
-	if(f_open(&fp, path, FA_READ))
+	unsigned int read = 0;
+	int result;
+
+	result = f_open(&fp, path, FA_READ);
+	if(result)
 	{
-		return 1;
+		alert(OVERLAY_ERROR, reset,
+			"Failed to open file for reading:\n"
+			"  %s\n"
+			"%s", path, f_status_str(result));
+		return;
 	}
 
-	if(f_read(&fp, _buf, sizeof(_buf), &read))
+	result = f_read(&fp, _buf, sizeof(_buf), &read);
+	if(result)
 	{
-		return 1;
+		alert(OVERLAY_ERROR, reset,
+			"Failed to read file contents:\n"
+			"  %s\n"
+			"%s", path, f_status_str(result));
+		f_close(&fp);
+		return;
 	}
 
-	if(f_close(&fp))
-	{
-		return 1;
-	}
-
+	f_close(&fp);
 	if(check_text(_buf, read))
 	{
-		return 1;
+		alert(OVERLAY_ERROR, reset,
+			"Editor cannot open binary file");
+		return;
 	}
 
+	_syntax = iscfile(path);
 	editor_open();
-	return 0;
 }
 
 void editor_key(int key, int c)

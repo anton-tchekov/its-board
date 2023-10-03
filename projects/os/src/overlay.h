@@ -9,9 +9,20 @@
 #ifndef __OVERLAY_H__
 #define __OVERLAY_H__
 
-void alert(const char *msg, void (*callback)(void));
-void confirm(const char *msg, void (*callback)(int));
-void prompt(const char *msg, void (*callback)(int, char *));
+enum
+{
+	OVERLAY_NORMAL,
+	OVERLAY_ERROR
+};
+
+void alert(int type, void (*callback)(void),
+	const char *msg, ...);
+
+void confirm(int type, void (*callback)(int),
+	const char *msg, ...);
+
+void prompt(int type, void (*callback)(int, char *),
+	const char *msg, ...);
 
 void overlay_key(int key, int c);
 

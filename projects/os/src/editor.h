@@ -11,6 +11,7 @@
 
 void editor_init(void);
 void editor_open(void);
+void editor_load(const char *path);
 void editor_key(int key, int c);
 
 #endif /* __EDITOR_H__ */

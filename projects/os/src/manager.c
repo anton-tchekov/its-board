@@ -548,4 +548,6 @@ void manager_key(int key, int c)
 	case MOD_CTRL | KEY_N: manager_new_file(); break;
 #endif
 	}
+
+	(void)c;
 }
