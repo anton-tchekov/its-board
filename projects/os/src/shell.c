@@ -157,6 +157,12 @@ void shell_init(void)
 	}
 }
 
+void shell_xy(int x, int y)
+{
+	this.X = x;
+	this.Y = y;
+}
+
 void shell_open(void)
 {
 	command_render();

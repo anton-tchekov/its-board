@@ -51,7 +51,8 @@
 		ip += 1; \
 	}
 
-NanoC_Status nanoc_interpreter_run(const u8 *program, NanoC_Builtins *builtins)
+NanoC_Status nanoc_interpreter_run(const u8 *program,
+	const NanoC_Builtins *builtins)
 {
 	i32 op_stack[NANOC_OP_STACK_SIZE];
 	i32 call_stack[NANOC_CALL_STACK_SIZE];

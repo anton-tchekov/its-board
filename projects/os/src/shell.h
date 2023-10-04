@@ -13,6 +13,7 @@ void shell_init(void);
 void shell_open(void);
 void shell_key(int key, int c);
 
+void shell_xy(int x, int y);
 void shell_cls(void);
 void shell_print(const char *s);
 void shell_char(int c);

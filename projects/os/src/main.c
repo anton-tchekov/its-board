@@ -20,6 +20,8 @@
 #include "manager.h"
 #include "test.h"
 
+#include <stdlib.h>
+
 static void os_key(void)
 {
 	/* TODO: Replace fake multitasking with
@@ -58,6 +60,7 @@ int main(void)
 	timer_init();
 	lcd_init(D2U_L2R, COLOR_BLACK);
 	ps2_init();
+	srand(314159265);
 
 	login_init();
 	shell_init();

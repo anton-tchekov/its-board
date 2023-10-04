@@ -14,12 +14,21 @@
 #include "nanoc_ctype.h"
 #include "util.h"
 #include "delay.h"
+#include "editor.h"
+#include "ctype_ext.h"
+#include "ff.h"
+#include "ffstatus.h"
 
 #include "stm32f4xx.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+static void _not_implemented(void)
+{
+	shell_print("Not Implemented\n");
+}
 
 static i32r _printn(i32r a, i32 *p)
 {
@@ -40,9 +49,8 @@ static i32r _printc(i32r a, i32 *p)
 
 static i32r _prints(i32r a, i32 *p)
 {
-	char buf[128];
-	sprintf(buf, "%s\n", (char *)p[0]);
-	shell_print(buf);
+	shell_print((char *)p[0]);
+	shell_char('\n');
 	return 0;
 	(void)a;
 }
@@ -191,26 +199,63 @@ static i32r _printf(i32r a, i32 *p)
 	return 0;
 }
 
+static i32r _mkfs(i32r a, i32 *p)
+{
+	u8 buf[512];
+	return f_mkfs((char *)p[0], 0, buf, sizeof(buf));
+	(void)a;
+}
+
 static i32r _mkdir(i32r a, i32 *p)
 {
+	int i;
+	for(i = 0; i < a; ++i)
+	{
+		int ret = f_mkdir((char *)p[i]);
+		if(ret)
+		{
+			return ret;
+		}
+	}
+
 	return 0;
+}
+
+static i32r _create(i32r a, i32 *p)
+{
+	FIL fp;
+	int ret = f_open(&fp, (char *)p[0], FA_CREATE_NEW);
+	if(ret) { return ret; }
+	return f_close(&fp);
+	(void)a;
 }
 
 static i32r _rm(i32r a, i32 *p)
 {
+	int i;
+	for(i = 0; i < a; ++i)
+	{
+		int ret = f_unlink((char *)p[i]);
+		if(ret)
+		{
+			return ret;
+		}
+	}
+
 	return 0;
 }
 
 static i32r _mv(i32r a, i32 *p)
 {
-	return 0;
+	return f_rename((char *)p[1], (char *)p[0]);
 	(void)a;
 }
 
 static i32r _cp(i32r a, i32 *p)
 {
+	_not_implemented();
 	return 0;
-	(void)a;
+	(void)a, (void)p;
 }
 
 static i32r _ls(i32r a, i32 *p)
@@ -221,7 +266,14 @@ static i32r _ls(i32r a, i32 *p)
 
 static i32r _edit(i32r a, i32 *p)
 {
+	editor_load((char *)p[0]);
 	return 0;
+	(void)a;
+}
+
+static i32r _fs_strerror(i32r a, i32 *p)
+{
+	return (i32r)f_status_str(p[0]);
 	(void)a;
 }
 
@@ -240,73 +292,130 @@ static i32r _srand(i32r a, i32 *p)
 
 static i32r _sprintf(i32r a, i32 *p)
 {
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
 }
 
 static i32r _snprintf(i32r a, i32 *p)
 {
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
 }
 
 static i32r _memcpy(i32r a, i32 *p)
 {
+	return (i32r)memcpy((void *)p[0], (void *)p[1], p[2]);
+	(void)a;
 }
 
 static i32r _memset(i32r a, i32 *p)
 {
-
+	return (i32r)memset((void *)p[0], p[1], p[2]);
+	(void)a;
 }
 
 static i32r _memcmp(i32r a, i32 *p)
 {
-
+	return (i32r)memcmp((void *)p[0], (void *)p[1], p[2]);
+	(void)a;
 }
 
 static i32r _memmove(i32r a, i32 *p)
 {
+	return (i32r)memmove((void *)p[0], (void *)p[1], p[2]);
+	(void)a;
 }
 
 static i32r _strlen(i32r a, i32 *p)
 {
+	return strlen((char *)p[0]);
+	(void)a;
 }
 
 static i32r _strnlen(i32r a, i32 *p)
 {
+	return strnlen((char *)p[0], p[1]);
+	(void)a;
 }
 
 static i32r _strcpy(i32r a, i32 *p)
 {
+	return (i32r)strcpy((char *)p[0], (char *)p[1]);
+	(void)a;
 }
 
 static i32r _strncpy(i32r a, i32 *p)
 {
+	return (i32r)strncpy((char *)p[0], (char *)p[1], p[2]);
+	(void)a;
 }
 
 static i32r _strcmp(i32r a, i32 *p)
 {
+	return strcmp((char *)p[0], (char *)p[1]);
+	(void)a;
 }
 
 static i32r _strncmp(i32r a, i32 *p)
 {
+	return strncmp((char *)p[0], (char *)p[1], p[2]);
+	(void)a;
 }
 
 static i32r _strchr(i32r a, i32 *p)
 {
+	return (i32r)strchr((char *)p[0], p[1]);
+	(void)a;
 }
 
 static i32r _clipget(i32r a, i32 *p)
 {
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
 }
 
 static i32r _clipsave(i32r a, i32 *p)
 {
+	_not_implemented();
+	return 0;
+	(void)a;
 }
 
 static i32r _isoct(i32r a, i32 *p)
 {
+	return is_octal(p[0]);
+	(void)a, (void)p;
 }
 
 static i32r _isbin(i32r a, i32 *p)
 {
+	return is_binary(p[0]);
+	(void)a;
+}
 
+static i32r _clear(i32r a, i32 *p)
+{
+	shell_cls();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _gotoxy(i32r a, i32 *p)
+{
+	shell_xy(p[0], p[1]);
+	return 0;
+	(void)a;
+}
+
+static i32r _hexdump(i32r a, i32 *p)
+{
+
+
+	return 0;
+	(void)a;
 }
 
 static i32r _help(i32r a, i32 *p);
@@ -317,6 +426,12 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "printc",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "prints",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "printf",        .NumArgs = 1, .IsVariadic = 1 },
+
+	{ .Name = "sprintf",       .NumArgs = 1, .IsVariadic = 1 },
+	{ .Name = "snprintf",      .NumArgs = 1, .IsVariadic = 1 },
+
+	{ .Name = "clear",         .NumArgs = 0, .IsVariadic = 0 },
+	{ .Name = "gotoxy",        .NumArgs = 2, .IsVariadic = 0 },
 
 	{ .Name = "about",         .NumArgs = 0, .IsVariadic = 0 },
 	{ .Name = "help",          .NumArgs = 0, .IsVariadic = 0 },
@@ -336,6 +451,8 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "isxdigit",      .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "tolower",       .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "toupper",       .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "isbin",         .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "isoct",         .NumArgs = 1, .IsVariadic = 0 },
 
 	{ .Name = "max",           .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "min",           .NumArgs = 2, .IsVariadic = 0 },
@@ -345,21 +462,33 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "rand",          .NumArgs = 0, .IsVariadic = 0 },
 	{ .Name = "srand",         .NumArgs = 1, .IsVariadic = 0 },
 
+	{ .Name = "mkfs",          .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "mkdir",         .NumArgs = 1, .IsVariadic = 1 },
+	{ .Name = "create",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "rm",            .NumArgs = 1, .IsVariadic = 1 },
 	{ .Name = "mv",            .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "cp",            .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "ls",            .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "edit",          .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "fs_strerror",   .NumArgs = 1, .IsVariadic = 0 },
+
+	{ .Name = "memcpy",        .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "memset",        .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "memcmp",        .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "memmove",       .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "strlen",        .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "strnlen",       .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "strcpy",        .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "strncpy",       .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "strcmp",        .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "strncmp",       .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "strchr",        .NumArgs = 2, .IsVariadic = 0 },
+
+	{ .Name = "clipget",       .NumArgs = 0, .IsVariadic = 0 },
+	{ .Name = "clipsave",      .NumArgs = 1, .IsVariadic = 0 },
+
+	{ .Name = "hexdump",       .NumArgs = 2, .IsVariadic = 0 },
 };
-
-static i32r _help(i32r a, i32 *p)
-{
-
-
-	return 0;
-	(void)a, (void)p;
-}
 
 static const NanoC_ParserBuiltins parser_builtins =
 {
@@ -367,55 +496,106 @@ static const NanoC_ParserBuiltins parser_builtins =
 	.Table = parser_builtins_data
 };
 
+#define HELP_COLS      4
+#define HELP_COLWIDTH 15
+
+static i32r _help(i32r a, i32 *p)
+{
+	int i;
+	char buf[16];
+	const NanoC_ParserBuiltin *builtin = parser_builtins_data;
+
+	for(i = 0; i < ARRLEN(parser_builtins_data); ++i, ++builtin)
+	{
+		buf[0] = builtin->IsVariadic ? '>' : ' ';
+		buf[1] = builtin->NumArgs + '0';
+		buf[2] = ' ';
+		strcpy(buf + 3, builtin->Name);
+		shell_xy((i % HELP_COLS) * HELP_COLWIDTH, i / HELP_COLS + 1);
+		shell_print(buf);
+	}
+
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r (*const functions[])(i32r, i32 *) =
+{
+	_printn,
+	_printc,
+	_prints,
+	_printf,
+
+	_sprintf,
+	_snprintf,
+
+	_clear,
+	_gotoxy,
+
+	_about,
+	_help,
+
+	_delay_ms,
+	_pin_high,
+	_pin_low,
+	_pin_toggle,
+
+	nanoc_isupper,
+	nanoc_islower,
+	nanoc_isdigit,
+	nanoc_isalpha,
+	nanoc_isalnum,
+	nanoc_isprint,
+	nanoc_isspace,
+	nanoc_isxdigit,
+	nanoc_tolower,
+	nanoc_toupper,
+	_isbin,
+	_isoct,
+
+	_max,
+	_min,
+	_abs,
+	_sign,
+
+	_rand,
+	_srand,
+
+	_mkfs,
+	_mkdir,
+	_create,
+	_rm,
+	_mv,
+	_cp,
+	_ls,
+	_edit,
+	_fs_strerror,
+
+	_memcpy,
+	_memset,
+	_memcmp,
+	_memmove,
+	_strlen,
+	_strnlen,
+	_strcpy,
+	_strncpy,
+	_strcmp,
+	_strncmp,
+	_strchr,
+
+	_clipget,
+	_clipsave,
+
+	_hexdump,
+};
+
+static const NanoC_Builtins builtins = { ARRLEN(functions), functions };
+
 static void compile(const char *src, int length)
 {
 	NanoC_Status status;
 	NanoC_Parser parser;
 	u8 output_buf[1024];
-
-	static i32r (*functions[])(i32r, i32 *) =
-	{
-		_printn,
-		_printc,
-		_prints,
-		_printf,
-
-		_about,
-		_help,
-
-		_delay_ms,
-		_pin_high,
-		_pin_low,
-		_pin_toggle,
-
-		nanoc_isupper,
-		nanoc_islower,
-		nanoc_isdigit,
-		nanoc_isalpha,
-		nanoc_isalnum,
-		nanoc_isprint,
-		nanoc_isspace,
-		nanoc_isxdigit,
-		nanoc_tolower,
-		nanoc_toupper,
-
-		_max,
-		_min,
-		_abs,
-		_sign,
-
-		_rand,
-		_srand,
-
-		_mkdir,
-		_rm,
-		_mv,
-		_cp,
-		_ls,
-		_edit,
-	};
-
-	NanoC_Builtins builtins = { ARRLEN(functions), functions };
 
 	nanoc_parser_init(&parser, src, output_buf, sizeof(output_buf),
 		&parser_builtins);
