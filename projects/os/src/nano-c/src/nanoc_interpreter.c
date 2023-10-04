@@ -174,6 +174,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program, NanoC_Builtins *builtins)
 
 			if(addr < 0)
 			{
+				/* TODO: Possible out ouf bounds funcitons call? */
 				CHECK_OVERFLOW(1);
 				op_stack[op] = builtins->Functions[-addr - 1]
 					(args, call_stack + sp + 2);
