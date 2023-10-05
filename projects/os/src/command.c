@@ -327,7 +327,6 @@ static i32r _cp(i32r a, i32 *p)
 
 static void fserror(int ret)
 {
-	shell_print("FS Error: ");
 	shell_print(f_status_str(ret));
 	shell_char('\n');
 }
@@ -369,6 +368,8 @@ static i32r _ls(i32r a, i32 *p)
 		{
 			sprintf(buf, "%10u %s\n", fno.fsize, fno.fname);
 		}
+
+		shell_print(buf);
 
 		++line;
 		if(line == 19)
@@ -635,6 +636,83 @@ static i32r _boolstr(i32r a, i32 *p)
 	(void)a;
 }
 
+static i32r _fopen(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _fclose(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _fread(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _fwrite(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _fseek(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _fsync(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _ftruncate(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _fexpand(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _opendir(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _closedir(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _readdir(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
 static i32r _help(i32r a, i32 *p);
 
 static const NanoC_ParserBuiltin parser_builtins_data[] =
@@ -651,7 +729,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "gotoxy",        .NumArgs = 2, .IsVariadic = 0 },
 
 	{ .Name = "about",         .NumArgs = 0, .IsVariadic = 0 },
-	{ .Name = "help",          .NumArgs = 0, .IsVariadic = 0 },
+	{ .Name = "help",          .NumArgs = 0, .IsVariadic = 1 },
 
 	{ .Name = "delay_ms",      .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "pin_high",      .NumArgs = 2, .IsVariadic = 0 },
@@ -721,6 +799,19 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "strb",          .NumArgs = 2, .IsVariadic = 0 },
 
 	{ .Name = "boolstr",       .NumArgs = 1, .IsVariadic = 0 },
+
+	{ .Name = "fopen",         .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "fopen",         .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "fclose",        .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "fread",         .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "fwrite",        .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "fseek",         .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "fsync",         .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "ftruncate",     .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "fexpand",       .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "opendir",       .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "closedir",      .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "readdir",       .NumArgs = 2, .IsVariadic = 0 },
 };
 
 static const NanoC_ParserBuiltins parser_builtins =
@@ -731,25 +822,43 @@ static const NanoC_ParserBuiltins parser_builtins =
 
 #define HELP_COLS      4
 #define HELP_COLWIDTH 15
+#define HELP_HEIGHT   19
 
 static i32r _help(i32r a, i32 *p)
 {
-	int i;
+	int n = 0, i = 0, end;
 	char buf[16];
 	const NanoC_ParserBuiltin *builtin = parser_builtins_data;
 
-	for(i = 0; i < (int)ARRLEN(parser_builtins_data); ++i, ++builtin)
+	if(a > 1)
+	{
+		shell_print("Invalid arguments\n");
+		return 1;
+	}
+
+	if(a == 1)
+	{
+		i = p[0];
+		builtin += i;
+	}
+
+	end = i + HELP_COLS * HELP_HEIGHT;
+	if(end > (int)ARRLEN(parser_builtins_data))
+	{
+		end = (int)ARRLEN(parser_builtins_data);
+	}
+
+	for(; i < end; ++i, ++builtin, ++n)
 	{
 		buf[0] = builtin->IsVariadic ? '>' : ' ';
 		buf[1] = builtin->NumArgs + '0';
 		buf[2] = ' ';
 		strcpy(buf + 3, builtin->Name);
-		shell_xy((i % HELP_COLS) * HELP_COLWIDTH, i / HELP_COLS + 1);
+		shell_xy((n % HELP_COLS) * HELP_COLWIDTH, n / HELP_COLS + 1);
 		shell_print(buf);
 	}
 
 	return 0;
-	(void)a, (void)p;
 }
 
 static i32r (*const functions[])(i32r, i32 *) =
@@ -835,22 +944,99 @@ static i32r (*const functions[])(i32r, i32 *) =
 	_strb,
 
 	_boolstr,
+
+	_fopen,
+	_fclose,
+	_fread,
+	_fwrite,
+	_fseek,
+	_fsync,
+	_ftruncate,
+	_fexpand,
+	_opendir,
+	_closedir,
+	_readdir,
 };
 
 static const NanoC_Builtins builtins = { ARRLEN(functions), functions };
+
+#define ROMSTART 0x08000000
+#define ROMEND   (ROMSTART + 2048 * 1024)
+
+#define RAMSTART 0x20000000
+#define RAMEND   (RAMSTART + 256 * 1024)
+
+static const char *addrmem(size_t addr)
+{
+	if(addr >= ROMSTART && addr < ROMEND)
+	{
+		return "ROM";
+	}
+
+	if(addr >= RAMSTART && addr < RAMEND)
+	{
+		return "RAM";
+	}
+
+	return NULL;
+}
+
+#define MAX_NT_SEARCH 128
+
+static int isstring(const char *ptr)
+{
+	const char *nt = memchr(ptr, 0, MAX_NT_SEARCH);
+	if(nt == NULL)
+	{
+		return 0;
+	}
+
+	while(ptr < nt)
+	{
+		if(!isprint(*ptr++))
+		{
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+static void printaddr(size_t addr)
+{
+	const char *mem = addrmem(addr);
+	const char *ptr = (const char *)addr;
+	if(!mem)
+	{
+		return;
+	}
+
+	if(!isstring(ptr))
+	{
+		return;
+	}
+
+	shell_char('[');
+	shell_print(mem);
+	shell_print("]: \"");
+	shell_print(ptr);
+	shell_print("\"\n");
+}
 
 static void compile(const char *src, int length)
 {
 	NanoC_Status status;
 	NanoC_Parser parser;
-	u8 output_buf[1024];
+	u8 output_buf[256];
+	char strings[256];
+	char buf[128];
+	size_t rv = 0;
 
-	nanoc_parser_init(&parser, src, output_buf, sizeof(output_buf),
-		&parser_builtins);
+	nanoc_parser_init(&parser, src, strings, output_buf,
+		sizeof(output_buf), &parser_builtins);
 	status = nanoc_statement(&parser);
 	if(status)
 	{
-		char buf[128];
 		sprintf(buf, "\nParse error: %s\n", nanoc_status_message(status));
 		shell_print(buf);
 		return;
@@ -858,10 +1044,9 @@ static void compile(const char *src, int length)
 
 	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
 
-	status = nanoc_interpreter_run(parser.Output.Buffer, &builtins);
+	status = nanoc_interpreter_run(parser.Output.Buffer, &builtins, &rv);
 	if(status)
 	{
-		char buf[128];
 		sprintf(buf, "\nRuntime error: %s\n",
 			nanoc_status_message(status));
 
@@ -869,7 +1054,9 @@ static void compile(const char *src, int length)
 		return;
 	}
 
-	shell_print("\n\nREADY.\n");
+	sprintf(buf, "\n\nREADY (%d / 0x%08x)\n", rv, rv);
+	shell_print(buf);
+	printaddr(rv);
 	(void)length;
 }
 

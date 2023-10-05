@@ -174,3 +174,17 @@ int memcmp(const void *ptr1, const void *ptr2, size_t count)
 
 	return 0;
 }
+
+const void *memchr(const void *ptr, int value, size_t count)
+{
+	uint8_t *p, *end;
+	for(p = (uint8_t *)ptr, end = p + count; p < end; ++p)
+	{
+		if(*p == value)
+		{
+			return p;
+		}
+	}
+
+	return NULL;
+}

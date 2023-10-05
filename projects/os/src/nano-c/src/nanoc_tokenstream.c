@@ -6,10 +6,11 @@ static inline u8r wrap_size(u8r idx)
 	return idx % NANOC_TOKEN_BUFFER_SIZE;
 }
 
-void nanoc_tokenstream_init(NanoC_TokenStream *ts, const char *source)
+void nanoc_tokenstream_init(NanoC_TokenStream *ts, const char *source,
+	char *strings)
 {
 	u8r i;
-	nanoc_lexer_init(&ts->Lexer, source);
+	nanoc_lexer_init(&ts->Lexer, source, strings);
 	ts->ReadIndex = 0;
 	for(i = 0; i < NANOC_TOKEN_BUFFER_SIZE; ++i)
 	{

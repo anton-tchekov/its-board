@@ -9,6 +9,6 @@
 #define NANOC_CALL_STACK_SIZE  512
 
 NanoC_Status nanoc_interpreter_run(const u8 *program,
-	const NanoC_Builtins *builtins);
+	const NanoC_Builtins *builtins, size_t *rv);
 
 #endif /* __NANOC_INTERPRETER_H__ */

@@ -136,6 +136,7 @@ void shell_key(int key, int c)
 	case KEY_END:               line_ctrl_end(line);        break;
 	case MOD_SHIFT | KEY_END:   line_ctrl_shift_end(line);  break;
 	case KEY_RETURN:            key_enter(line);            break;
+	case MOD_CTRL | KEY_RETURN: shell_cls();                break;
 	default:
 		if(isprint(c))
 		{

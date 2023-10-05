@@ -52,7 +52,7 @@
 	}
 
 NanoC_Status nanoc_interpreter_run(const u8 *program,
-	const NanoC_Builtins *builtins)
+	const NanoC_Builtins *builtins, size_t *rv)
 {
 	i32 op_stack[NANOC_OP_STACK_SIZE];
 	i32 call_stack[NANOC_CALL_STACK_SIZE];
@@ -67,6 +67,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 		switch(program[ip])
 		{
 		case NANOC_INSTR_HALT:
+			*rv = op_stack[0];
 			return NANOC_STATUS_SUCCESS;
 
 		case NANOC_INSTR_PUSHI8:

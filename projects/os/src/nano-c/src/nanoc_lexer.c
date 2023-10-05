@@ -87,12 +87,13 @@ static NanoC_Bool nanoc_lexer_skip(NanoC_Lexer *lexer)
 	return 0;
 }
 
-void nanoc_lexer_init(NanoC_Lexer *lexer, const char *src)
+void nanoc_lexer_init(NanoC_Lexer *lexer, const char *src, char *strings)
 {
 	lexer->Pos.Col = 0;
 	lexer->Pos.Row = 1;
 	lexer->Ptr = src;
 	lexer->LineBegin = src;
+	lexer->Strings = strings;
 	nanoc_lexer_read(lexer);
 }
 

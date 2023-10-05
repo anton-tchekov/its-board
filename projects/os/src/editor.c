@@ -468,6 +468,7 @@ void editor_load(const char *path)
 		return;
 	}
 
+	strcpy(_filename, path);
 	_syntax = iscfile(path);
 	editor_open();
 }

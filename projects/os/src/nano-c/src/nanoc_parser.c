@@ -30,9 +30,10 @@ static NanoC_Status insert_var(
 }
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
-	u8 *output, size_t output_size, const NanoC_ParserBuiltins *builtins)
+	char *strings, u8 *output, size_t output_size,
+	const NanoC_ParserBuiltins *builtins)
 {
-	nanoc_tokenstream_init(&parser->TokenStream, source);
+	nanoc_tokenstream_init(&parser->TokenStream, source, strings);
 	nanoc_output_init(&parser->Output, output, output_size);
 	nanoc_map_init(&parser->Variables, parser->VariableBuffer,
 		NANOC_VARIABLE_CAPACITY);

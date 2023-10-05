@@ -89,6 +89,7 @@ NanoC_Bool nanoc_lexer_char(NanoC_Lexer *lexer, NanoC_Token *token)
 
 NanoC_Bool nanoc_lexer_string(NanoC_Lexer *lexer, NanoC_Token *token)
 {
+	char *strs, *start;
 	const char *p;
 	int c, v;
 
@@ -97,6 +98,9 @@ NanoC_Bool nanoc_lexer_string(NanoC_Lexer *lexer, NanoC_Token *token)
 	{
 		return 0;
 	}
+
+	strs = lexer->Strings;
+	start = strs;
 
 	++p;
 	while((c = *p) != '\"')
@@ -122,11 +126,19 @@ NanoC_Bool nanoc_lexer_string(NanoC_Lexer *lexer, NanoC_Token *token)
 		{
 			return 0;
 		}
+
+		*strs++ = v;
 	}
+
+	*strs++ = '\0';
+	lexer->Strings = strs;
 
 	++p;
 	nanoc_lexer_forward(lexer, p);
-	token->Type = NANOC_TT_STRING;
+	token->Type = NANOC_TT_INTEGER;
+
+	/* TODO: Extremely cursed, non portable undefined behavior, but works! */
+	token->Value.Integer = (int)start;
 	token->Length = p - token->Ptr;
 	return 1;
 }

@@ -63,7 +63,8 @@ typedef struct NANOC_PARSER
 } NanoC_Parser;
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
-	u8 *output, size_t output_size, const NanoC_ParserBuiltins *builtins);
+	char *strings, u8 *output, size_t output_size,
+	const NanoC_ParserBuiltins *builtins);
 
 NanoC_Status nanoc_fn_call(NanoC_Parser *parser);
 NanoC_Status nanoc_statement(NanoC_Parser *parser);

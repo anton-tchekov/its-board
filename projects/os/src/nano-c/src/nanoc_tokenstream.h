@@ -18,7 +18,8 @@ typedef struct NANOC_TOKEN_STREAM
  * @param ts Token Stream
  * @param source Source code
  */
-void nanoc_tokenstream_init(NanoC_TokenStream *ts, const char *source);
+void nanoc_tokenstream_init(NanoC_TokenStream *ts, const char *source,
+	char *strings);
 
 /**
  * @brief Get a token from the buffer
