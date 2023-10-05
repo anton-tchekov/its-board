@@ -165,38 +165,53 @@ static i32r _sign(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _printf(i32r a, i32 *p)
+static int abomination(int count, char *buf, size_t n, const char *format, i32 *p)
 {
-	char buf[128];
-	char *format = (char *)p[0];
-
 	/* couldn't find a better way to do this */
-	switch(a)
+	switch(count)
 	{
-		case 0: sprintf(buf, format);
+		case 0: snprintf(buf, n, format);
 			break;
-		case 1: sprintf(buf, format, p[1]);
+		case 1: snprintf(buf, n, format, p[0]);
 			break;
-		case 2: sprintf(buf, format, p[1], p[2]);
+		case 2: snprintf(buf, n, format, p[0], p[1]);
 			break;
-		case 3: sprintf(buf, format, p[1], p[2], p[3]);
+		case 3: snprintf(buf, n, format, p[0], p[1], p[2]);
 			break;
-		case 4: sprintf(buf, format, p[1], p[2], p[3], p[4]);
+		case 4: snprintf(buf, n, format, p[0], p[1], p[2], p[3]);
 			break;
-		case 5: sprintf(buf, format, p[1], p[2], p[3], p[4], p[5]);
+		case 5: snprintf(buf, n, format, p[0], p[1], p[2], p[3], p[4]);
 			break;
-		case 6: sprintf(buf, format, p[1], p[2], p[3], p[4], p[5], p[6]);
-			break;
-		default: strcpy(buf,
-			"nobody will ever call printf with\n"
-			"more than like 6 parameters, right?\n"
-			"\n"
-			"~ Anton, 2023\n");
-			break;
+		case 6: return snprintf(buf, n, format, p[0], p[1], p[2], p[3], p[4], p[5]);;
 	}
 
+	return -1;
+}
+
+static i32r _printf(i32r a, i32 *p)
+{
+	int ret;
+	char buf[512];
+	if(a > 6)
+	{
+		shell_print("nobody will ever call printf with\n"
+			"more than like 6 parameters, right?\n");
+		return -1;
+	}
+
+	ret = abomination(a, buf, sizeof(buf), (char *)p[0], p + 1);
 	shell_print(buf);
-	return 0;
+	return ret;
+}
+
+static i32r _sprintf(i32r a, i32 *p)
+{
+	return abomination(a, (char *)p[0], 0xFFFFFF, (char *)p[1], p + 2);
+}
+
+static i32r _snprintf(i32r a, i32 *p)
+{
+	return abomination(a, (char *)p[0], p[1], (char *)p[2], p + 3);;
 }
 
 static i32r _mkfs(i32r a, i32 *p)
@@ -258,8 +273,65 @@ static i32r _cp(i32r a, i32 *p)
 	(void)a, (void)p;
 }
 
+static void fserror(int ret)
+{
+	shell_print("FS Error: ");
+	shell_print(f_status_str(ret));
+	shell_char('\n');
+}
+
 static i32r _ls(i32r a, i32 *p)
 {
+	int line = 0;
+	int ret;
+	DIR dp;
+	FILINFO fno;
+	char buf[32];
+
+	ret = f_opendir(&dp, (char *)p[0]);
+	if(ret)
+	{
+		fserror(ret);
+		return 1;
+	}
+
+	for(;;)
+	{
+		ret = f_readdir(&dp, &fno);
+		if(ret)
+		{
+			fserror(ret);
+			return ret;
+		}
+
+		if(fno.fname[0] == 0)
+		{
+			break;
+		}
+
+		if(fno.fattrib & AM_DIR)
+		{
+			sprintf(buf, "   <DIR>   %s\n", fno.fname);
+		}
+		else
+		{
+			sprintf(buf, "%10u %s\n", fno.fsize, fno.fname);
+		}
+
+		++line;
+		if(line == 19)
+		{
+			shell_xy(30, 1);
+		}
+	}
+
+	ret = f_closedir(&dp);
+	if(ret)
+	{
+		fserror(ret);
+		return ret;
+	}
+
 	return 0;
 	(void)a;
 }
@@ -288,20 +360,6 @@ static i32r _srand(i32r a, i32 *p)
 	srand(p[0]);
 	return 0;
 	(void)a;
-}
-
-static i32r _sprintf(i32r a, i32 *p)
-{
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
-}
-
-static i32r _snprintf(i32r a, i32 *p)
-{
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
 }
 
 static i32r _memcpy(i32r a, i32 *p)
@@ -381,7 +439,7 @@ static i32r _clipsave(i32r a, i32 *p)
 {
 	_not_implemented();
 	return 0;
-	(void)a;
+	(void)a, (void)p;
 }
 
 static i32r _isoct(i32r a, i32 *p)
@@ -410,13 +468,116 @@ static i32r _gotoxy(i32r a, i32 *p)
 	(void)a;
 }
 
+static inline int peek(u32 addr)
+{
+	return *(u8 *)addr;
+}
+
+static void hexdump(u32 start, u32 len)
+{
+	u32 s = start & ~7;
+	u32 end = start + len;
+	u32 e = (end + 7) & ~7;
+	char buf[16];
+
+	shell_print("\n             +0 +1 +2 +3 +4 +5 +6 +7\n");
+	for(; s < e; s += 8)
+	{
+		u32 cs;
+		u32 ce = s + 8;
+
+		sprintf(buf, "0x%08x:  ", s);
+		shell_print(buf);
+		for(cs = s; cs < ce; ++cs)
+		{
+			if(cs < start || cs >= end)
+			{
+				shell_print("   ");
+			}
+			else
+			{
+				sprintf(buf, "%02x ", peek(cs));
+				shell_print(buf);
+			}
+		}
+
+		shell_print(" [ ");
+		for(cs = s; cs < ce; ++cs)
+		{
+			if(cs < start || cs >= end)
+			{
+				shell_char(' ');
+			}
+			else
+			{
+				int val = peek(cs);
+				sprintf(buf, "%c", isprint(val) ? val : '.');
+				shell_print(buf);
+			}
+		}
+
+		shell_print(" ]\n");
+	}
+}
+
 static i32r _hexdump(i32r a, i32 *p)
 {
-
-
+	hexdump(p[0], p[1]);
 	return 0;
 	(void)a;
 }
+
+static i32r _ldr(i32r a, i32 *p)
+{
+	return *(u32 *)p[0];
+	(void)a;
+}
+
+static i32r _ldrh(i32r a, i32 *p)
+{
+	return *(u16 *)p[0];
+	(void)a;
+}
+
+static i32r _ldrsh(i32r a, i32 *p)
+{
+	return *(i16 *)p[0];
+	(void)a;
+}
+
+static i32r _ldrb(i32r a, i32 *p)
+{
+	return *(u8 *)p[0];
+	(void)a;
+}
+
+static i32r _ldrsb(i32r a, i32 *p)
+{
+	return *(i8 *)p[0];
+	(void)a;
+}
+
+static i32r _str(i32r a, i32 *p)
+{
+	*(u32 *)p[0] = p[1];
+	return p[1];
+	(void)a;
+}
+
+static i32r _strh(i32r a, i32 *p)
+{
+	*(u16 *)p[0] = p[1];
+	return p[1] & 0xFFFF;
+	(void)a;
+}
+
+static i32r _strb(i32r a, i32 *p)
+{
+	*(u8 *)p[0] = p[1];
+	return p[1] & 0xFF;
+	(void)a;
+}
+
 
 static i32r _help(i32r a, i32 *p);
 
@@ -488,6 +649,16 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "clipsave",      .NumArgs = 1, .IsVariadic = 0 },
 
 	{ .Name = "hexdump",       .NumArgs = 2, .IsVariadic = 0 },
+
+	{ .Name = "ldr",           .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "ldrh",          .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "ldrsh",         .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "ldrb",          .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "ldrsb",         .NumArgs = 1, .IsVariadic = 0 },
+
+	{ .Name = "str",           .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "strh",          .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "strb",          .NumArgs = 2, .IsVariadic = 0 },
 };
 
 static const NanoC_ParserBuiltins parser_builtins =
@@ -505,7 +676,7 @@ static i32r _help(i32r a, i32 *p)
 	char buf[16];
 	const NanoC_ParserBuiltin *builtin = parser_builtins_data;
 
-	for(i = 0; i < ARRLEN(parser_builtins_data); ++i, ++builtin)
+	for(i = 0; i < (int)ARRLEN(parser_builtins_data); ++i, ++builtin)
 	{
 		buf[0] = builtin->IsVariadic ? '>' : ' ';
 		buf[1] = builtin->NumArgs + '0';
@@ -587,6 +758,15 @@ static i32r (*const functions[])(i32r, i32 *) =
 	_clipsave,
 
 	_hexdump,
+
+	_ldr,
+	_ldrh,
+	_ldrsh,
+	_ldrb,
+	_ldrsb,
+	_str,
+	_strh,
+	_strb,
 };
 
 static const NanoC_Builtins builtins = { ARRLEN(functions), functions };
@@ -622,6 +802,7 @@ static void compile(const char *src, int length)
 	}
 
 	shell_print("\n\nREADY.\n");
+	(void)length;
 }
 
 void command_run(const char *cmd, int len)

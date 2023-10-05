@@ -89,7 +89,7 @@ static int print_dec(char *buf, int max, unsigned int value)
 
 static int print_hex(char *buf, int max, unsigned int value)
 {
-	const char *h = "0123456789abcdef";
+	const char *h = "0123456789ABCDEF";
 	int i = 0;
 	if(value == 0)
 	{
