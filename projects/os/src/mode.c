@@ -15,7 +15,7 @@
 #include "test.h"
 #include "overlay.h"
 
-static u8 _mode = MODE_LOGIN;
+static u8 _mode;
 
 void mode_set(int mode)
 {

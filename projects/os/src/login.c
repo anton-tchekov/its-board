@@ -51,19 +51,19 @@ static void println(int x, int y, int style, const char *s)
 	}
 }
 
-void login_open(void)
-{
-	terminal_clear();
-	login_init();
-}
-
-void login_init(void)
+static void login_redraw(void)
 {
 	_lm.State = LOGIN_STATE_INPUT;
 	_lm.Length = 0;
 	println(0, OFFSET_Y, NORMAL, "Password:");
 	terminal_set(OFFSET_X, OFFSET_Y, ' ' | INVERTED);
 	println(0, OFFSET_Y + 1, NORMAL, "");
+}
+
+void login_open(void)
+{
+	terminal_clear();
+	login_redraw();
 }
 
 static void login_char(LoginManager *lm, int c)
@@ -120,7 +120,7 @@ void login_key(int key, int c)
 	}
 	else if(_lm.State == LOGIN_STATE_ERROR)
 	{
-		login_init();
+		login_redraw();
 	}
 
 	(void)key;

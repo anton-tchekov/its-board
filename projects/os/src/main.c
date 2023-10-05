@@ -62,11 +62,11 @@ int main(void)
 	ps2_init();
 	srand(314159265);
 
-	login_init();
 	shell_init();
 	editor_init();
 	manager_init();
 
+	mode_unlock();
 	for(;;)
 	{
 		os_key();
