@@ -16,6 +16,7 @@
 #include "delay.h"
 #include "editor.h"
 #include "ctype_ext.h"
+#include "clipboard.h"
 #include "ff.h"
 #include "ffstatus.h"
 
@@ -24,6 +25,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+static FATFS _fatfs[2];
 
 static void _not_implemented(void)
 {
@@ -77,11 +80,10 @@ static GPIO_TypeDef *_getport(int chr)
 {
 	switch(chr)
 	{
-	case 'D':
-		return GPIOD;
-
-	case 'E':
-		return GPIOE;
+	case 'D': return GPIOD;
+	case 'E': return GPIOE;
+	case 'F': return GPIOF;
+	case 'G': return GPIOG;
 	}
 
 	return NULL;
@@ -129,8 +131,17 @@ static i32r _pin_toggle(i32r a, i32 *p)
 	GPIO_TypeDef *gpio = _getport(p[0]);
 	int port = p[1];
 	if(check_pin_fn(gpio, port)) { return 1; }
-	gpio->ODR ^= (1 << p[1]);
+	gpio->ODR ^= (1 << port);
 	return 0;
+	(void)a;
+}
+
+static i32r _pin_get(i32r a, i32 *p)
+{
+	GPIO_TypeDef *gpio = _getport(p[0]);
+	int port = p[1];
+	if(check_pin_fn(gpio, port)) { return 1; }
+	return (gpio->IDR >> port) & 1;
 	(void)a;
 }
 
@@ -162,6 +173,21 @@ static i32r _sign(i32r a, i32 *p)
 	}
 
 	return (v < 0) ? -1 : 1;
+	(void)a;
+}
+
+static i32r _pow(i32r a, i32 *p)
+{
+	int base = p[0];
+	int exp = p[1];
+	int res = 1;
+	while(exp > 0)
+	{
+		res *= base;
+		--exp;
+	}
+
+	return res;
 	(void)a;
 }
 
@@ -214,10 +240,36 @@ static i32r _snprintf(i32r a, i32 *p)
 	return abomination(a, (char *)p[0], p[1], (char *)p[2], p + 3);;
 }
 
+static int drive_valid(int drive)
+{
+	return drive >= 0 && drive <= 1;
+}
+
 static i32r _mkfs(i32r a, i32 *p)
 {
+	int drive = p[0];
+	if(!drive_valid(drive)) { return FR_INVALID_DRIVE; }
+	char path[3] = { drive + '0', ':', '\0' };
 	u8 buf[512];
-	return f_mkfs((char *)p[0], 0, buf, sizeof(buf));
+	return f_mkfs(path, 0, buf, sizeof(buf));
+	(void)a;
+}
+
+static i32r _mount(i32r a, i32 *p)
+{
+	int drive = p[0];
+	if(!drive_valid(drive)) { return FR_INVALID_DRIVE; }
+	char path[3] = { drive + '0', ':', '\0' };
+	return f_mount(_fatfs + drive, path, 0);
+	(void)a;
+}
+
+static i32r _unmount(i32r a, i32 *p)
+{
+	int drive = p[0];
+	if(!drive_valid(drive)) { return FR_INVALID_DRIVE; }
+	char path[3] = { drive + '0', ':', '\0' };
+	return f_unmount(path);
 	(void)a;
 }
 
@@ -437,15 +489,14 @@ static i32r _clipget(i32r a, i32 *p)
 
 static i32r _clipsave(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return clipboard_save((char *)p[0], p[1]);
+	(void)a;
 }
 
 static i32r _isoct(i32r a, i32 *p)
 {
 	return is_octal(p[0]);
-	(void)a, (void)p;
+	(void)a;
 }
 
 static i32r _isbin(i32r a, i32 *p)
@@ -578,6 +629,11 @@ static i32r _strb(i32r a, i32 *p)
 	(void)a;
 }
 
+static i32r _boolstr(i32r a, i32 *p)
+{
+	return (i32r)(p[0] ? "true" : "false");
+	(void)a;
+}
 
 static i32r _help(i32r a, i32 *p);
 
@@ -601,6 +657,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "pin_high",      .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "pin_low",       .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "pin_toggle",    .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "pin_get",       .NumArgs = 2, .IsVariadic = 0 },
 
 	{ .Name = "isupper",       .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "islower",       .NumArgs = 1, .IsVariadic = 0 },
@@ -619,11 +676,14 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "min",           .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "abs",           .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "sign",          .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "pow",           .NumArgs = 2, .IsVariadic = 0 },
 
 	{ .Name = "rand",          .NumArgs = 0, .IsVariadic = 0 },
 	{ .Name = "srand",         .NumArgs = 1, .IsVariadic = 0 },
 
 	{ .Name = "mkfs",          .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "mount",         .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "umount",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "mkdir",         .NumArgs = 1, .IsVariadic = 1 },
 	{ .Name = "create",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "rm",            .NumArgs = 1, .IsVariadic = 1 },
@@ -659,6 +719,8 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "str",           .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "strh",          .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "strb",          .NumArgs = 2, .IsVariadic = 0 },
+
+	{ .Name = "boolstr",       .NumArgs = 1, .IsVariadic = 0 },
 };
 
 static const NanoC_ParserBuiltins parser_builtins =
@@ -710,6 +772,7 @@ static i32r (*const functions[])(i32r, i32 *) =
 	_pin_high,
 	_pin_low,
 	_pin_toggle,
+	_pin_get,
 
 	nanoc_isupper,
 	nanoc_islower,
@@ -728,11 +791,14 @@ static i32r (*const functions[])(i32r, i32 *) =
 	_min,
 	_abs,
 	_sign,
+	_pow,
 
 	_rand,
 	_srand,
 
 	_mkfs,
+	_mount,
+	_unmount,
 	_mkdir,
 	_create,
 	_rm,
@@ -767,6 +833,8 @@ static i32r (*const functions[])(i32r, i32 *) =
 	_str,
 	_strh,
 	_strb,
+
+	_boolstr,
 };
 
 static const NanoC_Builtins builtins = { ARRLEN(functions), functions };
