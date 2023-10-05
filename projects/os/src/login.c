@@ -87,8 +87,6 @@ static void login_backspace(LoginManager *lm)
 
 static void login_enter(LoginManager *lm)
 {
-	if(lm->Length == 0) { return; }
-
 	if(!strncmp(lm->Input, _password, lm->Length))
 	{
 		mode_unlock();
