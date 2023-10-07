@@ -1,13 +1,20 @@
-#include <stdio.h>
-#include <ctype.h>
+/**
+ * @file    shell.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-02
+ */
 
-#include "line.h"
 #include "shell.h"
+#include "line.h"
 #include "util.h"
 #include "terminal.h"
 #include "ps2.h"
 #include "command.h"
 #include "editor.h"
+
+#include <stdio.h>
+#include <ctype.h>
 
 #define COMMAND_MAX_LENGTH  57
 #define COMMAND_BUFFER_SIZE 60

@@ -196,19 +196,13 @@ static int abomination(int count, char *buf, size_t n, const char *format, i32 *
 	/* couldn't find a better way to do this */
 	switch(count)
 	{
-		case 0: snprintf(buf, n, format);
-			break;
-		case 1: snprintf(buf, n, format, p[0]);
-			break;
-		case 2: snprintf(buf, n, format, p[0], p[1]);
-			break;
-		case 3: snprintf(buf, n, format, p[0], p[1], p[2]);
-			break;
-		case 4: snprintf(buf, n, format, p[0], p[1], p[2], p[3]);
-			break;
-		case 5: snprintf(buf, n, format, p[0], p[1], p[2], p[3], p[4]);
-			break;
-		case 6: return snprintf(buf, n, format, p[0], p[1], p[2], p[3], p[4], p[5]);;
+		case 0: return snprintf(buf, n, format);
+		case 1: return snprintf(buf, n, format, p[0]);
+		case 2: return snprintf(buf, n, format, p[0], p[1]);
+		case 3: return snprintf(buf, n, format, p[0], p[1], p[2]);
+		case 4: return snprintf(buf, n, format, p[0], p[1], p[2], p[3]);
+		case 5: return snprintf(buf, n, format, p[0], p[1], p[2], p[3], p[4]);
+		case 6: return snprintf(buf, n, format, p[0], p[1], p[2], p[3], p[4], p[5]);
 	}
 
 	return -1;
@@ -275,14 +269,11 @@ static i32r _unmount(i32r a, i32 *p)
 
 static i32r _mkdir(i32r a, i32 *p)
 {
-	int i;
+	int i, ret;
 	for(i = 0; i < a; ++i)
 	{
-		int ret = f_mkdir((char *)p[i]);
-		if(ret)
-		{
-			return ret;
-		}
+		ret = f_mkdir((char *)p[i]);
+		if(ret) { return ret; }
 	}
 
 	return 0;
@@ -291,22 +282,25 @@ static i32r _mkdir(i32r a, i32 *p)
 static i32r _create(i32r a, i32 *p)
 {
 	FIL fp;
-	int ret = f_open(&fp, (char *)p[0], FA_CREATE_NEW);
-	if(ret) { return ret; }
-	return f_close(&fp);
-	(void)a;
+	int i, ret;
+	for(i = 0; i < a; ++i)
+	{
+		ret = f_open(&fp, (char *)p[0], FA_CREATE_NEW);
+		if(ret) { return ret; }
+		ret = f_close(&fp);
+		if(ret) { return ret; }
+	}
+
+	return 0;
 }
 
 static i32r _rm(i32r a, i32 *p)
 {
-	int i;
+	int i, ret;
 	for(i = 0; i < a; ++i)
 	{
-		int ret = f_unlink((char *)p[i]);
-		if(ret)
-		{
-			return ret;
-		}
+		ret = f_unlink((char *)p[i]);
+		if(ret) { return ret; }
 	}
 
 	return 0;
@@ -362,7 +356,7 @@ static i32r _ls(i32r a, i32 *p)
 
 		if(fno.fattrib & AM_DIR)
 		{
-			sprintf(buf, "   <DIR>   %s\n", fno.fname);
+			sprintf(buf, "%s/\n", fno.fname);
 		}
 		else
 		{
@@ -482,6 +476,13 @@ static i32r _strchr(i32r a, i32 *p)
 }
 
 static i32r _clipget(i32r a, i32 *p)
+{
+	_not_implemented();
+	return 0;
+	(void)a, (void)p;
+}
+
+static i32r _cliplen(i32r a, i32 *p)
 {
 	_not_implemented();
 	return 0;
@@ -761,15 +762,15 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 
 	{ .Name = "mkfs",          .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "mount",         .NumArgs = 1, .IsVariadic = 0 },
-	{ .Name = "umount",        .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "unmount",       .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "mkdir",         .NumArgs = 1, .IsVariadic = 1 },
-	{ .Name = "create",        .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "create",        .NumArgs = 1, .IsVariadic = 1 },
 	{ .Name = "rm",            .NumArgs = 1, .IsVariadic = 1 },
 	{ .Name = "mv",            .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "cp",            .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "ls",            .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "edit",          .NumArgs = 1, .IsVariadic = 0 },
-	{ .Name = "fs_strerror",   .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "fserr",         .NumArgs = 1, .IsVariadic = 0 },
 
 	{ .Name = "memcpy",        .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "memset",        .NumArgs = 3, .IsVariadic = 0 },
@@ -784,6 +785,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "strchr",        .NumArgs = 2, .IsVariadic = 0 },
 
 	{ .Name = "clipget",       .NumArgs = 0, .IsVariadic = 0 },
+	{ .Name = "cliplen",       .NumArgs = 0, .IsVariadic = 0 },
 	{ .Name = "clipsave",      .NumArgs = 1, .IsVariadic = 0 },
 
 	{ .Name = "hexdump",       .NumArgs = 2, .IsVariadic = 0 },
@@ -801,13 +803,12 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "boolstr",       .NumArgs = 1, .IsVariadic = 0 },
 
 	{ .Name = "fopen",         .NumArgs = 3, .IsVariadic = 0 },
-	{ .Name = "fopen",         .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "fclose",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "fread",         .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "fwrite",        .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "fseek",         .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "fsync",         .NumArgs = 1, .IsVariadic = 0 },
-	{ .Name = "ftruncate",     .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "ftrunc",        .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "fexpand",       .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "opendir",       .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "closedir",      .NumArgs = 1, .IsVariadic = 0 },
@@ -861,7 +862,7 @@ static i32r _help(i32r a, i32 *p)
 	return 0;
 }
 
-static i32r (*const functions[])(i32r, i32 *) =
+static const NanoC_Builtin functions[] =
 {
 	_printn,
 	_printc,
@@ -930,6 +931,7 @@ static i32r (*const functions[])(i32r, i32 *) =
 	_strchr,
 
 	_clipget,
+	_cliplen,
 	_clipsave,
 
 	_hexdump,
@@ -1054,7 +1056,7 @@ static void compile(const char *src, int length)
 		return;
 	}
 
-	sprintf(buf, "\n\nREADY (%d / 0x%08x)\n", rv, rv);
+	sprintf(buf, "\n\nREADY (%d / 0x%x)\n", rv, rv);
 	shell_print(buf);
 	printaddr(rv);
 	(void)length;
