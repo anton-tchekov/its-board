@@ -211,7 +211,7 @@ static int abomination(int count, char *buf, size_t n, const char *format, i32 *
 static i32r _printf(i32r a, i32 *p)
 {
 	int ret;
-	char buf[512];
+	char buf[256];
 	if(a > 6)
 	{
 		shell_print("nobody will ever call printf with\n"
@@ -327,7 +327,6 @@ static void fserror(int ret)
 
 static i32r _ls(i32r a, i32 *p)
 {
-	int line = 0;
 	int ret;
 	DIR dp;
 	FILINFO fno;
@@ -360,16 +359,10 @@ static i32r _ls(i32r a, i32 *p)
 		}
 		else
 		{
-			sprintf(buf, "%10u %s\n", fno.fsize, fno.fname);
+			sprintf(buf, "%-15s %10u\n", fno.fsize, fno.fname);
 		}
 
 		shell_print(buf);
-
-		++line;
-		if(line == 19)
-		{
-			shell_xy(30, 1);
-		}
 	}
 
 	ret = f_closedir(&dp);
@@ -433,6 +426,12 @@ static i32r _memmove(i32r a, i32 *p)
 	(void)a;
 }
 
+static i32r _memchr(i32r a, i32 *p)
+{
+	return (i32r)memchr((void *)p[0], p[1], p[2]);
+	(void)a;
+}
+
 static i32r _strlen(i32r a, i32 *p)
 {
 	return strlen((char *)p[0]);
@@ -477,16 +476,17 @@ static i32r _strchr(i32r a, i32 *p)
 
 static i32r _clipget(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
-}
+	if(a == 0)
+	{
+		int val;
+		return (i32r)clipboard_get(&val);
+	}
+	else if(a == 1)
+	{
+		return (i32r)clipboard_get((int *)p[0]);
+	}
 
-static i32r _cliplen(i32r a, i32 *p)
-{
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return 1;
 }
 
 static i32r _clipsave(i32r a, i32 *p)
@@ -639,79 +639,62 @@ static i32r _boolstr(i32r a, i32 *p)
 
 static i32r _fopen(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_open((FIL *)p[0], (char *)p[1], p[2]);
+	(void)a;
 }
 
 static i32r _fclose(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_close((FIL *)p[0]);
+	(void)a;
 }
 
 static i32r _fread(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_read((FIL *)p[0], (void *)p[1], p[2], (UINT *)p[3]);
+	(void)a;
 }
 
 static i32r _fwrite(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_write((FIL *)p[0], (void *)p[1], p[2], (UINT *)p[3]);
+	(void)a;
 }
 
 static i32r _fseek(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_lseek((FIL *)p[0], p[1]);
+	(void)a;
 }
 
 static i32r _fsync(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_sync((FIL *)p[0]);
+	(void)a;
 }
 
 static i32r _ftruncate(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
-}
-
-static i32r _fexpand(i32r a, i32 *p)
-{
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_truncate((FIL *)p[0]);
+	(void)a;
 }
 
 static i32r _opendir(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_opendir((DIR *)p[0], (char *)p[1]);
+	(void)a;
 }
 
 static i32r _closedir(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_closedir((DIR *)p[0]);
+	(void)a;
 }
 
 static i32r _readdir(i32r a, i32 *p)
 {
-	_not_implemented();
-	return 0;
-	(void)a, (void)p;
+	return f_readdir((DIR *)p[0], (FILINFO *)p[1]);
+	(void)a;
 }
 
 static i32r _help(i32r a, i32 *p);
@@ -776,6 +759,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "memset",        .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "memcmp",        .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "memmove",       .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "memchr",        .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "strlen",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "strnlen",       .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "strcpy",        .NumArgs = 2, .IsVariadic = 0 },
@@ -785,8 +769,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "strchr",        .NumArgs = 2, .IsVariadic = 0 },
 
 	{ .Name = "clipget",       .NumArgs = 0, .IsVariadic = 0 },
-	{ .Name = "cliplen",       .NumArgs = 0, .IsVariadic = 0 },
-	{ .Name = "clipsave",      .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "clipsave",      .NumArgs = 1, .IsVariadic = 1 },
 
 	{ .Name = "hexdump",       .NumArgs = 2, .IsVariadic = 0 },
 
@@ -804,12 +787,11 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 
 	{ .Name = "fopen",         .NumArgs = 3, .IsVariadic = 0 },
 	{ .Name = "fclose",        .NumArgs = 1, .IsVariadic = 0 },
-	{ .Name = "fread",         .NumArgs = 3, .IsVariadic = 0 },
-	{ .Name = "fwrite",        .NumArgs = 3, .IsVariadic = 0 },
+	{ .Name = "fread",         .NumArgs = 4, .IsVariadic = 0 },
+	{ .Name = "fwrite",        .NumArgs = 4, .IsVariadic = 0 },
 	{ .Name = "fseek",         .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "fsync",         .NumArgs = 1, .IsVariadic = 0 },
-	{ .Name = "ftrunc",        .NumArgs = 2, .IsVariadic = 0 },
-	{ .Name = "fexpand",       .NumArgs = 2, .IsVariadic = 0 },
+	{ .Name = "ftrunc",        .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "opendir",       .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "closedir",      .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "readdir",       .NumArgs = 2, .IsVariadic = 0 },
@@ -922,6 +904,7 @@ static const NanoC_Builtin functions[] =
 	_memset,
 	_memcmp,
 	_memmove,
+	_memchr,
 	_strlen,
 	_strnlen,
 	_strcpy,
@@ -931,7 +914,6 @@ static const NanoC_Builtin functions[] =
 	_strchr,
 
 	_clipget,
-	_cliplen,
 	_clipsave,
 
 	_hexdump,
@@ -954,7 +936,6 @@ static const NanoC_Builtin functions[] =
 	_fseek,
 	_fsync,
 	_ftruncate,
-	_fexpand,
 	_opendir,
 	_closedir,
 	_readdir,

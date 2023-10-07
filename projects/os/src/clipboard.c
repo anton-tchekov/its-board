@@ -19,12 +19,13 @@ const char *clipboard_get(int *len)
 
 int clipboard_save(const char *text, int len)
 {
-	if(len > CLIPBOARD_MAX_LENGTH)
+	if(len >= CLIPBOARD_MAX_LENGTH)
 	{
 		return 1;
 	}
 
 	_clipboard_len = len;
 	memcpy(_clipboard_text, text, len);
+	_clipboard_text[len] = '\0';
 	return 0;
 }

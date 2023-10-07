@@ -385,9 +385,8 @@ static void editor_save_callback(int yes, char *path)
 	if(result)
 	{
 		alert(OVERLAY_ERROR, reset,
-			"Failed to open file for writing:\n"
-			"  %s\n"
-			"%s", path, f_status_str(result));
+			"Failed to open file for writing:\n  %s\n%s",
+			path, f_status_str(result));
 		return;
 	}
 
@@ -396,9 +395,8 @@ static void editor_save_callback(int yes, char *path)
 	{
 		f_close(&fp);
 		alert(OVERLAY_ERROR, reset,
-			"Failed to write text buffer to file:\n"
-			"  %s\n"
-			"%s", path, f_status_str(result));
+			"Failed to write text buffer to file:\n  %s\n%s",
+			path, f_status_str(result));
 		return;
 	}
 
@@ -409,7 +407,7 @@ static void editor_save_callback(int yes, char *path)
 void editor_save(void)
 {
 	prompt(OVERLAY_NORMAL, editor_save_callback,
-		"Save As:", _filename);
+		_filename, "Save As:");
 }
 
 static int check_text(const char *str, size_t len)
@@ -443,9 +441,8 @@ void editor_load(const char *path)
 	if(result)
 	{
 		alert(OVERLAY_ERROR, reset,
-			"Failed to open file for reading:\n"
-			"  %s\n"
-			"%s", path, f_status_str(result));
+			"Failed to open file for reading:\n  %s\n%s",
+			path, f_status_str(result));
 		return;
 	}
 
@@ -453,9 +450,8 @@ void editor_load(const char *path)
 	if(result)
 	{
 		alert(OVERLAY_ERROR, reset,
-			"Failed to read file contents:\n"
-			"  %s\n"
-			"%s", path, f_status_str(result));
+			"Failed to read file contents:\n  %s\n%s",
+			path, f_status_str(result));
 		f_close(&fp);
 		return;
 	}

@@ -86,7 +86,7 @@ void confirm(int type, void (*callback)(int),
 }
 
 void prompt(int type, void (*callback)(int, char *),
-	const char *msg, ...)
+	const char *def, const char *msg, ...)
 {
 	_overlay.Type = OVERLAY_PROMPT;
 	_overlay.Callback.Prompt = callback;
