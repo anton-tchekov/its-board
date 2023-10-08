@@ -9,29 +9,20 @@
 #include "ff.h"
 #include "shell.h"
 #include "types.h"
+#include "sd/sd.h"
 #include <stdio.h>
 
 void test_open(void)
 {
+	char buf[32];
+	SD sd;
+
 	shell_cls();
 	shell_print("--- [ TEST MODE ] ---\n\n");
 
-	char pri[64];
-	u8 buf[512];
-	int retval;
-	FATFS fs;
-
-	retval = f_mkfs("0:", 0, buf, sizeof(buf));
-	sprintf(pri, "RAMDISK MKFS -> %d\n", retval);
-	shell_print(pri);
-
-	retval = f_mount(&fs, "0:", 1);
-	sprintf(pri, "MOUNT -> %d\n", retval);
-	shell_print(pri);
-
-	retval = f_unmount("0:");
-	sprintf(pri, "UNMOUNT -> %d\n", retval);
-	shell_print(pri);
+	sprintf(buf, "status = %d\n", sd_init(&sd));
+	shell_print(buf);
+	sd_info_print(&sd);
 }
 
 void test_key(int key, int c)

@@ -383,7 +383,7 @@ static i32r _edit(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _fs_strerror(i32r a, i32 *p)
+static i32r _fserr(i32r a, i32 *p)
 {
 	return (i32r)f_status_str(p[0]);
 	(void)a;
@@ -898,7 +898,7 @@ static const NanoC_Builtin functions[] =
 	_cp,
 	_ls,
 	_edit,
-	_fs_strerror,
+	_fserr,
 
 	_memcpy,
 	_memset,

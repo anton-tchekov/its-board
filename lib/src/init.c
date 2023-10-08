@@ -318,9 +318,9 @@ void its_board_init(void)
 	GPIOD->MODER = 0x50005555;
 	GPIOD->BSRR = (1 << 15);
 
-	/* DC: F13, RST: F12 */
+	/* DC: F13, RST: F12, SDCS: E11 */
 	GPIOF->MODER = 0x05000000;
-	GPIOE->MODER = 0x5555;
+	GPIOE->MODER = 0x00405555;
 
 	/* All Pullup */
 	GPIOD->PUPDR = 0x5555;

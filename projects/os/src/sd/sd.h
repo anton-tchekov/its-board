@@ -38,18 +38,6 @@ typedef struct
 	/** SD card manufacturing month number */
 	u8 ManufacturingMonth;
 
-	/** SD card copy/original flag */
-	u8 FlagCopy;
-
-	/** SD card write protected flag */
-	u8 FlagWriteProtect;
-
-	/** SD card temporarily write protected flag */
-	u8 FlagTemporaryWriteProtect;
-
-	/** SD card format ID */
-	u8 Format;
-
 	/** SD card type: SD1 / SD2 / SDHC */
 	u8 CardType;
 } SD;

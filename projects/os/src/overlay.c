@@ -28,7 +28,6 @@ typedef struct
 		void (*Prompt)(int, char *);
 	} Callback;
 	u8 Element;
-	u8 Type;
 } Overlay;
 
 Overlay _overlay;
@@ -48,60 +47,38 @@ static size_t lines_count(const char *str)
 	return n;
 }
 
-static size_t longest_line(const char *str)
-{
-	int c;
-	size_t cnt = 0;
-	size_t max = 0;
-	while((c = *str++))
-	{
-		if(c == '\n')
-		{
-			max = (cnt > max) ? cnt : max;
-			cnt = 0;
-		}
-	}
-
-	return max;
-}
-
-static void overlay_open(void)
-{
-	mode_set(MODE_OVERLAY);
-}
-
 void alert(int type, void (*callback)(void),
 	const char *msg, ...)
 {
-	_overlay.Type = OVERLAY_ALERT;
-	overlay_open();
+	_overlay.Callback.Alert = callback;
+	mode_set(MODE_ALERT);
 }
 
 void confirm(int type, void (*callback)(int),
 	const char *msg, ...)
 {
-	_overlay.Type = OVERLAY_CONFIRM;
 	_overlay.Callback.Confirm = callback;
-	overlay_open();
+	mode_set(MODE_CONFIRM);
 }
 
 void prompt(int type, void (*callback)(int, char *),
 	const char *def, const char *msg, ...)
 {
-	_overlay.Type = OVERLAY_PROMPT;
 	_overlay.Callback.Prompt = callback;
-	overlay_open();
+	mode_set(MODE_PROMPT);
 }
 
-static void alert_key(int key)
+void alert_key(int key, int c)
 {
 	if(key == KEY_RETURN)
 	{
 		_overlay.Callback.Alert();
 	}
+
+	(void)c;
 }
 
-static void confirm_key(int key)
+void confirm_key(int key, int c)
 {
 	switch(key)
 	{
@@ -122,9 +99,11 @@ static void confirm_key(int key)
 		_overlay.Element = !_overlay.Element;
 		break;
 	}
+
+	(void)c;
 }
 
-static void prompt_key(int key, int c)
+void prompt_key(int key, int c)
 {
 	switch(key)
 	{
@@ -141,24 +120,6 @@ static void prompt_key(int key, int c)
 		break;
 
 	default:
-		break;
-	}
-}
-
-void overlay_key(int key, int c)
-{
-	switch(_overlay.Type)
-	{
-	case OVERLAY_ALERT:
-		alert_key(key);
-		break;
-
-	case OVERLAY_CONFIRM:
-		confirm_key(key);
-		break;
-
-	case OVERLAY_PROMPT:
-		prompt_key(key, c);
 		break;
 	}
 }

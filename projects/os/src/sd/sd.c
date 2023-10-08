@@ -1,5 +1,3 @@
-#if 0
-
 /**
  * @file    sd.c
  * @author  Anton Tchekov
@@ -105,8 +103,6 @@ static u8 _sd_command(u8 cmd, u32 arg)
 
 SD_Status _sd_init(SD *sd)
 {
-	shell_print("SD Detect\n");
-
 	u8r response;
 	u16r i;
 	u32r arg;
@@ -130,6 +126,7 @@ SD_Status _sd_init(SD *sd)
 		if(i == 0x1FF)
 		{
 			sd_ll_deselect();
+			spi_ll_fast();
 			return SD_TIMEOUT;
 		}
 	}
@@ -142,6 +139,7 @@ SD_Status _sd_init(SD *sd)
 			(spi_ll_xchg(0xFF) != 0xAA))
 		{
 			sd_ll_deselect();
+			spi_ll_fast();
 			return SD_FAILURE;
 		}
 
@@ -182,6 +180,7 @@ SD_Status _sd_init(SD *sd)
 		if(i == 0x7FFF)
 		{
 			sd_ll_deselect();
+			spi_ll_fast();
 			return SD_TIMEOUT;
 		}
 	}
@@ -191,6 +190,7 @@ SD_Status _sd_init(SD *sd)
 		if(_sd_command(CMD_READ_OCR, 0))
 		{
 			sd_ll_deselect();
+			spi_ll_fast();
 			return SD_FAILURE;
 		}
 
@@ -207,6 +207,7 @@ SD_Status _sd_init(SD *sd)
 	if(_sd_command(CMD_SET_BLOCKLEN, SD_BLOCK_SIZE))
 	{
 		sd_ll_deselect();
+		spi_ll_fast();
 		return SD_FAILURE;
 	}
 
@@ -218,10 +219,8 @@ SD_Status _sd_init(SD *sd)
 
 SD_Status _sd_info(SD *sd)
 {
-	shell_print("SD Info\n");
-
-	u8r i, b, csd_read_bl_len, csd_c_size_mult, csd_structure;
-	u16r j, csd_c_size;
+	u8 i, b, csd_read_bl_len, csd_c_size_mult, csd_structure;
+	u16 j, csd_c_size;
 
 	sd->Serial = 0;
 	sd->Manufacturer = 0;
@@ -248,42 +247,42 @@ SD_Status _sd_info(SD *sd)
 		b = spi_ll_xchg(0xFF);
 		switch(i)
 		{
-			case 0:
-				sd->Manufacturer = b;
-				break;
+		case 0:
+			sd->Manufacturer = b;
+			break;
 
-			case 1:
-			case 2:
-				sd->OEM[i - 1] = b;
-				break;
+		case 1:
+		case 2:
+			sd->OEM[i - 1] = b;
+			break;
 
-			case 3:
-			case 4:
-			case 5:
-			case 6:
-			case 7:
-				sd->ProductName[i - 3] = b;
-				break;
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			sd->ProductName[i - 3] = b;
+			break;
 
-			case 8:
-				sd->Revision = b;
-				break;
+		case 8:
+			sd->Revision = b;
+			break;
 
-			case 9:
-			case 10:
-			case 11:
-			case 12:
-				sd->Serial |= (u32)b << ((12 - i) * 8);
-				break;
+		case 9:
+		case 10:
+		case 11:
+		case 12:
+			sd->Serial |= (u32)b << ((12 - i) * 8);
+			break;
 
-			case 13:
-				sd->ManufacturingYear = b << 4;
-				break;
+		case 13:
+			sd->ManufacturingYear = b << 4;
+			break;
 
-			case 14:
-				sd->ManufacturingYear |= b >> 4;
-				sd->ManufacturingMonth = b & 0x0f;
-				break;
+		case 14:
+			sd->ManufacturingYear |= b >> 4;
+			sd->ManufacturingMonth = b & 0x0f;
+			break;
 		}
 	}
 
@@ -311,76 +310,57 @@ SD_Status _sd_info(SD *sd)
 		{
 			csd_structure = b >> 6;
 		}
-		else if(i == 14)
-		{
-			if(b & 0x40)
-			{
-				sd->FlagCopy = 1;
-			}
-
-			if(b & 0x20)
-			{
-				sd->FlagWriteProtect = 1;
-			}
-
-			if(b & 0x10)
-			{
-				sd->FlagTemporaryWriteProtect = 1;
-			}
-
-			sd->Format = (b & 0x0C) >> 2;
-		}
 		else
 		{
 			if(csd_structure == 0x01)
 			{
 				switch(i)
 				{
-					case 7:
-						b &= 0x3f;
-						/* fall through */
+				case 7:
+					b &= 0x3f;
+					/* fall through */
 
-					case 8:
-					case 9:
-						csd_c_size <<= 8;
-						csd_c_size |= b;
-						++csd_c_size;
-						sd->Capacity = (u32)csd_c_size << 10;
+				case 8:
+				case 9:
+					csd_c_size <<= 8;
+					csd_c_size |= b;
+					++csd_c_size;
+					sd->Capacity = (u32)csd_c_size << 10;
 				}
 			}
 			else if(csd_structure == 0x00)
 			{
 				switch(i)
 				{
-					case 5:
-						csd_read_bl_len = b & 0x0F;
-						break;
+				case 5:
+					csd_read_bl_len = b & 0x0F;
+					break;
 
-					case 6:
-						csd_c_size = b & 0x03;
-						csd_c_size <<= 8;
-						break;
+				case 6:
+					csd_c_size = b & 0x03;
+					csd_c_size <<= 8;
+					break;
 
-					case 7:
-						csd_c_size |= b;
-						csd_c_size <<= 2;
-						break;
+				case 7:
+					csd_c_size |= b;
+					csd_c_size <<= 2;
+					break;
 
-					case 8:
-						csd_c_size |= b >> 6;
-						++csd_c_size;
-						break;
+				case 8:
+					csd_c_size |= b >> 6;
+					++csd_c_size;
+					break;
 
-					case 9:
-						csd_c_size_mult = b & 0x03;
-						csd_c_size_mult <<= 1;
-						break;
+				case 9:
+					csd_c_size_mult = b & 0x03;
+					csd_c_size_mult <<= 1;
+					break;
 
-					case 10:
-						csd_c_size_mult |= b >> 7;
-						sd->Capacity = ((u32)csd_c_size <<
-							(csd_c_size_mult + csd_read_bl_len + 2)) >> 9;
-						break;
+				case 10:
+					csd_c_size_mult |= b >> 7;
+					sd->Capacity = ((u32)csd_c_size <<
+						(csd_c_size_mult + csd_read_bl_len + 2)) >> 9;
+					break;
 				}
 			}
 		}
@@ -392,20 +372,26 @@ SD_Status _sd_info(SD *sd)
 
 SD_Status sd_init(SD *sd)
 {
-	shell_print("SD Init\n");
-	return _sd_init(sd) && _sd_info(sd);
+	SD_Status ret;
+
+	ret = _sd_init(sd);
+	if(ret) { return ret; }
+
+	ret = _sd_info(sd);
+	if(ret) { return ret; }
+
+	return 0;
 }
 
 void sd_info_print(SD *sd)
 {
-	char buf[128];
+	char buf[64];
 
-	/* Print disk info */
 	sprintf(buf, "Card Type        : %s\n",
 		sd->CardType & SD_HC ? "SDHC" : "SD");
 	shell_print(buf);
 
-	sprintf(buf, "Manufacturer ID  : %02X\n",
+	sprintf(buf, "Manufacturer ID  : %02x\n",
 		sd->Manufacturer);
 	shell_print(buf);
 
@@ -421,7 +407,7 @@ void sd_info_print(SD *sd)
 		(sd->Revision >> 4) + '0', (sd->Revision & 0x0F) + '0');
 	shell_print(buf);
 
-	sprintf(buf, "Serial Number    : 0x%08"PRIx32"\n",
+	sprintf(buf, "Serial Number    : 0x%08x\n",
 		sd->Serial);
 	shell_print(buf);
 
@@ -429,23 +415,8 @@ void sd_info_print(SD *sd)
 		sd->ManufacturingMonth, 2000 + sd->ManufacturingYear);
 	shell_print(buf);
 
-	sprintf(buf, "Capacity         : %"PRIu32" blocks\n",
+	sprintf(buf, "Capacity         : %u blocks\n",
 		sd->Capacity);
-	shell_print(buf);
-
-	sprintf(buf, "                   (%"PRIu32" bytes)\n",
-		sd->Capacity * SD_BLOCK_SIZE);
-	shell_print(buf);
-
-	sprintf(buf, "Format           : 0x%02X\n",
-		sd->Format);
-	shell_print(buf);
-
-	sprintf(buf, "Flags            : %s%s\n",
-		sd->FlagCopy ? "Copy, " : "Original, ",
-		sd->FlagTemporaryWriteProtect ? "Temporarily Write Protected" :
-			(sd->FlagWriteProtect ? "Write Protected" :
-			"Rewritable"));
 	shell_print(buf);
 }
 
@@ -461,6 +432,7 @@ static u32r _sd_block_addr(SD *sd, u32r block)
 	return sd->CardType & SD_HC ? block : (block << SD_BLOCK_SIZE_POT);
 }
 
+#if 0
 SD_Status sd_read(SD *sd, u32r start, u32r count, void *data)
 {
 	u16 i;

@@ -19,7 +19,7 @@ static u8 _mode;
 
 void mode_set(int mode)
 {
-	if(_mode == MODE_LOGIN || _mode == MODE_OVERLAY)
+	if(_mode == MODE_LOGIN)
 	{
 		return;
 	}
@@ -79,8 +79,16 @@ void mode_key(int key, int c)
 		test_key(key, c);
 		break;
 
-	case MODE_OVERLAY:
-		overlay_key(key, c);
+	case MODE_ALERT:
+		alert_key(key, c);
+		break;
+
+	case MODE_CONFIRM:
+		confirm_key(key, c);
+		break;
+
+	case MODE_PROMPT:
+		prompt_key(key, c);
 		break;
 	}
 }

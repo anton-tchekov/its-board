@@ -50,6 +50,8 @@ void confirm(int type, void (*callback)(int),
 void prompt(int type, void (*callback)(int, char *),
 	const char *def, const char *msg, ...);
 
-void overlay_key(int key, int c);
+void alert_key(int key, int c);
+void confirm_key(int key, int c);
+void prompt_key(int key, int c);
 
 #endif /* __OVERLAY_H__ */
