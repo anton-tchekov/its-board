@@ -17,11 +17,12 @@
 #include "nanoc_lexer_identifier.h"
 #include "ff.h"
 #include "ffstatus.h"
+#include "shell.h"
 
 #include <stddef.h>
 #include <string.h>
 
-static char _buf[1024];
+static char _buf[1024 * 16];
 static Line line;
 static int _page_y, _page_x;
 static int _tab_size;
@@ -317,7 +318,7 @@ static void editor_render(void)
 		}
 		else if(i >= start && i < end)
 		{
-			bg = TERMINAL_BG_BLUE;
+			bg = TERMINAL_BG_ORANGE;
 		}
 		else
 		{
@@ -467,6 +468,72 @@ void editor_load(const char *path)
 	strcpy(_filename, path);
 	_syntax = iscfile(path);
 	editor_open();
+}
+
+void fserror(int ret);
+
+void editor_load_cmd(const char *path)
+{
+	FIL fp;
+	unsigned int read = 0;
+	int result;
+
+	result = f_open(&fp, path, FA_READ);
+	if(result)
+	{
+		fserror(result);
+		return;
+	}
+
+	result = f_read(&fp, _buf, sizeof(_buf), &read);
+	if(result)
+	{
+		fserror(result);
+		f_close(&fp);
+		return;
+	}
+
+	f_close(&fp);
+	if(check_text(_buf, read))
+	{
+		shell_print("Editor cannot open binary file\n");
+		return;
+	}
+
+	strcpy(_filename, path);
+	_syntax = iscfile(path);
+	shell_print("File opened\n");
+	line.Length = read;
+	line.SaveX = -1;
+	line.Cursor = 0;
+	line.Selection = 0;
+	_page_x = -5;
+	_page_y = 0;
+}
+
+void editor_save_cmd(char *path)
+{
+	FIL fp;
+	unsigned int written;
+	int result;
+
+	result = f_open(&fp, path, FA_CREATE_ALWAYS | FA_WRITE);
+	if(result)
+	{
+		fserror(result);
+		return;
+	}
+
+	result = f_write(&fp, line.Text, line.Length, &written);
+	if(result)
+	{
+		f_close(&fp);
+		fserror(result);
+		return;
+	}
+
+	f_close(&fp);
+	shell_print("File saved\n");
 }
 
 void editor_key(int key, int c)

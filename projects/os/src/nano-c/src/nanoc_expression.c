@@ -95,14 +95,14 @@ static NanoC_Status nanoc_expression_identifier(NanoC_Parser *parser)
 	token = TOKEN(0);
 	if(TT(1) == NANOC_TT_L_PAREN)
 	{
-		PROPAGATE(nanoc_fn_call(parser));
+		NANOC_PROPAGATE(nanoc_fn_call(parser));
 	}
 	else
 	{
 		if(!nanoc_map_find(&parser->Variables, token->Ptr,
 			token->Length, &local))
 		{
-			THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
+			NANOC_THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
 		}
 
 		nanoc_output_emit2(&parser->Output, NANOC_INSTR_PUSHL, local);
@@ -211,19 +211,19 @@ NanoC_Status nanoc_expression(NanoC_Parser *parser)
 			tt = NANOC_TT_U_MINUS;
 		}
 
-		PROPAGATE(check_prev(prev_class, token_class(tt)));
+		NANOC_PROPAGATE(check_prev(prev_class, token_class(tt)));
 		if(tt == NANOC_TT_INTEGER)
 		{
 			nanoc_expression_number(parser, cur_token);
 		}
 		else if(tt == NANOC_TT_IDENTIFIER)
 		{
-			PROPAGATE(nanoc_expression_identifier(parser));
+			NANOC_PROPAGATE(nanoc_expression_identifier(parser));
 		}
 		else if(tt == NANOC_TT_L_PAREN)
 		{
 			NEXT();
-			PROPAGATE(nanoc_expression(parser));
+			NANOC_PROPAGATE(nanoc_expression(parser));
 			EXPECT(NANOC_TT_R_PAREN, NANOC_ERROR_EXPECTED_R_PAREN);
 		}
 		else if(token_is_operator(tt))

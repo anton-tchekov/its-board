@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-#define THROW(e) \
+#define NANOC_THROW(e) \
 	do \
 	{ \
 		NanoC_Status __ret = e; \
@@ -16,7 +16,7 @@
 		return __ret; \
 	} while(0)
 
-#define PROPAGATE(E) \
+#define NANOC_PROPAGATE(E) \
 	do \
 	{ \
 		NanoC_Status __ret; \
@@ -32,13 +32,13 @@ void nanoc_log(
 
 #else /* NANOC_DEBUG */
 
-#define THROW(e) \
+#define NANOC_THROW(e) \
 	do \
 	{ \
 		return e; \
 	} while(0)
 
-#define PROPAGATE(E) \
+#define NANOC_PROPAGATE(E) \
 	do \
 	{ \
 		NanoC_Status __ret; \

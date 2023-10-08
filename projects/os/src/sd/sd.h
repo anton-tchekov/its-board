@@ -89,4 +89,6 @@ SD_Status sd_read(SD *sd, u32r start, u32r count, void *data);
  */
 SD_Status sd_write(SD *sd, u32r start, u32r count, const void *data);
 
+void sd_info_print(SD *sd);
+
 #endif /* __SD_H__ */

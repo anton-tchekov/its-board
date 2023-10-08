@@ -19,6 +19,8 @@
 #include "clipboard.h"
 #include "ff.h"
 #include "ffstatus.h"
+#include "sd/sd.h"
+#include "ramdisk.h"
 
 #include "stm32f4xx.h"
 
@@ -27,6 +29,7 @@
 #include <string.h>
 
 static FATFS _fatfs[2];
+SD sd;
 
 static void _not_implemented(void)
 {
@@ -239,6 +242,36 @@ static int drive_valid(int drive)
 	return drive >= 0 && drive <= 1;
 }
 
+void fserror(int ret)
+{
+	shell_print(f_status_str(ret));
+	shell_char('\n');
+}
+
+static i32r _blkinfo(i32r a, i32 *p)
+{
+	int drive = p[0];
+	if(!drive_valid(drive))
+	{
+		fserror(FR_INVALID_DRIVE);
+		return 1;
+	}
+
+	switch(drive)
+	{
+	case 0:
+		ramdisk_info_print();
+		break;
+
+	case 1:
+		sd_info_print(&sd);
+		break;
+	}
+
+	return 0;
+	(void)a;
+}
+
 static i32r _mkfs(i32r a, i32 *p)
 {
 	int drive = p[0];
@@ -254,7 +287,7 @@ static i32r _mount(i32r a, i32 *p)
 	int drive = p[0];
 	if(!drive_valid(drive)) { return FR_INVALID_DRIVE; }
 	char path[3] = { drive + '0', ':', '\0' };
-	return f_mount(_fatfs + drive, path, 0);
+	return f_mount(_fatfs + drive, path, 1);
 	(void)a;
 }
 
@@ -319,12 +352,6 @@ static i32r _cp(i32r a, i32 *p)
 	(void)a, (void)p;
 }
 
-static void fserror(int ret)
-{
-	shell_print(f_status_str(ret));
-	shell_char('\n');
-}
-
 static i32r _ls(i32r a, i32 *p)
 {
 	int ret;
@@ -359,7 +386,7 @@ static i32r _ls(i32r a, i32 *p)
 		}
 		else
 		{
-			sprintf(buf, "%-15s %10u\n", fno.fsize, fno.fname);
+			sprintf(buf, "%-15s %10u\n", fno.fname, fno.fsize);
 		}
 
 		shell_print(buf);
@@ -378,7 +405,14 @@ static i32r _ls(i32r a, i32 *p)
 
 static i32r _edit(i32r a, i32 *p)
 {
-	editor_load((char *)p[0]);
+	editor_load_cmd((char *)p[0]);
+	return 0;
+	(void)a;
+}
+
+static i32r _edsav(i32r a, i32 *p)
+{
+	editor_save_cmd((char *)p[0]);
 	return 0;
 	(void)a;
 }
@@ -743,6 +777,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "rand",          .NumArgs = 0, .IsVariadic = 0 },
 	{ .Name = "srand",         .NumArgs = 1, .IsVariadic = 0 },
 
+	{ .Name = "blkinfo",       .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "mkfs",          .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "mount",         .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "unmount",       .NumArgs = 1, .IsVariadic = 0 },
@@ -753,6 +788,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "cp",            .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "ls",            .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "edit",          .NumArgs = 1, .IsVariadic = 0 },
+	{ .Name = "edsav",         .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "fserr",         .NumArgs = 1, .IsVariadic = 0 },
 
 	{ .Name = "memcpy",        .NumArgs = 3, .IsVariadic = 0 },
@@ -888,6 +924,7 @@ static const NanoC_Builtin functions[] =
 	_rand,
 	_srand,
 
+	_blkinfo,
 	_mkfs,
 	_mount,
 	_unmount,
@@ -898,6 +935,7 @@ static const NanoC_Builtin functions[] =
 	_cp,
 	_ls,
 	_edit,
+	_edsav,
 	_fserr,
 
 	_memcpy,

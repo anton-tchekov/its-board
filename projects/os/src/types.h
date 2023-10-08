@@ -13,6 +13,18 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#define ARRLEN(a) (sizeof(a) / sizeof(*a))
+
+#define PROPAGATE(E) \
+	do \
+	{ \
+		int __ret = (E); \
+		if(__ret) \
+		{ \
+			return __ret; \
+		} \
+	} while(0)
+
 typedef uint32_t u8r;
 typedef uint8_t u8;
 

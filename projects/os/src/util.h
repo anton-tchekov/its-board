@@ -11,8 +11,6 @@
 
 #include "types.h"
 
-#define ARRLEN(a) (sizeof(a) / sizeof(*a))
-
 static inline u16r read_16(const u8 *p)
 {
 	return ((u16r)p[0]) | (((u16r)p[1]) << 8);

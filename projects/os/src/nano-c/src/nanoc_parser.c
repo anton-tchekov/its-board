@@ -11,7 +11,7 @@ static NanoC_Status insert_var(
 	NanoC_Status ret;
 	if(token->Type != NANOC_TT_IDENTIFIER)
 	{
-		THROW(NANOC_ERROR_EXPECTED_IDENTIFIER);
+		NANOC_THROW(NANOC_ERROR_EXPECTED_IDENTIFIER);
 	}
 
 	ret = nanoc_map_insert(&parser->Variables,
@@ -19,11 +19,11 @@ static NanoC_Status insert_var(
 
 	if(ret == NANOC_ERROR_STACK_OVERFLOW)
 	{
-		THROW(NANOC_ERROR_TOO_MANY_VARIABLES);
+		NANOC_THROW(NANOC_ERROR_TOO_MANY_VARIABLES);
 	}
 	else if(ret == NANOC_ERROR_DUPLICATE_MAP_ELEMENT)
 	{
-		THROW(NANOC_ERROR_VARIABLE_REDEFINITION);
+		NANOC_THROW(NANOC_ERROR_VARIABLE_REDEFINITION);
 	}
 
 	return NANOC_STATUS_SUCCESS;
@@ -52,7 +52,7 @@ NanoC_Status nanoc_block_inner(NanoC_Parser *parser)
 	NEXT();
 	while(TT(0) != NANOC_TT_R_BRACE)
 	{
-		PROPAGATE(nanoc_statement(parser));
+		NANOC_PROPAGATE(nanoc_statement(parser));
 		NEXT();
 	}
 
@@ -82,7 +82,7 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 
 	if(builtin_id < 0)
 	{
-		THROW(NANOC_ERROR_UNDEFINED_FN);
+		NANOC_THROW(NANOC_ERROR_UNDEFINED_FN);
 	}
 
 	builtin = &parser->Builtins->Table[builtin_id];
@@ -94,11 +94,11 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 		for(;;)
 		{
 			NanoC_TokenType tt;
-			PROPAGATE(nanoc_expression(parser));
+			NANOC_PROPAGATE(nanoc_expression(parser));
 			++arg_cnt;
 			if(arg_cnt >= NANOC_MAX_FN_ARGS)
 			{
-				THROW(NANOC_ERROR_TOO_MANY_FN_ARGS);
+				NANOC_THROW(NANOC_ERROR_TOO_MANY_FN_ARGS);
 			}
 
 			tt = TT(0);
@@ -112,14 +112,14 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 			}
 			else
 			{
-				THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
+				NANOC_THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 			}
 		}
 	}
 
 	if(!check_fn_args(arg_cnt, builtin->NumArgs, builtin->IsVariadic))
 	{
-		THROW(NANOC_ERROR_FN_NUM_ARGS);
+		NANOC_THROW(NANOC_ERROR_FN_NUM_ARGS);
 	}
 
 	nanoc_output_emit2(&parser->Output, NANOC_INSTR_CALL, arg_cnt);
@@ -136,7 +136,7 @@ static NanoC_Status nanoc_assign(
 		nanoc_output_emit2(&parser->Output, NANOC_INSTR_PUSHL, idx);
 	}
 
-	PROPAGATE(nanoc_expression(parser));
+	NANOC_PROPAGATE(nanoc_expression(parser));
 	if(op)
 	{
 		nanoc_output_emit(&parser->Output, op);
@@ -176,7 +176,7 @@ static NanoC_Opcode assign_instr(NanoC_TokenType tt)
 
 static NanoC_Status nanoc_action(NanoC_Parser *parser)
 {
-	PROPAGATE(nanoc_fn_call(parser));
+	NANOC_PROPAGATE(nanoc_fn_call(parser));
 	nanoc_output_emit(&parser->Output, NANOC_INSTR_POP);
 	NEXT();
 	EXPECT(NANOC_TT_SEMICOLON, NANOC_ERROR_EXPECTED_SEMICOLON);
@@ -197,14 +197,14 @@ static NanoC_Status nanoc_identifier(NanoC_Parser *parser)
 		if(!nanoc_map_find(&parser->Variables,
 			token->Ptr, token->Length, &local))
 		{
-			THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
+			NANOC_THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
 		}
 
 		NEXT();
 		return nanoc_assign(parser, assign_instr(tt), local);
 	}
 
-	THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
+	NANOC_THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 }
 
 NanoC_Status nanoc_int(NanoC_Parser *parser)
@@ -215,18 +215,18 @@ NanoC_Status nanoc_int(NanoC_Parser *parser)
 	{
 		NEXT();
 		token = TOKEN(0);
-		PROPAGATE(insert_var(parser, token, &idx));
+		NANOC_PROPAGATE(insert_var(parser, token, &idx));
 		NEXT();
 		token = TOKEN(0);
 		if(token->Type == NANOC_TT_ASSIGN)
 		{
-			PROPAGATE(nanoc_assign(parser, 0, idx));
+			NANOC_PROPAGATE(nanoc_assign(parser, 0, idx));
 		}
 		token = TOKEN(0);
 	} while(token->Type == NANOC_TT_COMMA);
 	if(token->Type != NANOC_TT_SEMICOLON)
 	{
-		THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
+		NANOC_THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 	}
 
 	return NANOC_STATUS_SUCCESS;
@@ -241,7 +241,7 @@ static NanoC_Status nanoc_return(NanoC_Parser *parser)
 	}
 	else
 	{
-		PROPAGATE(nanoc_expression(parser));
+		NANOC_PROPAGATE(nanoc_expression(parser));
 		EXPECT(NANOC_TT_SEMICOLON, NANOC_ERROR_EXPECTED_SEMICOLON);
 	}
 
@@ -259,7 +259,7 @@ static NanoC_Status nanoc_parser_inc_dec(
 	if(!nanoc_map_find(&parser->Variables,
 		token->Ptr, token->Length, &idx))
 	{
-		THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
+		NANOC_THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
 	}
 
 	NEXT();
@@ -285,10 +285,10 @@ NanoC_Status nanoc_substmt(NanoC_Parser *parser, NanoC_TokenType end)
 		tt = TT(0);
 		switch(tt)
 		{
-		case NANOC_TT_IDENTIFIER: PROPAGATE(nanoc_identifier(parser)); break;
-		case NANOC_TT_DECREMENT:  PROPAGATE(nanoc_dec(parser));        break;
-		case NANOC_TT_INCREMENT:  PROPAGATE(nanoc_inc(parser));        break;
-		default: THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
+		case NANOC_TT_IDENTIFIER: NANOC_PROPAGATE(nanoc_identifier(parser)); break;
+		case NANOC_TT_DECREMENT:  NANOC_PROPAGATE(nanoc_dec(parser));        break;
+		case NANOC_TT_INCREMENT:  NANOC_PROPAGATE(nanoc_inc(parser));        break;
+		default: NANOC_THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 		}
 
 		tt = TT(0);
@@ -300,7 +300,7 @@ NanoC_Status nanoc_substmt(NanoC_Parser *parser, NanoC_TokenType end)
 		NEXT();
 	}
 	while(tt == NANOC_TT_COMMA);
-	THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
+	NANOC_THROW(NANOC_ERROR_UNEXPECTED_TOKEN);
 }
 
 NanoC_Status nanoc_statement(NanoC_Parser *parser)

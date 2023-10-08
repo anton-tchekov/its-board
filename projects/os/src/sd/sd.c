@@ -9,6 +9,7 @@
 #include "sd_ll.h"
 #include "spi_ll.h"
 #include "delay.h"
+#include "shell.h"
 #include <stdio.h>
 #include <inttypes.h>
 
@@ -66,22 +67,20 @@
 /** SDHC card type */
 #define SD_HC                  (1 << 2)
 
-/**
- * @brief Execute an SD command (panic if failed)
- *
- * @param cmd Command number
- * @param arg Address parameter
- * @return Output byte
- */
-static u8 _sd_command(u8 cmd, u32 arg)
+static void _sd_command_start(u8 cmd, u32 arg)
 {
-	u8 i, response;
 	spi_ll_xchg(0xFF);
 	spi_ll_xchg(0x40 | cmd);
 	spi_ll_xchg((arg >> 24) & 0xFF);
 	spi_ll_xchg((arg >> 16) & 0xFF);
 	spi_ll_xchg((arg >> 8) & 0xFF);
 	spi_ll_xchg((arg >> 0) & 0xFF);
+}
+
+static u8 _sd_command(u8 cmd, u32 arg)
+{
+	u8 i, response;
+	_sd_command_start(cmd, arg);
 	switch(cmd)
 	{
 	case CMD_GO_IDLE_STATE:
@@ -97,9 +96,38 @@ static u8 _sd_command(u8 cmd, u32 arg)
 		break;
 	}
 
-	for(i = 0; i < 10 && ((response = spi_ll_xchg(0xFF)) == 0xFF); ++i) ;
+	for(i = 0; i < 10 && ((response = spi_ll_xchg(0xFF)) == 0xFF); ++i) {}
 	return response;
 }
+
+static SD_Status _sd_command_try(u8 cmd, u32 arg)
+{
+	u8 i, response;
+	_sd_command_start(cmd, arg);
+	spi_ll_xchg(0xFF);
+	for(i = 0; ; ++i)
+	{
+		response = spi_ll_xchg(0xFF);
+		if(response != 0xFF)
+		{
+			break;
+		}
+
+		if(i >= 10)
+		{
+			return SD_TIMEOUT;
+		}
+	}
+
+	if(response)
+	{
+		sd_ll_deselect();
+		return SD_FAILURE;
+	}
+
+	return SD_SUCCESS;
+}
+
 
 SD_Status _sd_init(SD *sd)
 {
@@ -432,28 +460,11 @@ static u32r _sd_block_addr(SD *sd, u32r block)
 	return sd->CardType & SD_HC ? block : (block << SD_BLOCK_SIZE_POT);
 }
 
-#if 0
-SD_Status sd_read(SD *sd, u32r start, u32r count, void *data)
+static u32r _sd_wait_ready(u8r target)
 {
-	u16 i;
-	u8 *data8, response;
-
-	data8 = data;
-	sd_ll_select();
-
-	/* Start read */
-	RETURN_IF(_sd_command_try(CMD_READ_SINGLE_BLOCK,
-		_sd_block_addr(block)));
-
-	/* Wait for ready */
-	for(i = 0; ; ++i)
+	u16r i;
+	for(i = 0; spi_ll_xchg(0xFF) != target; ++i)
 	{
-		response = spi_ll_xchg(0xFF);
-		if(response == 0xFE)
-		{
-			break;
-		}
-
 		if(i == 0xFFFF)
 		{
 			sd_ll_deselect();
@@ -461,58 +472,68 @@ SD_Status sd_read(SD *sd, u32r start, u32r count, void *data)
 		}
 	}
 
-	/* Read data */
+	return SD_SUCCESS;
+}
+
+SD_Status sd_read_block(SD *sd, u32r block, u8 *data)
+{
+	u16r i;
+	sd_ll_select();
+	PROPAGATE(_sd_command_try(CMD_READ_SINGLE_BLOCK, _sd_block_addr(sd, block)));
+	PROPAGATE(_sd_wait_ready(0xFE));
 	for(i = 0; i < SD_BLOCK_SIZE; ++i)
 	{
-		data8[i] = spi_ll_xchg(0xFF);
+		data[i] = spi_ll_xchg(0xFF);
 	}
 
 	spi_ll_xchg(0xFF);
 	spi_ll_xchg(0xFF);
 	spi_ll_xchg(0xFF);
 	sd_ll_deselect();
+	return SD_SUCCESS;
+}
+
+SD_Status sd_write_block(SD *sd, u32r block, const u8 *data)
+{
+	u16r i;
+	sd_ll_select();
+	PROPAGATE(_sd_command_try(CMD_WRITE_SINGLE_BLOCK, _sd_block_addr(sd, block)));
+	spi_ll_xchg(0xFE);
+	for(i = 0; i < SD_BLOCK_SIZE; ++i)
+	{
+		spi_ll_xchg(data[i]);
+	}
+
+	spi_ll_xchg(0xFF);
+	spi_ll_xchg(0xFF);
+	PROPAGATE(_sd_wait_ready(0xFF));
+	spi_ll_xchg(0xFF);
+	sd_ll_deselect();
+	return SD_SUCCESS;
+}
+
+SD_Status sd_read(SD *sd, u32r start, u32r count, void *data)
+{
+	u32r end = start + count;
+	u8 *data8 = data;
+	for(; start < end; ++start)
+	{
+		PROPAGATE(sd_read_block(sd, start, data8));
+		data8 += SD_BLOCK_SIZE;
+	}
+
 	return SD_SUCCESS;
 }
 
 SD_Status sd_write(SD *sd, u32r start, u32r count, const void *data)
 {
-	u16 i;
-	u8 response;
-	const u8 *data8;
-
-	data8 = data;
-	sd_ll_select();
-
-	/* Start write */
-	RETURN_IF(_sd_command_try(CMD_WRITE_SINGLE_BLOCK,
-		_sd_block_addr(block)))
-	spi_ll_xchg(0xFE);
-	for(i = 0; i < SD_BLOCK_SIZE; ++i)
+	u32r end = start + count;
+	const u8 *data8 = data;
+	for(; start < end; ++start)
 	{
-		spi_ll_xchg(*data8++);
+		PROPAGATE(sd_write_block(sd, start, data8));
+		data8 += SD_BLOCK_SIZE;
 	}
 
-	spi_ll_xchg(0xFF);
-	spi_ll_xchg(0xFF);
-
-	/* Wait for ready */
-	for(i = 0; ; ++i)
-	{
-		response = spi_ll_xchg(0xFF);
-		if(response == 0xFF)
-		{
-			break;
-		}
-
-		if(i == 0xFFFF)
-		{
-			sd_ll_deselect();
-			return SD_TIMEOUT;
-		}
-	}
-
-	spi_ll_xchg(0xFF);
-	sd_ll_deselect();
 	return SD_SUCCESS;
 }
-#endif

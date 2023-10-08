@@ -2,7 +2,7 @@
 .thumb
 
 vector_table:
-.word     0x20020000
+.word     0x20030000
 .word     main
 .word     NMI_Handler
 .word     HardFault_Handler

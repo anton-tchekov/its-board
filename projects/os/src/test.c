@@ -14,15 +14,9 @@
 
 void test_open(void)
 {
-	char buf[32];
-	SD sd;
 
 	shell_cls();
 	shell_print("--- [ TEST MODE ] ---\n\n");
-
-	sprintf(buf, "status = %d\n", sd_init(&sd));
-	shell_print(buf);
-	sd_info_print(&sd);
 }
 
 void test_key(int key, int c)

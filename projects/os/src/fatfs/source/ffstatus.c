@@ -14,7 +14,7 @@ const char *f_status_str(FRESULT status)
 		"Ok",                        /* FR_OK = 0,              (0) Succeeded */
 		"I/O error",                 /* FR_DISK_ERR,            (1) A hard error occurred in the low level disk I/O layer */
 		"Internal error",            /* FR_INT_ERR,             (2) Assertion failed */
-		"Disk ",                     /* FR_NOT_READY,           (3) The physical drive cannot work */
+		"Not ready",                 /* FR_NOT_READY,           (3) The physical drive cannot work */
 		"No such file or directory", /* FR_NO_FILE,             (4) Could not find the file */
 		"No such path",              /* FR_NO_PATH,             (5) Could not find the path */
 		"Invalid path format",       /* FR_INVALID_NAME,        (6) The path name format is invalid */

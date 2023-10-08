@@ -20,7 +20,7 @@
 	{ \
 		if(nanoc_tokenstream_get(&parser->TokenStream, 0)->Type != TYPE) \
 		{ \
-			THROW(ERROR); \
+			NANOC_THROW(ERROR); \
 		} \
 	} while(0)
 
@@ -29,7 +29,7 @@
 	{ \
 		if((A) != (B)) \
 		{ \
-			THROW(ERROR); \
+			NANOC_THROW(ERROR); \
 		} \
 	} while(0)
 

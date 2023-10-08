@@ -9,11 +9,11 @@ NanoC_Status nanoc_if(NanoC_Parser *parser)
 	NEXT();
 	EXPECT(NANOC_TT_L_PAREN, NANOC_ERROR_EXPECTED_L_PAREN);
 	NEXT();
-	PROPAGATE(nanoc_expression(parser));
+	NANOC_PROPAGATE(nanoc_expression(parser));
 	EXPECT(NANOC_TT_R_PAREN, NANOC_ERROR_EXPECTED_R_PAREN);
 	addr = nanoc_output_unknown_jump(&parser->Output, NANOC_INSTR_JZ);
 	NEXT();
-	PROPAGATE(nanoc_block(parser));
+	NANOC_PROPAGATE(nanoc_block(parser));
 	nanoc_output_jump_here(&parser->Output, addr);
 	if(TT(1) == NANOC_TT_ELSE)
 	{
@@ -22,12 +22,12 @@ NanoC_Status nanoc_if(NanoC_Parser *parser)
 		if(TT(1) == NANOC_TT_IF)
 		{
 			NEXT();
-			PROPAGATE(nanoc_if(parser));
+			NANOC_PROPAGATE(nanoc_if(parser));
 		}
 		else
 		{
 			NEXT();
-			PROPAGATE(nanoc_block(parser));
+			NANOC_PROPAGATE(nanoc_block(parser));
 		}
 
 		nanoc_output_jump_here(&parser->Output, addr);

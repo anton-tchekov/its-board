@@ -10,6 +10,7 @@
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
 #include "ramdisk.h"
+#include "sd/sd.h"
 
 /* Definitions of physical drive number for each drive */
 #define DEV_RAM		0	/* Example: Map Ramdisk to physical drive 0 */
@@ -18,6 +19,8 @@
 /*-----------------------------------------------------------------------*/
 /* Get Drive Status                                                      */
 /*-----------------------------------------------------------------------*/
+
+extern SD sd;
 
 DSTATUS disk_status (
 	BYTE pdrv		/* Physical drive nmuber to identify the drive */
@@ -29,14 +32,14 @@ DSTATUS disk_status (
 		return 0;
 
 	case DEV_MMC:
-		return STA_NODISK;
+		return 0;
 	}
 
 	return STA_NOINIT;
 }
 
 /*-----------------------------------------------------------------------*/
-/* Inidialize a Drive                                                    */
+/* Initialize a Drive                                                    */
 /*-----------------------------------------------------------------------*/
 
 DSTATUS disk_initialize (
@@ -49,7 +52,7 @@ DSTATUS disk_initialize (
 		return 0;
 
 	case DEV_MMC:
-		return STA_NODISK;
+		return sd_init(&sd) ? STA_NOINIT : 0;
 	}
 
 	return STA_NOINIT;
@@ -73,7 +76,7 @@ DRESULT disk_read (
 		return RES_OK;
 
 	case DEV_MMC:
-		return RES_ERROR;
+		return sd_read(&sd, sector, count, buff) ? RES_ERROR : RES_OK;
 	}
 
 	return RES_PARERR;
@@ -99,7 +102,7 @@ DRESULT disk_write (
 		return RES_OK;
 
 	case DEV_MMC:
-		return RES_ERROR;
+		return sd_write(&sd, sector, count, buff) ? RES_ERROR : RES_OK;
 	}
 
 	return RES_PARERR;
@@ -123,17 +126,27 @@ DRESULT disk_ioctl (
 	case DEV_RAM:
 		switch(cmd)
 		{
-			case GET_SECTOR_COUNT:
-				*(LBA_t *)buff = 192;
-				break;
+		case GET_SECTOR_COUNT:
+			*(LBA_t *)buff = 192;
+			break;
 
-			case GET_BLOCK_SIZE:
-				*(DWORD *)buff = 1;
-				break;
+		case GET_BLOCK_SIZE:
+			*(DWORD *)buff = 1;
+			break;
 		}
 		return RES_OK;
 
 	case DEV_MMC:
+		switch(cmd)
+		{
+		case GET_SECTOR_COUNT:
+			*(LBA_t *)buff = sd.Capacity;
+			break;
+
+		case GET_BLOCK_SIZE:
+			*(DWORD *)buff = 1;
+			break;
+		}
 		return RES_ERROR;
 	}
 

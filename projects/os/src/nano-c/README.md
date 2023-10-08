@@ -366,20 +366,20 @@ the parser, (best example: string literals)
 It makes the code shorter, more efficient and easier to understand by eliminating
 unneccessary passing around of data.
 
-**3.** (Excessive?) Use of macros: `PROPAGATE`, `THROW`, `EXPECT`, etc.
+**3.** (Excessive?) Use of macros: `NANOC_PROPAGATE`, `NANOC_THROW`, `EXPECT`, etc.
 
 I am using macros mainly to make error handling easier.
 The parser uses recursion to handle expressions, nested blocks, etc.
 When there is an error, it needs to be propagated up to
 where it can be handled.
 
-`THROW` "throws" an error, by returning the error code. In debug mode,
+`NANOC_THROW` "throws" an error, by returning the error code. In debug mode,
 also prints file, function and line number to make finding bugs easier.
 
-`PROPAGATE`
-If the called function returns 0 (success), PROPAGATE does nothing.
+`NANOC_PROPAGATE`
+If the called function returns 0 (success), NANOC_PROPAGATE does nothing.
 If the called function returns a negative status code (error),
-PROPAGATE returns the return value
+NANOC_PROPAGATE returns the return value
 
 Exceptions in C, yay!
 
@@ -387,7 +387,7 @@ Exceptions in C, yay!
 
     if(_token.Type != SOME_TOKEN_TYPE)
     {
-        THROW(ERROR_EXPECTED_SOME_TOKEN_TYPE);
+        NANOC_THROW(ERROR_EXPECTED_SOME_TOKEN_TYPE);
     }
 
 `error.c` uses macros to generate the error messages automatically.
@@ -432,10 +432,8 @@ Quote from the link:
 
 - `error.c`: Error handling macros and error definitions
 
-`THROW` to throw a previously defined error\
-`PROPAGATE` to propagate the error\
-New errors are added in the `FOREACH_ERROR` macro, the preprocessor
-generates the enum and error messages automatically.
+`NANOC_THROW` to throw a previously defined error\
+`NANOC_PROPAGATE` to propagate the error\
 
 - `util.c`: Misc. utility functions
 
