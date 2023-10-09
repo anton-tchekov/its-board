@@ -14,7 +14,22 @@
 
 #include "types.h"
 
-u8r nanoc_instr_print(const u8 *program, size_t offset);
+/**
+ * @brief Disassemble and print the instruction at the offset
+ *        in the bytecode
+ *
+ * @param program Bytecode
+ * @param offset Byte offset
+ * @return Size of the disassembled instruction in bytes
+ */
+size_t nanoc_instr_print(const u8 *program, size_t offset);
+
+/**
+ * @brief Disassemble and print all instructions
+ *
+ * @param program Bytecode
+ * @param len Length of program in bytes
+ */
 void nanoc_disasm(const u8 *program, size_t len);
 
 #endif /* NANOC_DEBUG */

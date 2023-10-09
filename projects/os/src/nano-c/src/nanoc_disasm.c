@@ -17,9 +17,9 @@
 
 #define R(X) "\033[31;1m" X "\033[0m"
 
-u8r nanoc_instr_print(const u8 *program, size_t offset)
+size_t nanoc_instr_print(const u8 *program, size_t offset)
 {
-	u8r size;
+	size_t size = 1;
 	const u8 *p = program + offset;
 
 	printf(" %5ld | %04lX | " , offset, offset);
@@ -132,7 +132,6 @@ u8r nanoc_instr_print(const u8 *program, size_t offset)
 
 	default:
 		printf(R("INVALID") "\n");
-		size = 1;
 		break;
 	}
 
