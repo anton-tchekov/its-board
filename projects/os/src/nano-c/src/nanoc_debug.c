@@ -23,11 +23,11 @@ void nanoc_fatal_error(const char *msg, const char *file,
 	fprintf(stderr,
 		"\n"
 		"----------------------------\n"
-		"--- " COLOR_BOLD_RED "[NANO-C] FATAL ERROR" COLOR_RESET " ---\n"
+		"--- " NANOC_TERMINAL_BOLD_RED "[NANO-C] FATAL ERROR" NANOC_TERMINAL_RESET " ---\n"
 		"----------------------------\n"
 		"\n"
-		COLOR_BOLD_WHITE "%s:%d" COLOR_RESET
-		" in function `" COLOR_BOLD_WHITE "%s" COLOR_RESET "`:\n"
+		NANOC_TERMINAL_BOLD_WHITE "%s:%d" NANOC_TERMINAL_RESET
+		" in function `" NANOC_TERMINAL_BOLD_WHITE "%s" NANOC_TERMINAL_RESET "`:\n"
 		"%s\n\n",
 		file, line, func, msg);
 

@@ -25,7 +25,7 @@
 
 #define BINARY_OP(C) \
 	{ \
-		i32r A, B; \
+		NanoC_Value A, B; \
 		CHECK_UNDERFLOW(2); \
 		op -= 1; \
 		A = op_stack[op - 1]; \
@@ -36,7 +36,7 @@
 
 #define BINARY_OP_DIV(C) \
 	{ \
-		i32r A, B; \
+		NanoC_Value A, B; \
 		CHECK_UNDERFLOW(2); \
 		op -= 1; \
 		A = op_stack[op - 1]; \
@@ -51,7 +51,7 @@
 
 #define UNARY_OP(C) \
 	{ \
-		i32r A; \
+		NanoC_Value A; \
 		CHECK_UNDERFLOW(1); \
 		A = op_stack[op - 1]; \
 		op_stack[op - 1] = (C); \
@@ -59,10 +59,10 @@
 	}
 
 NanoC_Status nanoc_interpreter_run(const u8 *program,
-	const NanoC_Builtins *builtins, size_t *rv)
+	const NanoC_Builtins *builtins, NanoC_Value *rv)
 {
-	i32 op_stack[NANOC_OP_STACK_SIZE];
-	i32 call_stack[NANOC_CALL_STACK_SIZE];
+	NanoC_Value op_stack[NANOC_OP_STACK_SIZE];
+	NanoC_Value call_stack[NANOC_CALL_STACK_SIZE];
 
 	u8r op = 0;
 	u16r sp = 0;

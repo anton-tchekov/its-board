@@ -12,6 +12,12 @@
 #include "nanoc_types.h"
 #include "nanoc_parser.h"
 
+/**
+ * @brief Parse if, else-if, else statement
+ *
+ * @param parser Parser
+ * @return Status code
+ */
 NanoC_Status nanoc_if(NanoC_Parser *parser);
 
 #endif /* __NANOC_IF_H__ */

@@ -3,13 +3,13 @@
  * @author  Anton Tchekov
  * @version 0.1
  * @date    2023-10-09
- * @brief   NanoC interpreter instructions
+ * @brief   NanoC interpreter instruction
  */
 
 #ifndef __NANOC_INSTRUCTION_H__
 #define __NANOC_INSTRUCTION_H__
 
-enum
+typedef enum NANOC_OPCODE
 {
 	NANOC_INSTR_HALT,
 	NANOC_INSTR_PUSHI8,
@@ -50,6 +50,6 @@ enum
 	NANOC_INSTR_B_NOT,
 	NANOC_INSTR_U_MINUS,
 	NANOC_INSTR_OP_END = NANOC_INSTR_U_MINUS
-};
+} NanoC_Opcode;
 
 #endif /* __NANOC_INSTRUCTION_H__ */

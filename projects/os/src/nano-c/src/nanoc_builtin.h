@@ -9,9 +9,9 @@
 #ifndef __NANOC_BUILTIN_H__
 #define __NANOC_BUILTIN_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 
-typedef i32r (*NanoC_Builtin)(i32r, i32 *);
+typedef NanoC_Value (*NanoC_Builtin)(NanoC_Value, NanoC_Value *);
 
 typedef struct NANOC_BUILTINS
 {
@@ -32,7 +32,7 @@ typedef struct NANOC_PARSER_BUILTINS
 	const NanoC_ParserBuiltin *Table;
 } NanoC_ParserBuiltins;
 
-int nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
-	const char *name, size_t len);
+NanoC_Bool nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
+	const char *name, size_t len, size_t *idx);
 
 #endif /* __NANOC_BUILTIN_H__ */

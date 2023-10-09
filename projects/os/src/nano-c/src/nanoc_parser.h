@@ -23,7 +23,7 @@
 #define NANOC_MAX_FN_ARGS         16
 #define NANOC_BC_BUFFER_SIZE      16
 
-#define EXPECT(TYPE, ERROR) \
+#define NANOC_EXPECT(TYPE, ERROR) \
 	do \
 	{ \
 		if(nanoc_tokenstream_get(&parser->TokenStream, 0)->Type != TYPE) \
@@ -32,22 +32,13 @@
 		} \
 	} while(0)
 
-#define EXPECT_EQ(A, B, ERROR) \
-	do \
-	{ \
-		if((A) != (B)) \
-		{ \
-			NANOC_THROW(ERROR); \
-		} \
-	} while(0)
-
-#define TOKEN(N) \
+#define NANOC_TOKEN(N) \
 	nanoc_tokenstream_get(&parser->TokenStream, (N))
 
-#define TT(N) \
-	(TOKEN(N)->Type)
+#define NANOC_TT(N) \
+	(NANOC_TOKEN(N)->Type)
 
-#define NEXT() \
+#define NANOC_NEXT() \
 	nanoc_tokenstream_next(&parser->TokenStream)
 
 typedef struct NANOC_PARSER
@@ -63,11 +54,10 @@ typedef struct NANOC_PARSER
 	NanoC_AddressStack ContinueStack;
 	NanoC_Map Variables;
 	const NanoC_ParserBuiltins *Builtins;
-	u16 FuncLocalsIdx;
-	u8 BreakNesting;
-	u8 ContinueNesting;
-	u8 AndOrTop;
-	u8 OpTop;
+	size_t BreakNesting;
+	size_t ContinueNesting;
+	size_t AndOrTop;
+	size_t OpTop;
 } NanoC_Parser;
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,

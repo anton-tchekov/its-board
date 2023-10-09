@@ -11,19 +11,22 @@
 #include "nanoc_status.h"
 #include "nanoc_util.h"
 
-typedef enum TOKEN_CLASS
+typedef u8r NanoC_TokenClass;
+typedef u8r NanoC_Precedence;
+
+enum
 {
 	TC_OPERAND,
 	TC_BINARY,
 	TC_UNARY,
 	TC_COUNT
-} TokenClass;
+};
 
 #define LUT(X) ((X) - NANOC_TT_OP_START)
 
 #ifdef NANOC_DEBUG
 
-static const char *token_class_tostring(u8r token_class)
+static const char *token_class_tostring(NanoC_TokenClass token_class)
 {
 	static const char *lut[] =
 	{
@@ -38,7 +41,7 @@ static const char *token_class_tostring(u8r token_class)
 
 #ifdef NANOC_DESKTOP
 
-static void token_class_print(u8r token_class)
+static void token_class_print(NanoC_TokenClass token_class)
 {
 	printf("TOKEN CLASS = %s\n", token_class_tostring(token_class));
 }
@@ -52,7 +55,7 @@ static NanoC_Bool token_is_operator(NanoC_TokenType token_type)
 		(token_type <= NANOC_TT_OP_END);
 }
 
-static u8r precedence_get(NanoC_TokenType token_type)
+static NanoC_Precedence precedence_get(NanoC_TokenType token_type)
 {
 	static const u8 precedence_lut[] =
 	{
@@ -91,16 +94,14 @@ static NanoC_Opcode token_to_instr(NanoC_TokenType token_type)
 
 static void nanoc_expression_number(NanoC_Parser *parser, NanoC_Token *token)
 {
-	nanoc_output_pushi(&parser->Output, token->Value.Integer);
+	nanoc_output_pushi(&parser->Output, token->Value);
 }
 
 static NanoC_Status nanoc_expression_identifier(NanoC_Parser *parser)
 {
 	size_t local;
-	NanoC_Token *token;
-
-	token = TOKEN(0);
-	if(TT(1) == NANOC_TT_L_PAREN)
+	NanoC_Token *token = NANOC_TOKEN(0);
+	if(NANOC_TT(1) == NANOC_TT_L_PAREN)
 	{
 		NANOC_PROPAGATE(nanoc_fn_call(parser));
 	}
@@ -118,9 +119,9 @@ static NanoC_Status nanoc_expression_identifier(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
-static void and_or_addr_here(NanoC_Parser *parser, u8r prev_top)
+static void and_or_addr_here(NanoC_Parser *parser, size_t prev_top)
 {
-	u8r i = parser->AndOrTop;
+	size_t i = parser->AndOrTop;
 	while(i > prev_top)
 	{
 		--i;
@@ -131,9 +132,9 @@ static void and_or_addr_here(NanoC_Parser *parser, u8r prev_top)
 }
 
 static void nanoc_expression_operator(NanoC_Parser *parser,
-	u8r local_top, u8r ao_top, NanoC_TokenType tt)
+	size_t local_top, size_t ao_top, NanoC_TokenType tt)
 {
-	u8r prec = precedence_get(tt);
+	NanoC_Precedence prec = precedence_get(tt);
 
 	while((parser->OpTop > local_top) &&
 		(precedence_get(parser->OperatorStack[parser->OpTop - 1]) <= prec))
@@ -161,7 +162,8 @@ static void nanoc_expression_operator(NanoC_Parser *parser,
 	}
 }
 
-static u8r check_prev(u8r prev_class, u8r cur_class)
+static NanoC_Status check_prev(
+	NanoC_TokenClass prev_class, NanoC_TokenClass cur_class)
 {
 	static const u8 lut[TC_COUNT][TC_COUNT] =
 	{
@@ -181,9 +183,9 @@ static u8r check_prev(u8r prev_class, u8r cur_class)
 	return lut[prev_class][cur_class];
 }
 
-static u8r token_class(u8r tt)
+static NanoC_TokenClass token_class(NanoC_TokenType tt)
 {
-	u8r token_class = TC_BINARY;
+	NanoC_TokenClass token_class = TC_BINARY;
 	if(tt == NANOC_TT_INTEGER ||
 		tt == NANOC_TT_IDENTIFIER ||
 		tt == NANOC_TT_L_PAREN)
@@ -203,10 +205,10 @@ static u8r token_class(u8r tt)
 NanoC_Status nanoc_expression(NanoC_Parser *parser)
 {
 	NanoC_Token *cur_token;
-	u8r local_top = parser->OpTop;
-	u8r aoprev_top = parser->AndOrTop;
+	size_t local_top = parser->OpTop;
+	size_t aoprev_top = parser->AndOrTop;
 	NanoC_TokenType tt = NANOC_TT_NULL;
-	u8r prev_class;
+	NanoC_TokenClass prev_class;
 
 	for(;;)
 	{
@@ -229,9 +231,9 @@ NanoC_Status nanoc_expression(NanoC_Parser *parser)
 		}
 		else if(tt == NANOC_TT_L_PAREN)
 		{
-			NEXT();
+			NANOC_NEXT();
 			NANOC_PROPAGATE(nanoc_expression(parser));
-			EXPECT(NANOC_TT_R_PAREN, NANOC_ERROR_EXPECTED_R_PAREN);
+			NANOC_EXPECT(NANOC_TT_R_PAREN, NANOC_ERROR_EXPECTED_R_PAREN);
 		}
 		else if(token_is_operator(tt))
 		{
@@ -242,7 +244,7 @@ NanoC_Status nanoc_expression(NanoC_Parser *parser)
 			break;
 		}
 
-		NEXT();
+		NANOC_NEXT();
 	}
 
 	while(parser->OpTop > local_top)

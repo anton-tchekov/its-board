@@ -14,8 +14,8 @@ static NanoC_Bool _match(const char *builtin, const char *token, size_t len)
 	return strlen(builtin) == len && !strncmp(builtin, token, len);
 }
 
-int nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
-	const char *name, size_t len)
+NanoC_Bool nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
+	const char *name, size_t len, size_t *idx)
 {
 	size_t i, count;
 	const NanoC_ParserBuiltin *elem;
@@ -26,9 +26,10 @@ int nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
 	{
 		if(_match(elem->Name, name, len))
 		{
-			return i;
+			*idx = i;
+			return 1;
 		}
 	}
 
-	return -1;
+	return 0;
 }

@@ -23,14 +23,9 @@ typedef struct NANOC_TOKEN
 	const char *Ptr;
 	const char *LineBegin;
 	size_t Length;
+	NanoC_Value Value;
 	NanoC_Position Pos;
-	u8 Type;
-	union
-	{
-		f32 Float;
-		i32 Integer;
-		u32 Unsigned;
-	} Value;
+	NanoC_TokenType Type;
 } NanoC_Token;
 
 void nanoc_token_print(NanoC_Token *token);

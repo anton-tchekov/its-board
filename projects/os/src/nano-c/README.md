@@ -366,7 +366,8 @@ the parser, (best example: string literals)
 It makes the code shorter, more efficient and easier to understand by eliminating
 unneccessary passing around of data.
 
-**3.** (Excessive?) Use of macros: `NANOC_PROPAGATE`, `NANOC_THROW`, `EXPECT`, etc.
+**3.** (Excessive?) Use of macros: `NANOC_PROPAGATE`, `NANOC_THROW`,
+`NANOC_EXPECT`, etc.
 
 I am using macros mainly to make error handling easier.
 The parser uses recursion to handle expressions, nested blocks, etc.
@@ -383,7 +384,7 @@ NANOC_PROPAGATE returns the return value
 
 Exceptions in C, yay!
 
-`EXPECT` is used to shorten the commonly needed:
+`NANOC_EXPECT` is used to shorten the commonly needed:
 
     if(_token.Type != SOME_TOKEN_TYPE)
     {

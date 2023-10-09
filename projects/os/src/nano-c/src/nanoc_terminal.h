@@ -11,9 +11,9 @@
 
 #ifdef NANOC_DESKTOP
 
-#define COLOR_BOLD_WHITE "\033[0;1m"
-#define COLOR_BOLD_RED   "\033[31;1m"
-#define COLOR_RESET      "\033[0m"
+#define NANOC_TERMINAL_BOLD_WHITE "\033[0;1m"
+#define NANOC_TERMINAL_BOLD_RED   "\033[31;1m"
+#define NANOC_TERMINAL_RESET      "\033[0m"
 
 #endif /* NANOC_DESKTOP */
 

@@ -42,7 +42,6 @@ const char *nanoc_status_message(NanoC_Status status_code)
 		"UNDEFINED_VARIABLE",
 		"UNDEFINED_FN",
 		"FN_NUM_ARGS",
-		"TOO_MANY_FN_ARGS",
 		"DIVISION_BY_ZERO",
 		"INVALID_INSTRUCTION"
 	};

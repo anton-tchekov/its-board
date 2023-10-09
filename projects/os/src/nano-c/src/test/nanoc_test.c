@@ -16,29 +16,32 @@
 #include "types.h"
 #include <stdio.h>
 #include <assert.h>
+#include <inttypes.h>
 
-static i32r output;
+static NanoC_Value output;
 
-static i32r test(i32r a, i32 *p)
+static NanoC_Value test(NanoC_Value a, NanoC_Value *p)
 {
 	output = p[0];
 	return 0;
 }
 
-static int test_positive_run(const char *source, int expected)
+static int test_positive_run(const char *source, NanoC_Value expected)
 {
 	int ret;
+	NanoC_Value rv;
 	NanoC_Parser parser;
 	u8 output_buf[1024];
-	i32r (*functions[])(i32r, i32 *) = { test };
+	char strings[1024];
+	NanoC_Value (*functions[])(NanoC_Value, NanoC_Value *) = { test };
 	NanoC_Builtins builtins =
 	{
 		1,
 		functions
 	};
 
-	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf),
-		&parser_builtins);
+	nanoc_parser_init(&parser, source, strings,
+		output_buf, sizeof(output_buf), &parser_builtins);
 	ret = nanoc_statement(&parser);
 	if(ret)
 	{
@@ -47,7 +50,7 @@ static int test_positive_run(const char *source, int expected)
 	}
 
 	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
-	ret = nanoc_interpreter_run(parser.Output.Buffer, &builtins);
+	ret = nanoc_interpreter_run(parser.Output.Buffer, &builtins, &rv);
 	if(ret)
 	{
 		printf("Interpreter error: %s\n", nanoc_status_message(ret));
@@ -56,7 +59,7 @@ static int test_positive_run(const char *source, int expected)
 
 	if(output != expected)
 	{
-		printf("Expected %d got %d\n", expected, output);
+		printf("Expected %"PRIdPTR" got %"PRIdPTR"\n", expected, output);
 		return 0;
 	}
 
@@ -67,7 +70,8 @@ static int test_negative_run(const char *source)
 {
 	NanoC_Parser parser;
 	u8 output_buf[1024];
-	nanoc_parser_init(&parser, source, output_buf, sizeof(output_buf),
+	char strings[1024];
+	nanoc_parser_init(&parser, source, strings, output_buf, sizeof(output_buf),
 		&parser_builtins);
 	return nanoc_statement(&parser);
 }

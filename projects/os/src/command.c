@@ -35,7 +35,7 @@ static void _not_implemented(void)
 	shell_print("Not Implemented\n");
 }
 
-static i32r _printn(i32r a, i32 *p)
+static NanoC_Value _printn(NanoC_Value a, NanoC_Value *p)
 {
 	char buf[16];
 	sprintf(buf, "%d\n", p[0]);
@@ -44,7 +44,7 @@ static i32r _printn(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _printc(i32r a, i32 *p)
+static NanoC_Value _printc(NanoC_Value a, NanoC_Value *p)
 {
 	char buf[2] = { p[0], '\0' };
 	shell_print(buf);
@@ -52,7 +52,7 @@ static i32r _printc(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _prints(i32r a, i32 *p)
+static NanoC_Value _prints(NanoC_Value a, NanoC_Value *p)
 {
 	shell_print((char *)p[0]);
 	shell_char('\n');
@@ -60,7 +60,7 @@ static i32r _prints(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _about(i32r a, i32 *p)
+static NanoC_Value _about(NanoC_Value a, NanoC_Value *p)
 {
 	shell_print(
 		"ITS Board Shell V0.1\n"
@@ -71,7 +71,7 @@ static i32r _about(i32r a, i32 *p)
 	(void)a, (void)p;
 }
 
-static i32r _delay_ms(i32r a, i32 *p)
+static NanoC_Value _delay_ms(NanoC_Value a, NanoC_Value *p)
 {
 	delay_ms(p[0]);
 	return 0;
@@ -108,7 +108,7 @@ static int check_pin_fn(GPIO_TypeDef *gpio, int port)
 	return 0;
 }
 
-static i32r _pin_high(i32r a, i32 *p)
+static NanoC_Value _pin_high(NanoC_Value a, NanoC_Value *p)
 {
 	GPIO_TypeDef *gpio = _getport(p[0]);
 	int port = p[1];
@@ -118,7 +118,7 @@ static i32r _pin_high(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _pin_low(i32r a, i32 *p)
+static NanoC_Value _pin_low(NanoC_Value a, NanoC_Value *p)
 {
 	GPIO_TypeDef *gpio = _getport(p[0]);
 	int port = p[1];
@@ -128,7 +128,7 @@ static i32r _pin_low(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _pin_toggle(i32r a, i32 *p)
+static NanoC_Value _pin_toggle(NanoC_Value a, NanoC_Value *p)
 {
 	GPIO_TypeDef *gpio = _getport(p[0]);
 	int port = p[1];
@@ -138,7 +138,7 @@ static i32r _pin_toggle(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _pin_get(i32r a, i32 *p)
+static NanoC_Value _pin_get(NanoC_Value a, NanoC_Value *p)
 {
 	GPIO_TypeDef *gpio = _getport(p[0]);
 	int port = p[1];
@@ -147,28 +147,28 @@ static i32r _pin_get(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _max(i32r a, i32 *p)
+static NanoC_Value _max(NanoC_Value a, NanoC_Value *p)
 {
 	return p[0] > p[1] ? p[0] : p[1];
 	(void)a;
 }
 
-static i32r _min(i32r a, i32 *p)
+static NanoC_Value _min(NanoC_Value a, NanoC_Value *p)
 {
 	return p[0] < p[1] ? p[0] : p[1];
 	(void)a;
 }
 
-static i32r _abs(i32r a, i32 *p)
+static NanoC_Value _abs(NanoC_Value a, NanoC_Value *p)
 {
-	i32 v = p[0];
+	NanoC_Value v = p[0];
 	return v < 0 ? -v : v;
 	(void)a;
 }
 
-static i32r _sign(i32r a, i32 *p)
+static NanoC_Value _sign(NanoC_Value a, NanoC_Value *p)
 {
-	i32 v = p[0];
+	NanoC_Value v = p[0];
 	if(v == 0)
 	{
 		return 0;
@@ -178,7 +178,7 @@ static i32r _sign(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _pow(i32r a, i32 *p)
+static NanoC_Value _pow(NanoC_Value a, NanoC_Value *p)
 {
 	int base = p[0];
 	int exp = p[1];
@@ -193,7 +193,7 @@ static i32r _pow(i32r a, i32 *p)
 	(void)a;
 }
 
-static int abomination(int count, char *buf, size_t n, const char *format, i32 *p)
+static int abomination(int count, char *buf, size_t n, const char *format, NanoC_Value *p)
 {
 	/* couldn't find a better way to do this */
 	switch(count)
@@ -210,7 +210,7 @@ static int abomination(int count, char *buf, size_t n, const char *format, i32 *
 	return -1;
 }
 
-static i32r _printf(i32r a, i32 *p)
+static NanoC_Value _printf(NanoC_Value a, NanoC_Value *p)
 {
 	int ret;
 	char buf[256];
@@ -226,12 +226,12 @@ static i32r _printf(i32r a, i32 *p)
 	return ret;
 }
 
-static i32r _sprintf(i32r a, i32 *p)
+static NanoC_Value _sprintf(NanoC_Value a, NanoC_Value *p)
 {
 	return abomination(a, (char *)p[0], 0xFFFFFF, (char *)p[1], p + 2);
 }
 
-static i32r _snprintf(i32r a, i32 *p)
+static NanoC_Value _snprintf(NanoC_Value a, NanoC_Value *p)
 {
 	return abomination(a, (char *)p[0], p[1], (char *)p[2], p + 3);;
 }
@@ -247,7 +247,7 @@ void fserror(int ret)
 	shell_char('\n');
 }
 
-static i32r _blkinfo(i32r a, i32 *p)
+static NanoC_Value _blkinfo(NanoC_Value a, NanoC_Value *p)
 {
 	int drive = p[0];
 	if(!drive_valid(drive))
@@ -271,7 +271,7 @@ static i32r _blkinfo(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _mkfs(i32r a, i32 *p)
+static NanoC_Value _mkfs(NanoC_Value a, NanoC_Value *p)
 {
 	int drive = p[0];
 	if(!drive_valid(drive)) { return FR_INVALID_DRIVE; }
@@ -281,7 +281,7 @@ static i32r _mkfs(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _mount(i32r a, i32 *p)
+static NanoC_Value _mount(NanoC_Value a, NanoC_Value *p)
 {
 	int drive = p[0];
 	if(!drive_valid(drive)) { return FR_INVALID_DRIVE; }
@@ -290,7 +290,7 @@ static i32r _mount(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _unmount(i32r a, i32 *p)
+static NanoC_Value _unmount(NanoC_Value a, NanoC_Value *p)
 {
 	int drive = p[0];
 	if(!drive_valid(drive)) { return FR_INVALID_DRIVE; }
@@ -299,7 +299,7 @@ static i32r _unmount(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _mkdir(i32r a, i32 *p)
+static NanoC_Value _mkdir(NanoC_Value a, NanoC_Value *p)
 {
 	int i, ret;
 	for(i = 0; i < a; ++i)
@@ -311,7 +311,7 @@ static i32r _mkdir(i32r a, i32 *p)
 	return 0;
 }
 
-static i32r _create(i32r a, i32 *p)
+static NanoC_Value _create(NanoC_Value a, NanoC_Value *p)
 {
 	FIL fp;
 	int i, ret;
@@ -326,7 +326,7 @@ static i32r _create(i32r a, i32 *p)
 	return 0;
 }
 
-static i32r _rm(i32r a, i32 *p)
+static NanoC_Value _rm(NanoC_Value a, NanoC_Value *p)
 {
 	int i, ret;
 	for(i = 0; i < a; ++i)
@@ -338,20 +338,20 @@ static i32r _rm(i32r a, i32 *p)
 	return 0;
 }
 
-static i32r _mv(i32r a, i32 *p)
+static NanoC_Value _mv(NanoC_Value a, NanoC_Value *p)
 {
 	return f_rename((char *)p[1], (char *)p[0]);
 	(void)a;
 }
 
-static i32r _cp(i32r a, i32 *p)
+static NanoC_Value _cp(NanoC_Value a, NanoC_Value *p)
 {
 	_not_implemented();
 	return 0;
 	(void)a, (void)p;
 }
 
-static i32r _ls(i32r a, i32 *p)
+static NanoC_Value _ls(NanoC_Value a, NanoC_Value *p)
 {
 	int ret;
 	DIR dp;
@@ -402,212 +402,212 @@ static i32r _ls(i32r a, i32 *p)
 	(void)a;
 }
 
-static i32r _edit(i32r a, i32 *p)
+static NanoC_Value _edit(NanoC_Value a, NanoC_Value *p)
 {
 	editor_load_cmd((char *)p[0]);
 	return 0;
 	(void)a;
 }
 
-static i32r _edsav(i32r a, i32 *p)
+static NanoC_Value _edsav(NanoC_Value a, NanoC_Value *p)
 {
 	editor_save_cmd((char *)p[0]);
 	return 0;
 	(void)a;
 }
 
-static i32r _fserr(i32r a, i32 *p)
+static NanoC_Value _fserr(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)f_status_str(p[0]);
+	return (NanoC_Value)f_status_str(p[0]);
 	(void)a;
 }
 
-static i32r _rand(i32r a, i32 *p)
+static NanoC_Value _rand(NanoC_Value a, NanoC_Value *p)
 {
 	return rand();
 	(void)a, (void)p;
 }
 
-static i32r _srand(i32r a, i32 *p)
+static NanoC_Value _srand(NanoC_Value a, NanoC_Value *p)
 {
 	srand(p[0]);
 	return 0;
 	(void)a;
 }
 
-static i32r _memcpy(i32r a, i32 *p)
+static NanoC_Value _memcpy(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)memcpy((void *)p[0], (void *)p[1], p[2]);
+	return (NanoC_Value)memcpy((void *)p[0], (void *)p[1], p[2]);
 	(void)a;
 }
 
-static i32r _memset(i32r a, i32 *p)
+static NanoC_Value _memset(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)memset((void *)p[0], p[1], p[2]);
+	return (NanoC_Value)memset((void *)p[0], p[1], p[2]);
 	(void)a;
 }
 
-static i32r _memcmp(i32r a, i32 *p)
+static NanoC_Value _memcmp(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)memcmp((void *)p[0], (void *)p[1], p[2]);
+	return (NanoC_Value)memcmp((void *)p[0], (void *)p[1], p[2]);
 	(void)a;
 }
 
-static i32r _memmove(i32r a, i32 *p)
+static NanoC_Value _memmove(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)memmove((void *)p[0], (void *)p[1], p[2]);
+	return (NanoC_Value)memmove((void *)p[0], (void *)p[1], p[2]);
 	(void)a;
 }
 
-static i32r _memchr(i32r a, i32 *p)
+static NanoC_Value _memchr(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)memchr((void *)p[0], p[1], p[2]);
+	return (NanoC_Value)memchr((void *)p[0], p[1], p[2]);
 	(void)a;
 }
 
-static i32r _strlen(i32r a, i32 *p)
+static NanoC_Value _strlen(NanoC_Value a, NanoC_Value *p)
 {
 	return strlen((char *)p[0]);
 	(void)a;
 }
 
-static i32r _strnlen(i32r a, i32 *p)
+static NanoC_Value _strnlen(NanoC_Value a, NanoC_Value *p)
 {
 	return strnlen((char *)p[0], p[1]);
 	(void)a;
 }
 
-static i32r _strcpy(i32r a, i32 *p)
+static NanoC_Value _strcpy(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)strcpy((char *)p[0], (char *)p[1]);
+	return (NanoC_Value)strcpy((char *)p[0], (char *)p[1]);
 	(void)a;
 }
 
-static i32r _strncpy(i32r a, i32 *p)
+static NanoC_Value _strncpy(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)strncpy((char *)p[0], (char *)p[1], p[2]);
+	return (NanoC_Value)strncpy((char *)p[0], (char *)p[1], p[2]);
 	(void)a;
 }
 
-static i32r _strcmp(i32r a, i32 *p)
+static NanoC_Value _strcmp(NanoC_Value a, NanoC_Value *p)
 {
 	return strcmp((char *)p[0], (char *)p[1]);
 	(void)a;
 }
 
-static i32r _strncmp(i32r a, i32 *p)
+static NanoC_Value _strncmp(NanoC_Value a, NanoC_Value *p)
 {
 	return strncmp((char *)p[0], (char *)p[1], p[2]);
 	(void)a;
 }
 
-static i32r _strchr(i32r a, i32 *p)
+static NanoC_Value _strchr(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)strchr((char *)p[0], p[1]);
+	return (NanoC_Value)strchr((char *)p[0], p[1]);
 	(void)a;
 }
 
-static i32r _clipget(i32r a, i32 *p)
+static NanoC_Value _clipget(NanoC_Value a, NanoC_Value *p)
 {
 	if(a == 0)
 	{
 		int val;
-		return (i32r)clipboard_get(&val);
+		return (NanoC_Value)clipboard_get(&val);
 	}
 	else if(a == 1)
 	{
-		return (i32r)clipboard_get((int *)p[0]);
+		return (NanoC_Value)clipboard_get((int *)p[0]);
 	}
 
 	return 1;
 }
 
-static i32r _clipsave(i32r a, i32 *p)
+static NanoC_Value _clipsave(NanoC_Value a, NanoC_Value *p)
 {
 	return clipboard_save((char *)p[0], p[1]);
 	(void)a;
 }
 
-static i32r nanoc_isupper(i32r a, i32 *p)
+static NanoC_Value nanoc_isupper(NanoC_Value a, NanoC_Value *p)
 {
 	return isupper(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_islower(i32r a, i32 *p)
+static NanoC_Value nanoc_islower(NanoC_Value a, NanoC_Value *p)
 {
 	return islower(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_isdigit(i32r a, i32 *p)
+static NanoC_Value nanoc_isdigit(NanoC_Value a, NanoC_Value *p)
 {
 	return isdigit(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_isalpha(i32r a, i32 *p)
+static NanoC_Value nanoc_isalpha(NanoC_Value a, NanoC_Value *p)
 {
 	return isalpha(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_isalnum(i32r a, i32 *p)
+static NanoC_Value nanoc_isalnum(NanoC_Value a, NanoC_Value *p)
 {
 	return isalnum(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_isprint(i32r a, i32 *p)
+static NanoC_Value nanoc_isprint(NanoC_Value a, NanoC_Value *p)
 {
 	return isprint(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_isspace(i32r a, i32 *p)
+static NanoC_Value nanoc_isspace(NanoC_Value a, NanoC_Value *p)
 {
 	return isspace(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_isxdigit(i32r a, i32 *p)
+static NanoC_Value nanoc_isxdigit(NanoC_Value a, NanoC_Value *p)
 {
 	return isxdigit(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_tolower(i32r a, i32 *p)
+static NanoC_Value nanoc_tolower(NanoC_Value a, NanoC_Value *p)
 {
 	return tolower(p[0]);
 	(void)a;
 }
 
-static i32r nanoc_toupper(i32r a, i32 *p)
+static NanoC_Value nanoc_toupper(NanoC_Value a, NanoC_Value *p)
 {
 	return toupper(p[0]);
 	(void)a;
 }
 
-static i32r _isoct(i32r a, i32 *p)
+static NanoC_Value _isoct(NanoC_Value a, NanoC_Value *p)
 {
 	return is_octal(p[0]);
 	(void)a;
 }
 
-static i32r _isbin(i32r a, i32 *p)
+static NanoC_Value _isbin(NanoC_Value a, NanoC_Value *p)
 {
 	return is_binary(p[0]);
 	(void)a;
 }
 
-static i32r _clear(i32r a, i32 *p)
+static NanoC_Value _clear(NanoC_Value a, NanoC_Value *p)
 {
 	shell_cls();
 	return 0;
 	(void)a, (void)p;
 }
 
-static i32r _gotoxy(i32r a, i32 *p)
+static NanoC_Value _gotoxy(NanoC_Value a, NanoC_Value *p)
 {
 	shell_xy(p[0], p[1]);
 	return 0;
@@ -666,131 +666,131 @@ static void hexdump(u32 start, u32 len)
 	}
 }
 
-static i32r _hexdump(i32r a, i32 *p)
+static NanoC_Value _hexdump(NanoC_Value a, NanoC_Value *p)
 {
 	hexdump(p[0], p[1]);
 	return 0;
 	(void)a;
 }
 
-static i32r _ldr(i32r a, i32 *p)
+static NanoC_Value _ldr(NanoC_Value a, NanoC_Value *p)
 {
 	return *(u32 *)p[0];
 	(void)a;
 }
 
-static i32r _ldrh(i32r a, i32 *p)
+static NanoC_Value _ldrh(NanoC_Value a, NanoC_Value *p)
 {
 	return *(u16 *)p[0];
 	(void)a;
 }
 
-static i32r _ldrsh(i32r a, i32 *p)
+static NanoC_Value _ldrsh(NanoC_Value a, NanoC_Value *p)
 {
 	return *(i16 *)p[0];
 	(void)a;
 }
 
-static i32r _ldrb(i32r a, i32 *p)
+static NanoC_Value _ldrb(NanoC_Value a, NanoC_Value *p)
 {
 	return *(u8 *)p[0];
 	(void)a;
 }
 
-static i32r _ldrsb(i32r a, i32 *p)
+static NanoC_Value _ldrsb(NanoC_Value a, NanoC_Value *p)
 {
 	return *(i8 *)p[0];
 	(void)a;
 }
 
-static i32r _str(i32r a, i32 *p)
+static NanoC_Value _str(NanoC_Value a, NanoC_Value *p)
 {
 	*(u32 *)p[0] = p[1];
 	return p[1];
 	(void)a;
 }
 
-static i32r _strh(i32r a, i32 *p)
+static NanoC_Value _strh(NanoC_Value a, NanoC_Value *p)
 {
 	*(u16 *)p[0] = p[1];
 	return p[1] & 0xFFFF;
 	(void)a;
 }
 
-static i32r _strb(i32r a, i32 *p)
+static NanoC_Value _strb(NanoC_Value a, NanoC_Value *p)
 {
 	*(u8 *)p[0] = p[1];
 	return p[1] & 0xFF;
 	(void)a;
 }
 
-static i32r _boolstr(i32r a, i32 *p)
+static NanoC_Value _boolstr(NanoC_Value a, NanoC_Value *p)
 {
-	return (i32r)(p[0] ? "true" : "false");
+	return (NanoC_Value)(p[0] ? "true" : "false");
 	(void)a;
 }
 
-static i32r _fopen(i32r a, i32 *p)
+static NanoC_Value _fopen(NanoC_Value a, NanoC_Value *p)
 {
 	return f_open((FIL *)p[0], (char *)p[1], p[2]);
 	(void)a;
 }
 
-static i32r _fclose(i32r a, i32 *p)
+static NanoC_Value _fclose(NanoC_Value a, NanoC_Value *p)
 {
 	return f_close((FIL *)p[0]);
 	(void)a;
 }
 
-static i32r _fread(i32r a, i32 *p)
+static NanoC_Value _fread(NanoC_Value a, NanoC_Value *p)
 {
 	return f_read((FIL *)p[0], (void *)p[1], p[2], (UINT *)p[3]);
 	(void)a;
 }
 
-static i32r _fwrite(i32r a, i32 *p)
+static NanoC_Value _fwrite(NanoC_Value a, NanoC_Value *p)
 {
 	return f_write((FIL *)p[0], (void *)p[1], p[2], (UINT *)p[3]);
 	(void)a;
 }
 
-static i32r _fseek(i32r a, i32 *p)
+static NanoC_Value _fseek(NanoC_Value a, NanoC_Value *p)
 {
 	return f_lseek((FIL *)p[0], p[1]);
 	(void)a;
 }
 
-static i32r _fsync(i32r a, i32 *p)
+static NanoC_Value _fsync(NanoC_Value a, NanoC_Value *p)
 {
 	return f_sync((FIL *)p[0]);
 	(void)a;
 }
 
-static i32r _ftruncate(i32r a, i32 *p)
+static NanoC_Value _ftruncate(NanoC_Value a, NanoC_Value *p)
 {
 	return f_truncate((FIL *)p[0]);
 	(void)a;
 }
 
-static i32r _opendir(i32r a, i32 *p)
+static NanoC_Value _opendir(NanoC_Value a, NanoC_Value *p)
 {
 	return f_opendir((DIR *)p[0], (char *)p[1]);
 	(void)a;
 }
 
-static i32r _closedir(i32r a, i32 *p)
+static NanoC_Value _closedir(NanoC_Value a, NanoC_Value *p)
 {
 	return f_closedir((DIR *)p[0]);
 	(void)a;
 }
 
-static i32r _readdir(i32r a, i32 *p)
+static NanoC_Value _readdir(NanoC_Value a, NanoC_Value *p)
 {
 	return f_readdir((DIR *)p[0], (FILINFO *)p[1]);
 	(void)a;
 }
 
-static i32r _help(i32r a, i32 *p);
+static NanoC_Value _help(NanoC_Value a, NanoC_Value *p);
 
 static const NanoC_ParserBuiltin parser_builtins_data[] =
 {
@@ -902,7 +902,7 @@ static const NanoC_ParserBuiltins parser_builtins =
 #define HELP_COLWIDTH 15
 #define HELP_HEIGHT   19
 
-static i32r _help(i32r a, i32 *p)
+static NanoC_Value _help(NanoC_Value a, NanoC_Value *p)
 {
 	int n = 0, i = 0, end;
 	char buf[16];

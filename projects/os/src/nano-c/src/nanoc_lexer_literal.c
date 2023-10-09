@@ -9,7 +9,7 @@
 #include "nanoc_util.h"
 #include <ctype.h>
 
-static i32 _escape_sequence(const char *p, size_t *out_len)
+static NanoC_Value _escape_sequence(const char *p, size_t *out_len)
 {
 	static const u8 tab[] =
 	{
@@ -49,7 +49,7 @@ NanoC_Bool nanoc_lexer_char(NanoC_Lexer *lexer, NanoC_Token *token)
 {
 	const char *p;
 	NanoC_Char c;
-	i32 v;
+	NanoC_Value v;
 
 	p = lexer->Ptr;
 	if(*p != '\'')
@@ -88,7 +88,7 @@ NanoC_Bool nanoc_lexer_char(NanoC_Lexer *lexer, NanoC_Token *token)
 
 	++p;
 	nanoc_lexer_forward(lexer, p);
-	token->Value.Integer = v;
+	token->Value = v;
 	token->Type = NANOC_TT_INTEGER;
 	token->Length = p - token->Ptr;
 	return 1;
@@ -98,7 +98,8 @@ NanoC_Bool nanoc_lexer_string(NanoC_Lexer *lexer, NanoC_Token *token)
 {
 	char *strs, *start;
 	const char *p;
-	int c, v;
+	NanoC_Char c;
+	NanoC_Value v;
 
 	p = lexer->Ptr;
 	if(*p != '\"')
@@ -143,9 +144,7 @@ NanoC_Bool nanoc_lexer_string(NanoC_Lexer *lexer, NanoC_Token *token)
 	++p;
 	nanoc_lexer_forward(lexer, p);
 	token->Type = NANOC_TT_INTEGER;
-
-	/* TODO: Extremely cursed, non portable undefined behavior, but works! */
-	token->Value.Integer = (int)start;
+	token->Value = (NanoC_Value)start;
 	token->Length = p - token->Ptr;
 	return 1;
 }

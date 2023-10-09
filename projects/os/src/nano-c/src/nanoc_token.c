@@ -13,6 +13,7 @@
 #include "nanoc_instruction.h"
 #include "nanoc_terminal.h"
 #include <stdio.h>
+#include <inttypes.h>
 
 size_t _print_handle_tab(NanoC_Char c, size_t count)
 {
@@ -44,7 +45,7 @@ void nanoc_token_print(NanoC_Token *token)
 
 	if(token->Type == NANOC_TT_INTEGER)
 	{
-		printf(" (value = %d)", token->Value.Integer);
+		printf(" (value = %"PRIdPTR")", token->Value);
 	}
 
 	fputc('\n', stdout);
@@ -62,7 +63,7 @@ void nanoc_token_print(NanoC_Token *token)
 
 	/* Print token */
 	before = count;
-	printf(COLOR_BOLD_RED "%.*s" COLOR_RESET, (int)token->Length, token->Ptr);
+	printf(NANOC_TERMINAL_BOLD_RED "%.*s" NANOC_TERMINAL_RESET, (int)token->Length, token->Ptr);
 	count += token->Length;
 	s += token->Length;
 
@@ -80,13 +81,13 @@ void nanoc_token_print(NanoC_Token *token)
 	}
 
 	/* Print underline */
-	fputs(COLOR_BOLD_RED "^", stdout);
+	fputs(NANOC_TERMINAL_BOLD_RED "^", stdout);
 	for(i = 1; i < token->Length; ++i)
 	{
 		fputc('~', stdout);
 	}
 
-	fputs(COLOR_RESET "\n", stdout);
+	fputs(NANOC_TERMINAL_RESET "\n", stdout);
 }
 
 #endif /* NANOC_DESKTOP */

@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
+
 #include "file_io.h"
 #include "nanoc_parser.h"
 #include "nanoc_expression.h"
@@ -14,9 +16,9 @@
 
 #include "builtins.h"
 
-static i32 debug_print(i32r a, i32 *p)
+static NanoC_Value debug_print(NanoC_Value a, NanoC_Value *p)
 {
-	printf("%d\n", p[0]);
+	printf("%"PRIdPTR"\n", p[0]);
 	return 0;
 }
 
@@ -24,11 +26,13 @@ int main(int argc, char **argv)
 {
 	const char *filename;
 	size_t length;
+	NanoC_Value rv;
 	char *content;
 	NanoC_Parser parser;
 	u8 output_buf[1024];
+	char strings[1024];
 
-	i32r (*functions[])(i32r, i32r *) = { debug_print };
+	NanoC_Value (*functions[])(NanoC_Value, NanoC_Value *) = { debug_print };
 
 	NanoC_Builtins builtins =
 	{
@@ -51,15 +55,15 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	nanoc_parser_init(&parser, content, output_buf, sizeof(output_buf),
-		&parser_builtins);
+	nanoc_parser_init(&parser, content, strings,
+		output_buf, sizeof(output_buf), &parser_builtins);
 
 	nanoc_statement(&parser);
 	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
 	nanoc_disasm(parser.Output.Buffer, parser.Output.Pos);
 
-	printf("exit code = %d\n",
-		nanoc_interpreter_run(parser.Output.Buffer, &builtins));
+	printf("status = %d\n",
+		nanoc_interpreter_run(parser.Output.Buffer, &builtins, &rv));
 
 #if 0
 	printf("%s\n", content);

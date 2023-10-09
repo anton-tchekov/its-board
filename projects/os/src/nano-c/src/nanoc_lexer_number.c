@@ -9,9 +9,9 @@
 #include "nanoc_util.h"
 #include "ctype_ext.h"
 
-static u32 lexer_binary(NanoC_Lexer *lexer)
+static NanoC_Value lexer_binary(NanoC_Lexer *lexer)
 {
-	u32 n = 0;
+	NanoC_Value n = 0;
 	NanoC_Char c;
 	nanoc_lexer_advance(lexer);
 	c = nanoc_lexer_advance(lexer);
@@ -24,9 +24,9 @@ static u32 lexer_binary(NanoC_Lexer *lexer)
 	return n;
 }
 
-static u32 lexer_hex(NanoC_Lexer *lexer)
+static NanoC_Value lexer_hex(NanoC_Lexer *lexer)
 {
-	u32 n = 0;
+	NanoC_Value n = 0;
 	NanoC_Char c;
 	nanoc_lexer_advance(lexer);
 	c = nanoc_lexer_advance(lexer);
@@ -39,9 +39,9 @@ static u32 lexer_hex(NanoC_Lexer *lexer)
 	return n;
 }
 
-static u32 lexer_octal(NanoC_Lexer *lexer)
+static NanoC_Value lexer_octal(NanoC_Lexer *lexer)
 {
-	u32 n = 0;
+	NanoC_Value n = 0;
 	NanoC_Char c = nanoc_lexer_advance(lexer);
 	while(is_octal(c))
 	{
@@ -52,9 +52,9 @@ static u32 lexer_octal(NanoC_Lexer *lexer)
 	return n;
 }
 
-static i32 lexer_decimal(NanoC_Lexer *lexer)
+static NanoC_Value lexer_decimal(NanoC_Lexer *lexer)
 {
-	i32 n = 0;
+	NanoC_Value n = 0;
 	NanoC_Char c = lexer->Current;
 	while(isdigit(c))
 	{
@@ -67,7 +67,7 @@ static i32 lexer_decimal(NanoC_Lexer *lexer)
 
 NanoC_Bool nanoc_lexer_number(NanoC_Lexer *lexer, NanoC_Token *token)
 {
-	i32 n;
+	NanoC_Value n;
 	NanoC_Char c = lexer->Current;
 	if(!isdigit(c))
 	{
@@ -96,7 +96,7 @@ NanoC_Bool nanoc_lexer_number(NanoC_Lexer *lexer, NanoC_Token *token)
 		n = lexer_decimal(lexer);
 	}
 
-	token->Value.Integer = n;
+	token->Value = n;
 	token->Length = lexer->Ptr - token->Ptr;
 	return 1;
 }

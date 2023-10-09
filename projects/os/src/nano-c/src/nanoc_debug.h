@@ -27,7 +27,7 @@
 		if(!(expr)) \
 		{ \
 			nanoc_fatal_error("Assertion failed: `" \
-				COLOR_BOLD_WHITE #expr COLOR_RESET "`", \
+				NANOC_TERMINAL_BOLD_WHITE #expr NANOC_TERMINAL_RESET "`", \
 				__FILE__, __func__, __LINE__); \
 		} \
 	} \
