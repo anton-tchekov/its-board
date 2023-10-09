@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_debug.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC debug utils
+ */
+
 #ifndef __NANOC_DEBUG_H__
 #define __NANOC_DEBUG_H__
 

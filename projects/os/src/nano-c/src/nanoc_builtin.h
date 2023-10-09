@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_builtin.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC builtin function interface
+ */
+
 #ifndef __NANOC_BUILTIN_H__
 #define __NANOC_BUILTIN_H__
 

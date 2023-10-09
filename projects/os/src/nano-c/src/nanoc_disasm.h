@@ -1,5 +1,5 @@
 /**
- * @file    nanoc_disassembler.h
+ * @file    nanoc_disasm.h
  * @author  Anton Tchekov
  * @version 0.1
  * @date    2023-10-09

@@ -11,7 +11,6 @@
 #include "nanoc_instruction.h"
 #include "nanoc_interpreter.h"
 #include "nanoc_status.h"
-#include "nanoc_ctype.h"
 #include "util.h"
 #include "delay.h"
 #include "editor.h"
@@ -526,6 +525,66 @@ static i32r _clipget(i32r a, i32 *p)
 static i32r _clipsave(i32r a, i32 *p)
 {
 	return clipboard_save((char *)p[0], p[1]);
+	(void)a;
+}
+
+static i32r nanoc_isupper(i32r a, i32 *p)
+{
+	return isupper(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_islower(i32r a, i32 *p)
+{
+	return islower(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_isdigit(i32r a, i32 *p)
+{
+	return isdigit(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_isalpha(i32r a, i32 *p)
+{
+	return isalpha(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_isalnum(i32r a, i32 *p)
+{
+	return isalnum(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_isprint(i32r a, i32 *p)
+{
+	return isprint(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_isspace(i32r a, i32 *p)
+{
+	return isspace(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_isxdigit(i32r a, i32 *p)
+{
+	return isxdigit(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_tolower(i32r a, i32 *p)
+{
+	return tolower(p[0]);
+	(void)a;
+}
+
+static i32r nanoc_toupper(i32r a, i32 *p)
+{
+	return toupper(p[0]);
 	(void)a;
 }
 

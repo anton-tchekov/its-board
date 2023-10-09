@@ -8,9 +8,9 @@
 #include "nanoc_address_stack.h"
 
 void nanoc_address_stack_update(
-	NanoC_AddressStack *as, NanoC_Output *output, u8r prev, NanoC_Address addr)
+	NanoC_AddressStack *as, NanoC_Output *output, size_t prev, NanoC_Address addr)
 {
-	u8r top = as->Top;
+	size_t top = as->Top;
 	u16 *stack = as->Stack;
 	while(top > prev)
 	{
@@ -18,5 +18,5 @@ void nanoc_address_stack_update(
 		nanoc_output_emit16_at(output, stack[top], addr);
 	}
 
-	as->Top = top;
+	as->Top = prev;
 }

@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_status.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC status codes and error handling
+ */
+
 #ifndef __NANOC_STATUS_H__
 #define __NANOC_STATUS_H__
 
