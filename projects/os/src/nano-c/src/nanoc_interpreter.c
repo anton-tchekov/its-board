@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_interpreter.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_interpreter.h"
 #include "nanoc_instruction.h"
 #include "nanoc_debug.h"

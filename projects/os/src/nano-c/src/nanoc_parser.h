@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_parser.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC parser
+ */
+
 #ifndef __NANOC_PARSER_H__
 #define __NANOC_PARSER_H__
 

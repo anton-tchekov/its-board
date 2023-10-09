@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_disassembler.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC disassembler
+ */
+
 #ifndef __NANOC_DISASM_H__
 #define __NANOC_DISASM_H__
 

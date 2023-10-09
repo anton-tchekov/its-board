@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_loop.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC loops: while, do-while, for, loop
+ */
+
 #ifndef __NANOC_LOOP_H__
 #define __NANOC_LOOP_H__
 
