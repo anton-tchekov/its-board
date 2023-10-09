@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_tokenstream.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_tokenstream.h"
 #include "nanoc_debug.h"
 

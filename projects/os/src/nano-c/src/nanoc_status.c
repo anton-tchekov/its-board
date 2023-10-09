@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_status.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_status.h"
 #include "nanoc_debug.h"
 #include "nanoc_util.h"

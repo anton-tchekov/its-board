@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_terminal.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC terminal escape sequences
+ */
+
 #ifndef __NANOC_TERMINAL_H__
 #define __NANOC_TERMINAL_H__
 

@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_parser.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_parser.h"
 #include "nanoc_loop.h"
 #include "nanoc_if.h"

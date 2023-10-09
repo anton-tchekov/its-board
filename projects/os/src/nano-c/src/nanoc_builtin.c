@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_builtin.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_builtin.h"
 #include "nanoc_types.h"
 #include <string.h>

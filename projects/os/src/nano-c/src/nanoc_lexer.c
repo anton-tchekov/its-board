@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_lexer.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_lexer.h"
 #include "nanoc_lexer_literal.h"
 #include "nanoc_lexer_identifier.h"

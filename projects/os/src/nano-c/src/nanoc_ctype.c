@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_ctype.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_ctype.h"
 #include <ctype.h>
 

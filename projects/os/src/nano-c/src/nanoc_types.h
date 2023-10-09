@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_types.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC types
+ */
+
 #ifndef __NANOC_TYPES__
 #define __NANOC_TYPES__
 

@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_token.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC token
+ */
+
 #ifndef __NANOC_TOKEN_H__
 #define __NANOC_TOKEN_H__
 

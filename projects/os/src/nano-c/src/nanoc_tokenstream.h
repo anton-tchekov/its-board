@@ -1,3 +1,11 @@
+/**
+ * @file    nanoc_tokenstream.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC token stream
+ */
+
 #ifndef __NANOC_TOKENSTREAM_H__
 #define __NANOC_TOKENSTREAM_H__
 

@@ -1,7 +1,15 @@
+/**
+ * @file    nanoc_instruction.h
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ * @brief   NanoC interpreter instructions
+ */
+
 #ifndef __NANOC_INSTRUCTION_H__
 #define __NANOC_INSTRUCTION_H__
 
-typedef enum NANOC_INSTRUCTION
+enum
 {
 	NANOC_INSTR_HALT,
 	NANOC_INSTR_PUSHI8,
@@ -42,6 +50,6 @@ typedef enum NANOC_INSTRUCTION
 	NANOC_INSTR_B_NOT,
 	NANOC_INSTR_U_MINUS,
 	NANOC_INSTR_OP_END = NANOC_INSTR_U_MINUS
-} NanoC_Instruction;
+};
 
 #endif /* __NANOC_INSTRUCTION_H__ */

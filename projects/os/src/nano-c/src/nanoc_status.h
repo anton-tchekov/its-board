@@ -1,5 +1,5 @@
-#ifndef __NANOC_ERROR_H__
-#define __NANOC_ERROR_H__
+#ifndef __NANOC_STATUS_H__
+#define __NANOC_STATUS_H__
 
 #include "types.h"
 #include "nanoc_types.h"
@@ -77,4 +77,4 @@ enum
 
 const char *nanoc_status_message(NanoC_Status status_code);
 
-#endif /* __NANOC_ERROR_H__ */
+#endif /* __NANOC_STATUS_H__ */

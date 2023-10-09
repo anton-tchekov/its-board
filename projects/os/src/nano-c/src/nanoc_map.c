@@ -1,3 +1,10 @@
+/**
+ * @file    nanoc_map.c
+ * @author  Anton Tchekov
+ * @version 0.1
+ * @date    2023-10-09
+ */
+
 #include "nanoc_map.h"
 #include "nanoc_instruction.h"
 #include "nanoc_status.h"
