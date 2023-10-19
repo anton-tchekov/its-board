@@ -17,15 +17,11 @@
 #include "login.h"
 #include "shell.h"
 #include "editor.h"
-#include "manager.h"
-#include "test.h"
 
 #include <stdlib.h>
 
 static void os_key(void)
 {
-	/* TODO: Replace fake multitasking with
-		real multitasking and remove polling */
 	KeyEvent event;
 	if(!ps2_read(&event))
 	{
@@ -42,8 +38,6 @@ static void os_key(void)
 	case MOD_OS | KEY_0: mode_set(MODE_LOGIN);   break;
 	case MOD_OS | KEY_1: mode_set(MODE_SHELL);   break;
 	case MOD_OS | KEY_2: mode_set(MODE_EDITOR);  break;
-	case MOD_OS | KEY_3: mode_set(MODE_MANAGER); break;
-	case MOD_OS | KEY_7: mode_set(MODE_TEST);    break;
 	default:
 		mode_key(event.Key, event.Codepoint);
 		break;
@@ -64,7 +58,6 @@ int main(void)
 
 	shell_init();
 	editor_init();
-	manager_init();
 
 	mode_unlock();
 	for(;;)

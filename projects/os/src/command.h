@@ -17,4 +17,11 @@
  */
 void command_run(const char *cmd, int len);
 
+/**
+ * @brief Print a file system error message
+ *
+ * @param ret Error code
+ */
+void fserror(int ret);
+
 #endif /* __COMMAND_H__ */

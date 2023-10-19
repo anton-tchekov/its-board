@@ -11,7 +11,7 @@
 #include "keyboard.h"
 #include "font.h"
 #include "mode.h"
-#include "overlay.h"
+#include "command.h"
 #include "ctype_ext.h"
 #include "nanoc_lexer_identifier.h"
 #include "ff.h"
@@ -364,52 +364,6 @@ void editor_init(void)
 	line_init(&line, _buf, sizeof(_buf));
 }
 
-static void reset(void)
-{
-	mode_set(MODE_EDITOR);
-}
-
-static void editor_save_callback(int yes, char *path)
-{
-	FIL fp;
-	unsigned int written;
-	int result;
-
-	if(!yes)
-	{
-		reset();
-		return;
-	}
-
-	result = f_open(&fp, path, FA_CREATE_ALWAYS | FA_WRITE);
-	if(result)
-	{
-		alert(OVERLAY_ERROR, reset,
-			"Failed to open file for writing:\n  %s\n%s",
-			path, f_status_str(result));
-		return;
-	}
-
-	result = f_write(&fp, line.Text, line.Length, &written);
-	if(result)
-	{
-		f_close(&fp);
-		alert(OVERLAY_ERROR, reset,
-			"Failed to write text buffer to file:\n  %s\n%s",
-			path, f_status_str(result));
-		return;
-	}
-
-	f_close(&fp);
-	reset();
-}
-
-void editor_save(void)
-{
-	prompt(OVERLAY_NORMAL, editor_save_callback,
-		_filename, "Save As:");
-}
-
 static int check_text(const char *str, size_t len)
 {
 	const char *end = str + len;
@@ -430,46 +384,6 @@ static int iscfile(const char *path)
 	size_t len = strlen(path);
 	return len > 2 && path[len - 1] == 'C' && path[len - 2] == '.';
 }
-
-void editor_load(const char *path)
-{
-	FIL fp;
-	unsigned int read = 0;
-	int result;
-
-	result = f_open(&fp, path, FA_READ);
-	if(result)
-	{
-		alert(OVERLAY_ERROR, reset,
-			"Failed to open file for reading:\n  %s\n%s",
-			path, f_status_str(result));
-		return;
-	}
-
-	result = f_read(&fp, _buf, sizeof(_buf), &read);
-	if(result)
-	{
-		alert(OVERLAY_ERROR, reset,
-			"Failed to read file contents:\n  %s\n%s",
-			path, f_status_str(result));
-		f_close(&fp);
-		return;
-	}
-
-	f_close(&fp);
-	if(check_text(_buf, read))
-	{
-		alert(OVERLAY_ERROR, reset,
-			"Editor cannot open binary file");
-		return;
-	}
-
-	strcpy(_filename, path);
-	_syntax = iscfile(path);
-	editor_open();
-}
-
-void fserror(int ret);
 
 void editor_load_cmd(const char *path)
 {
@@ -565,8 +479,6 @@ void editor_key(int key, int c)
 	case MOD_CTRL | KEY_T:      toggle_tab_size();                 break;
 	case MOD_CTRL | KEY_J:      toggle_show_space();               break;
 	case MOD_CTRL | KEY_K:      toggle_syntax_color();             break;
-
-	case MOD_CTRL | KEY_S:      editor_save();                     break;
 
 	case MOD_CTRL | KEY_HOME:             line_ctrl_home(&line);       break;
 	case MOD_CTRL | MOD_SHIFT | KEY_HOME: line_ctrl_shift_home(&line); break;

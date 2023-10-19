@@ -78,4 +78,3 @@ $(LIBOBJDIR)/startup.o: $(LIBSRCDIR)/startup.s
 -include $(DEPS)
 
 .PHONY: clean all upload debug release
-

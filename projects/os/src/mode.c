@@ -11,9 +11,6 @@
 #include "login.h"
 #include "shell.h"
 #include "editor.h"
-#include "manager.h"
-#include "test.h"
-#include "overlay.h"
 
 static u8 _mode;
 
@@ -38,14 +35,6 @@ void mode_set(int mode)
 	case MODE_EDITOR:
 		editor_open();
 		break;
-
-	case MODE_MANAGER:
-		manager_open();
-		break;
-
-	case MODE_TEST:
-		test_open();
-		break;
 	}
 }
 
@@ -69,26 +58,6 @@ void mode_key(int key, int c)
 
 	case MODE_EDITOR:
 		editor_key(key, c);
-		break;
-
-	case MODE_MANAGER:
-		manager_key(key, c);
-		break;
-
-	case MODE_TEST:
-		test_key(key, c);
-		break;
-
-	case MODE_ALERT:
-		alert_key(key, c);
-		break;
-
-	case MODE_CONFIRM:
-		confirm_key(key, c);
-		break;
-
-	case MODE_PROMPT:
-		prompt_key(key, c);
 		break;
 	}
 }

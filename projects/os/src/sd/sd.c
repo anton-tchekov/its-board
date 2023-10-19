@@ -460,7 +460,7 @@ static u32r _sd_block_addr(SD *sd, u32r block)
 	return sd->CardType & SD_HC ? block : (block << SD_BLOCK_SIZE_POT);
 }
 
-static u32r _sd_wait_ready(u8r target)
+static u32r _sd_wait_ready(int target)
 {
 	u16r i;
 	for(i = 0; spi_ll_xchg(0xFF) != target; ++i)
