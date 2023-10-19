@@ -9,7 +9,6 @@
 #ifndef __NANOC_MAP_H__
 #define __NANOC_MAP_H__
 
-#include "types.h"
 #include "nanoc_types.h"
 #include "nanoc_status.h"
 

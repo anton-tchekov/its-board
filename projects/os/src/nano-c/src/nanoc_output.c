@@ -30,19 +30,19 @@ void nanoc_output_emit2(NanoC_Output *output, NanoC_Opcode instr, u8r val)
 
 void nanoc_output_emit16(NanoC_Output *output, u16r val)
 {
-	write_16(output->Buffer + output->Pos, val);
+	nanoc_write_16(output->Buffer + output->Pos, val);
 	output->Pos += 2;
 }
 
 void nanoc_output_emit32(NanoC_Output *output, u32r val)
 {
-	write_32(output->Buffer + output->Pos, val);
+	nanoc_write_32(output->Buffer + output->Pos, val);
 	output->Pos += 4;
 }
 
 void nanoc_output_emit16_at(NanoC_Output *output, u32r loc, u16r val)
 {
-	write_16(output->Buffer + loc, val);
+	nanoc_write_16(output->Buffer + loc, val);
 }
 
 void nanoc_output_pushi(NanoC_Output *output, u32 value)

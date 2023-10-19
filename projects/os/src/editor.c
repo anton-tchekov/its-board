@@ -9,7 +9,6 @@
 #include "line.h"
 #include "terminal.h"
 #include "keyboard.h"
-#include "util.h"
 #include "font.h"
 #include "mode.h"
 #include "overlay.h"

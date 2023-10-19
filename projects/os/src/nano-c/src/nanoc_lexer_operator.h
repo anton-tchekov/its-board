@@ -9,7 +9,7 @@
 #ifndef __NANOC_LEXER_OPERATOR_H__
 #define __NANOC_LEXER_OPERATOR_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 #include "nanoc_lexer.h"
 
 /**

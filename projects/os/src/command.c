@@ -11,7 +11,6 @@
 #include "nanoc_instruction.h"
 #include "nanoc_interpreter.h"
 #include "nanoc_status.h"
-#include "util.h"
 #include "delay.h"
 #include "editor.h"
 #include "ctype_ext.h"
@@ -1110,7 +1109,7 @@ static void compile(const char *src, int length)
 	u8 output_buf[256];
 	char strings[256];
 	char buf[128];
-	size_t rv = 0;
+	NanoC_Value rv = 0;
 
 	nanoc_parser_init(&parser, src, strings, output_buf,
 		sizeof(output_buf), &parser_builtins);

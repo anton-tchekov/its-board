@@ -9,7 +9,7 @@
 #ifndef __NANOC_TOKEN_H__
 #define __NANOC_TOKEN_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 #include "nanoc_tokentype.h"
 
 typedef struct NanoC_Position

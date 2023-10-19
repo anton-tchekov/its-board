@@ -12,7 +12,7 @@
 #ifdef NANOC_DESKTOP
 #ifdef NANOC_DEBUG
 
-#include "types.h"
+#include "nanoc_types.h"
 
 /**
  * @brief Disassemble and print the instruction at the offset

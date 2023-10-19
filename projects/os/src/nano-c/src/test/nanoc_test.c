@@ -10,10 +10,10 @@
 #include "nanoc_interpreter.h"
 #include "nanoc_builtin.h"
 #include "nanoc_util.h"
+#include "nanoc_types.h"
 
 #include "builtins.h"
 
-#include "types.h"
 #include <stdio.h>
 #include <assert.h>
 #include <inttypes.h>
@@ -26,6 +26,15 @@ static NanoC_Value test(NanoC_Value a, NanoC_Value *p)
 	return 0;
 }
 
+static NanoC_Value ldchar(NanoC_Value a, NanoC_Value *p)
+{
+	NanoC_Value v = p[0];
+	printf("sizeof(v) = %d, value = %ld\n", sizeof(NanoC_Value), v);
+	char *s = (char *)v;
+	//printf("value = %s\n", s);
+	return 0; //s[0];
+}
+
 static int test_positive_run(const char *source, NanoC_Value expected)
 {
 	int ret;
@@ -33,10 +42,10 @@ static int test_positive_run(const char *source, NanoC_Value expected)
 	NanoC_Parser parser;
 	u8 output_buf[1024];
 	char strings[1024];
-	NanoC_Value (*functions[])(NanoC_Value, NanoC_Value *) = { test };
+	NanoC_Value (*functions[])(NanoC_Value, NanoC_Value *) = { test, ldchar };
 	NanoC_Builtins builtins =
 	{
-		1,
+		2,
 		functions
 	};
 
@@ -264,6 +273,9 @@ void nanoc_test_run(void)
 		{ "{ int foo, bar; foo = 6, bar = foo + 1; test(bar); }", 7 },
 		{ "{ int foo, bar; foo = 1, ++foo, bar = foo; test(bar); }", 2 },
 		{ "{ int i = 1, j = 4; ++i, ++j; test(i + j); }", 7 },
+
+		{ "{ int str = \"hello world\"; test(1); }", 1 },
+		{ "{ int str = \"hello world\"; test(ldchar(str)); }", 'l' },
 
 		/* Comment bug */
 		{ "/**/test(1);", 1 },

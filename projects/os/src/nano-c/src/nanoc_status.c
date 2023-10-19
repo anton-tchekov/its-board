@@ -46,6 +46,6 @@ const char *nanoc_status_message(NanoC_Status status_code)
 		"INVALID_INSTRUCTION"
 	};
 
-	nanoc_assert(status_code < ARRLEN(err_msgs));
+	nanoc_assert(status_code < NANOC_ARRLEN(err_msgs));
 	return err_msgs[status_code];
 }

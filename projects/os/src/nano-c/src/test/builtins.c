@@ -1,5 +1,4 @@
 #include "builtins.h"
-#include "util.h"
 
 static const NanoC_ParserBuiltin parser_builtins_data[] =
 {
@@ -9,17 +8,7 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 		.IsVariadic = 0,
 	},
 	{
-		.Name = "printf",
-		.NumArgs = 1,
-		.IsVariadic = 1,
-	},
-	{
-		.Name = "printn",
-		.NumArgs = 1,
-		.IsVariadic = 0,
-	},
-	{
-		.Name = "isalpha",
+		.Name = "ldchar",
 		.NumArgs = 1,
 		.IsVariadic = 0,
 	},

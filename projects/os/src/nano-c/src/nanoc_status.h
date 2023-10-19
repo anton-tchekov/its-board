@@ -9,7 +9,6 @@
 #ifndef __NANOC_STATUS_H__
 #define __NANOC_STATUS_H__
 
-#include "types.h"
 #include "nanoc_types.h"
 
 typedef enum

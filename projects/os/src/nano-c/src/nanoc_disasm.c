@@ -36,12 +36,12 @@ size_t nanoc_instr_print(const u8 *program, size_t offset)
 		break;
 
 	case NANOC_INSTR_PUSHI16:
-		printf(R("PUSHI16") " %d\n", read_16(p + 1));
+		printf(R("PUSHI16") " %d\n", nanoc_read_16(p + 1));
 		size = 3;
 		break;
 
 	case NANOC_INSTR_PUSHI32:
-		printf(R("PUSHI32") " %d\n", read_32(p + 1));
+		printf(R("PUSHI32") " %d\n", nanoc_read_32(p + 1));
 		size = 5;
 		break;
 
@@ -56,27 +56,27 @@ size_t nanoc_instr_print(const u8 *program, size_t offset)
 		break;
 
 	case NANOC_INSTR_JZ:
-		printf(R("JZ") " %d\n", read_16(p + 1));
+		printf(R("JZ") " %d\n", nanoc_read_16(p + 1));
 		size = 3;
 		break;
 
 	case NANOC_INSTR_JNZ:
-		printf(R("JNZ") " %d\n", read_16(p + 1));
+		printf(R("JNZ") " %d\n", nanoc_read_16(p + 1));
 		size = 3;
 		break;
 
 	case NANOC_INSTR_PJZ:
-		printf(R("PJZ") " %d\n", read_16(p + 1));
+		printf(R("PJZ") " %d\n", nanoc_read_16(p + 1));
 		size = 3;
 		break;
 
 	case NANOC_INSTR_PJNZ:
-		printf(R("PJNZ") " %d\n", read_16(p + 1));
+		printf(R("PJNZ") " %d\n", nanoc_read_16(p + 1));
 		size = 3;
 		break;
 
 	case NANOC_INSTR_JMP:
-		printf(R("JMP") " %d\n", read_16(p + 1));
+		printf(R("JMP") " %d\n", nanoc_read_16(p + 1));
 		size = 3;
 		break;
 
@@ -86,7 +86,7 @@ size_t nanoc_instr_print(const u8 *program, size_t offset)
 		break;
 
 	case NANOC_INSTR_CALL:
-		printf(R("CALL") " %d (%d)\n", read_s16(p + 2), p[1]);
+		printf(R("CALL") " %d (%d)\n", nanoc_read_s16(p + 2), p[1]);
 		size = 4;
 		break;
 

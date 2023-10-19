@@ -9,7 +9,7 @@
 #ifndef __NANOC_ADDRESS_STACK_H__
 #define __NANOC_ADDRESS_STACK_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 #include "nanoc_output.h"
 
 typedef struct NANOC_ADDRESS_STACK

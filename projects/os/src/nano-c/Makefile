@@ -11,7 +11,7 @@ PROJECT := nano-c
 CC := gcc
 
 # Compiler flags
-CFLAGS := -Wall -Wextra -g -O2 -std=c99 -pedantic -DNANOC_DEBUG \
+CFLAGS := -Wall -Wextra -g -O0 -std=c99 -pedantic -DNANOC_DEBUG \
 	-DNANOC_DESKTOP -I ../  -fprofile-arcs -ftest-coverage
 
 # Linker flags

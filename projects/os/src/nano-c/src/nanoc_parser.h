@@ -9,7 +9,7 @@
 #ifndef __NANOC_PARSER_H__
 #define __NANOC_PARSER_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 #include "nanoc_tokenstream.h"
 #include "nanoc_output.h"
 #include "nanoc_address_stack.h"

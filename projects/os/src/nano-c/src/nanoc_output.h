@@ -9,7 +9,7 @@
 #ifndef __NANOC_OUTPUT_H__
 #define __NANOC_OUTPUT_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 #include "nanoc_instruction.h"
 #include "nanoc_types.h"
 

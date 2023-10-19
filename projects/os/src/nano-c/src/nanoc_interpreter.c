@@ -86,14 +86,14 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 
 		case NANOC_INSTR_PUSHI16:
 			CHECK_OVERFLOW(1);
-			op_stack[op] = read_16(program + ip + 1);
+			op_stack[op] = nanoc_read_16(program + ip + 1);
 			op += 1;
 			ip += 3;
 			break;
 
 		case NANOC_INSTR_PUSHI32:
 			CHECK_OVERFLOW(1);
-			op_stack[op] = read_32(program + ip + 1);
+			op_stack[op] = nanoc_read_32(program + ip + 1);
 			op += 1;
 			ip += 5;
 			break;
@@ -117,7 +117,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 			op -= 1;
 			if(!op_stack[op])
 			{
-				ip = read_16(program + ip + 1);
+				ip = nanoc_read_16(program + ip + 1);
 				break;
 			}
 
@@ -129,7 +129,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 			op -= 1;
 			if(op_stack[op])
 			{
-				ip = read_16(program + ip + 1);
+				ip = nanoc_read_16(program + ip + 1);
 				break;
 			}
 
@@ -141,7 +141,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 			if(!op_stack[op - 1])
 			{
 				/* If first condition is false, skip */
-				ip = read_16(program + ip + 1);
+				ip = nanoc_read_16(program + ip + 1);
 				break;
 			}
 
@@ -155,7 +155,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 			if(op_stack[op - 1])
 			{
 				/* If first condition is true, skip */
-				ip = read_16(program + ip + 1);
+				ip = nanoc_read_16(program + ip + 1);
 				break;
 			}
 
@@ -165,14 +165,14 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 			break;
 
 		case NANOC_INSTR_JMP:
-			ip = read_16(program + ip + 1);
+			ip = nanoc_read_16(program + ip + 1);
 			break;
 
 		case NANOC_INSTR_CALL:
 		{
 			u8r i;
 			u8r args = program[ip + 1];
-			i16r addr = read_s16(program + ip + 2);
+			i16r addr = nanoc_read_s16(program + ip + 2);
 			ip += 4;
 			CHECK_UNDERFLOW(args);
 			op -= args;

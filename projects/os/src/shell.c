@@ -7,7 +7,6 @@
 
 #include "shell.h"
 #include "line.h"
-#include "util.h"
 #include "terminal.h"
 #include "ps2.h"
 #include "command.h"

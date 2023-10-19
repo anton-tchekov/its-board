@@ -9,7 +9,7 @@
 #ifndef __NANOC_TOKENSTREAM_H__
 #define __NANOC_TOKENSTREAM_H__
 
-#include "types.h"
+#include "nanoc_types.h"
 #include "nanoc_lexer.h"
 
 #define NANOC_TOKEN_BUFFER_SIZE 2
