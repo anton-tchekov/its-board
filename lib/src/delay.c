@@ -10,6 +10,7 @@
 
 void delay_us(uint32_t us)
 {
+	/* TODO: Possible overflow bug */
 	uint32_t ts_end = timer_get() + us * TICKS_PER_US;
 	while(timer_get() < ts_end) {}
 }

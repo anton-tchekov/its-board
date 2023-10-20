@@ -20,14 +20,9 @@ NanoC_TokenType nanoc_keyword_detect(const char *ident, size_t len)
 		'f', 'o', 'r', NANOC_LUT_ST(NANOC_TT_FOR),
 		'l', 'o', 'o', 'p', NANOC_LUT_ST(NANOC_TT_LOOP),
 		'i', 'n', 't', NANOC_LUT_ST(NANOC_TT_INT),
-		'f', 'n', NANOC_LUT_ST(NANOC_TT_FN),
 		'b', 'r', 'e', 'a', 'k', NANOC_LUT_ST(NANOC_TT_BREAK),
 		'c', 'o', 'n', 't', 'i', 'n', 'u', 'e', NANOC_LUT_ST(NANOC_TT_CONTINUE),
 		'r', 'e', 't', 'u', 'r', 'n', NANOC_LUT_ST(NANOC_TT_RETURN),
-		'D', 'C', 'B', NANOC_LUT_ST(NANOC_TT_DCB),
-		'D', 'C', 'W', NANOC_LUT_ST(NANOC_TT_DCW),
-		'D', 'C', 'D', NANOC_LUT_ST(NANOC_TT_DCD),
-		'F', 'I', 'L', 'L', NANOC_LUT_ST(NANOC_TT_FILL),
 		NANOC_LUT_ST(NANOC_TT_IDENTIFIER)
 	};
 

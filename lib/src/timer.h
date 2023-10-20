@@ -26,7 +26,7 @@ void timer_init(void);
  * @brief This function gets the current timer value
  * @return TIM2 timer ticks
  */
-inline uint32_t timer_get(void)
+static inline uint32_t timer_get(void)
 {
 	return TIM2->CNT;
 }

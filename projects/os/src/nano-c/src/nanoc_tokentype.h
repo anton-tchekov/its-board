@@ -28,15 +28,9 @@ typedef enum NANOC_TOKENTYPE
 	NANOC_TT_FOR,
 	NANOC_TT_LOOP,
 	NANOC_TT_INT,
-	NANOC_TT_FN,
 	NANOC_TT_BREAK,
 	NANOC_TT_CONTINUE,
 	NANOC_TT_RETURN,
-
-	NANOC_TT_DCB,
-	NANOC_TT_DCW,
-	NANOC_TT_DCD,
-	NANOC_TT_FILL,
 
 	NANOC_TT_L_PAREN,                         /* "("   */
 	NANOC_TT_R_PAREN,                         /* ")"   */

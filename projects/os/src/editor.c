@@ -382,7 +382,8 @@ static int check_text(const char *str, size_t len)
 static int iscfile(const char *path)
 {
 	size_t len = strlen(path);
-	return len > 2 && path[len - 1] == 'C' && path[len - 2] == '.';
+	int last = path[len - 1];
+	return len > 2 && (last == 'C' || last == 'c') && path[len - 2] == '.';
 }
 
 void editor_load_cmd(const char *path)

@@ -44,6 +44,8 @@ static void os_key(void)
 	}
 }
 
+#include "fonts/Terminus16.h"
+
 /**
  * @brief Main function
  * @return Unreachable
