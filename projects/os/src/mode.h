@@ -12,7 +12,6 @@
 /** Enum of all modes/apps */
 enum
 {
-	MODE_LOGIN,
 	MODE_SHELL,
 	MODE_EDITOR,
 };
@@ -23,11 +22,6 @@ enum
  * @param mode One of the enum values above
  */
 void mode_set(int mode);
-
-/**
- * @brief Unlock the system
- */
-void mode_unlock(void);
 
 /**
  * @brief Forward a key press to an app

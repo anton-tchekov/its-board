@@ -8,7 +8,6 @@
 #include "mode.h"
 #include "types.h"
 
-#include "login.h"
 #include "shell.h"
 #include "editor.h"
 
@@ -16,18 +15,9 @@ static u8 _mode;
 
 void mode_set(int mode)
 {
-	if(_mode == MODE_LOGIN)
-	{
-		return;
-	}
-
 	_mode = mode;
 	switch(_mode)
 	{
-	case MODE_LOGIN:
-		login_open();
-		break;
-
 	case MODE_SHELL:
 		shell_open();
 		break;
@@ -48,10 +38,6 @@ void mode_key(int key, int c)
 {
 	switch(_mode)
 	{
-	case MODE_LOGIN:
-		login_key(key, c);
-		break;
-
 	case MODE_SHELL:
 		shell_key(key, c);
 		break;

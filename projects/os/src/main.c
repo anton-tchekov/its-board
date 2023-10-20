@@ -14,7 +14,6 @@
 #include "terminal.h"
 #include "mode.h"
 
-#include "login.h"
 #include "shell.h"
 #include "editor.h"
 
@@ -35,7 +34,6 @@ static void os_key(void)
 
 	switch(event.Key)
 	{
-	case MOD_OS | KEY_0: mode_set(MODE_LOGIN);   break;
 	case MOD_OS | KEY_1: mode_set(MODE_SHELL);   break;
 	case MOD_OS | KEY_2: mode_set(MODE_EDITOR);  break;
 	default:
@@ -61,7 +59,6 @@ int main(void)
 	shell_init();
 	editor_init();
 
-	mode_unlock();
 	for(;;)
 	{
 		os_key();
