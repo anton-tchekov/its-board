@@ -1639,8 +1639,7 @@ const Font _Terminus16_Bold =
 {
 	.Width = 8,
 	.Height = 16,
-	.Bitmap = _terminus16_bitmap,
-	.Extra = UC("ä")
+	.Bitmap = _terminus16_bitmap
 };
 
 const Font *const Terminus16_Bold = &_Terminus16_Bold;

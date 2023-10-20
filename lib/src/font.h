@@ -2,7 +2,6 @@
 #define __FONT_H__
 
 #include <stdint.h>
-#include "utf8.h"
 
 enum
 {
@@ -18,7 +17,6 @@ typedef struct
 	int Width;
 	int Height;
 	const uint8_t *Bitmap;
-	int Extra;
 } Font;
 
 void font_char(int x, int y, int c, int fg, int bg, const Font *font);
