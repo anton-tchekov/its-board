@@ -13,17 +13,21 @@
 #include "font.h"
 #include "fonts/Terminus16_Bold.h"
 #include "adc.h"
+#include "GP2Y0A21YK.h"
 #include <stdio.h>
 
 static void adc_readloop(void)
 {
 	char buf[128];
-	int32_t value;
+	int32_t value, voltage, distance;
 
 	for(;;)
 	{
 		value = adc_read(2, 6);
-		sprintf(buf, "%6d", value);
+		voltage = adc_to_mv(value) / 10;
+		distance = gp2_get_distance(voltage);
+
+		sprintf(buf, "%6d | %6d * 10 mV | %6d mm", value, voltage, distance);
 		font_str(10, 10, buf, COLOR_WHITE, COLOR_BLACK, Terminus16_Bold);
 		delay_ms(100);
 	}
