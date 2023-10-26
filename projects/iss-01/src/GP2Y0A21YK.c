@@ -6,138 +6,104 @@
  */
 
 #include "GP2Y0A21YK.h"
+#include <stddef.h>
 
-// Get the amount of elements in an array
-#define elements_in_array(array) (int32_t)(sizeof(array) / sizeof(array[0]))
+/** Get the number of elements in an array */
+#define ARRLEN(A) (sizeof(A) / sizeof(*A))
 
-/**
- * Voltage values for the corresponding GRAPH_POINTS_MM array
- * the voltage values are written in 10 mV
- * For example: 315 = 3.15 V
- */
-static const int32_t GRAPH_POINTS_VOLTAGE[] =
+typedef struct
 {
-	315, 295, 273, 231, 164, 131, 108, 92, 74, 61, 52, 45, 40
-};
+	/**
+	 * Voltage value for the corresponding distance
+	 * The voltage values are written in 10 mV
+	 * For example: 315 = 3.15 V
+	 */
+	uint16_t Voltage;
 
-/**
- * Distance values for the corresponding GRAPH_POINTS_VOLTAGE array
- * the distance values are written in mm
- * For example: 300 = 300 mm
- */
-static const int32_t GRAPH_POINTS_MM[] =
+	/**
+	 * Distance value for the corresponding voltage
+	 * The distance values are written in mm
+	 * For example: 300 = 300 mm
+	 */
+	uint16_t MM;
+} GraphPoint;
+
+/** Graph points array */
+static const GraphPoint gp[] =
 {
-	60, 70, 80, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800
+	{ 315,  60 },
+	{ 295,  70 },
+	{ 273,  80 },
+	{ 231, 100 },
+	{ 164, 150 },
+	{ 131, 200 },
+	{ 108, 250 },
+	{  92, 300 },
+	{  74, 400 },
+	{  61, 500 },
+	{  52, 600 },
+	{  45, 700 },
+	{  40, 800 },
 };
 
 /**
  * @brief Acts as a Linear interpolation formula, thats supposed to help
- * approximate points that are in between 2 graph points if the function is unknown.
+ * approximate points that are in between 2 graph points if the function
+ * is unknown.
  *
  * This function is to be used if you have the y value but want to find out the
  * corresponding x value between 2 known x values and their given y values
  *
- * @param y the point you wanna know the x value of
+ * @param y The point you wanna know the x value of
  *
- * @param y1 the y value for x1
- * @param y2 the y value for x2
+ * @param y1 The y value for x1
+ * @param y2 The y value for x2
  *
- * @param x1 the closest dot to the left, that you know the y value for
- * @param x2 the closest dot to the right, that you know the y value for
+ * @param x1 The closest dot to the left, that you know the y value for
+ * @param x2 The closest dot to the right, that you know the y value for
  *
- * @retval result of the linear interpolation, gives the approximate x for the given y
+ * @return Result of the linear interpolation, gives the approximate x
+ *         for the given y
  */
-static int32_t linear_interpolation_for_y(int32_t y, int32_t y1, int32_t y2, int32_t x1, int32_t x2)
+static inline int32_t lerp_y(int32_t y,
+	int32_t y1, int32_t y2, int32_t x1, int32_t x2)
 {
-  return (x1 + (y - y1) * (x2 - x1) / (y2 - y1));
+	return (x1 + (y - y1) * (x2 - x1) / (y2 - y1));
 }
 
 /**
- * @brief gets the closest voltage to the left of the given voltage in the GRAPH_POINTS_VOLTAGE[] array
- * @param voltage the given voltage you want to find the closest left value to
- * @retval the closest left voltage in 10mv
-*/
-static int32_t closest_voltage_left(int32_t voltage)
-{
-  // Start with the most left point
-  int32_t closest_left = GRAPH_POINTS_VOLTAGE[0];
-
-  int32_t current_v_point = 0;
-  int32_t result = 0;
-
-  // Iterate through the graph_points_array
-  for(int32_t i = 0; i < elements_in_array(GRAPH_POINTS_VOLTAGE); i++)
-  {
-    // if theres an element smaller than the current most left voltage, but bigger than
-    // the given voltage, make it the new closet_left voltage
-    current_v_point = GRAPH_POINTS_VOLTAGE[i];
-    if(current_v_point < closest_left && current_v_point > voltage)
-    {
-      closest_left = current_v_point;
-      result = current_v_point;
-    }
-  }
-
-  return result;
-}
-
-/**
- * @brief gets the closest voltage to the right of the given voltage in the GRAPH_POINTS_VOLTAGE[] array
- * @param voltage the given voltage you want to find the closest right value to
- * @retval the closest right voltage in 10mv
+ * @brief Gets the closest voltage to the left of the given voltage in the
+ *        graph_points[] array
+ *
+ * @param voltage The given voltage you want to find the closest left value to
+ * @return The index into the array with the closest left voltage in 10 mV
  */
-static int32_t closest_voltage_right(int32_t voltage)
+static inline int32_t closest_voltage_left(uint32_t voltage)
 {
-  // Start with the most right point
-  int32_t closest_right = GRAPH_POINTS_VOLTAGE[elements_in_array(GRAPH_POINTS_VOLTAGE)];
+	int32_t i;
 
-  int32_t current_v_point = 0;
-  int32_t result = 0;
+	/* Iterate through the graph_points array */
+	for(i = 0; i < (int32_t)ARRLEN(gp) - 1; ++i)
+	{
+		if(gp[i].Voltage >= voltage &&
+			gp[i + 1].Voltage <= voltage)
+		{
+			return i;
+		}
+	}
 
-  // Iterate through the graph_points_array
-  for(int32_t i = 0; i < elements_in_array(GRAPH_POINTS_VOLTAGE); i++)
-  {
-    // if theres an element bigger than the current most right voltage, but smaller than
-    // the given voltage, make it the new closest_right voltage
-    current_v_point = GRAPH_POINTS_VOLTAGE[i];
-    if(current_v_point > closest_right && current_v_point < voltage)
-    {
-      closest_right = current_v_point;
-      result = current_v_point;
-    }
-  }
-
-  return result;
+	return -1;
 }
 
-/**
- * @brief gets the index of a given voltage in the GRAPH_POINTS_VOLTAGE
- * @param voltage the voltage you wanna find the index of
- * @retval the index, if it was found in the array and -1 if it wasnt found in the array
-*/
-static int32_t get_voltage_index(int32_t voltage)
+int32_t gp2_get_distance(uint32_t voltage)
 {
-  for(int32_t i = 0; i < elements_in_array(GRAPH_POINTS_VOLTAGE); i++)
-  {
-    if(voltage == GRAPH_POINTS_VOLTAGE[i])
-    {
-      return i;
-    }
-  }
+	/* Left index */
+	int32_t li = closest_voltage_left(voltage);
+	if(li < 0)
+	{
+		return -1;
+	}
 
-  return -1;
-}
-
-int32_t GP2_get_distance(int32_t voltage)
-{
-  int32_t y = voltage;
-  int32_t y1 = closest_voltage_left(voltage);
-  int32_t y2 = closest_voltage_right(voltage);
-
-  int32_t x1 = GRAPH_POINTS_MM[get_voltage_index(y1)];
-  int32_t x2 = GRAPH_POINTS_MM[get_voltage_index(y2)];
-
-  int32_t distance = linear_interpolation_for_y(y, y1, y2, x1, x2);
-
-  return distance;
+	return lerp_y(voltage, gp[li].Voltage, gp[li + 1].Voltage,
+		gp[li].MM, gp[li + 1].MM);
 }

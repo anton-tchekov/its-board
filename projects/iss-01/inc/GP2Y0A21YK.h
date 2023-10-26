@@ -17,6 +17,6 @@
  * @param voltage The voltage which you received by the sensor in 10 mV units
  * @retval The distance in mm
  */
-int32_t GP2_get_distance(int32_t voltage);
+int32_t gp2_get_distance(uint32_t voltage);
 
 #endif /* __GP2Y0A21YK_H__ */
