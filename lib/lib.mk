@@ -1,5 +1,5 @@
 CC        := arm-none-eabi-gcc
-CFLAGS    := -Wall -Wextra -ffreestanding -nostdlib -nostartfiles \
+CFLAGS    += -Wall -Wextra -ffreestanding -nostdlib -nostartfiles \
 	-nodefaultlibs -O2 -std=c99 -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 \
 	-D STM32F429xx
 
