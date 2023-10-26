@@ -1,46 +1,52 @@
+/**
+ * @file    GP2Y0A21YK.c
+ * @author  Haron Nazari
+ * @version 0.1
+ * @date    2023-10-26
+ */
+
 #include "GP2Y0A21YK.h"
 
 // Get the amount of elements in an array
 #define elements_in_array(array) (int32_t)(sizeof(array) / sizeof(array[0]))
 
-/*
- Voltage values for the corresponding GRAPH_POINTS_CM array
- the voltage values are written in 10mv
- For example : 315 = 3.15v
-*/
+/**
+ * Voltage values for the corresponding GRAPH_POINTS_MM array
+ * the voltage values are written in 10 mV
+ * For example: 315 = 3.15 V
+ */
 static const int32_t GRAPH_POINTS_VOLTAGE[] =
 {
-  315, 295, 273, 231, 164, 131, 108, 92, 74, 61, 52, 45, 40
+	315, 295, 273, 231, 164, 131, 108, 92, 74, 61, 52, 45, 40
 };
 
-/*
-  Distance values for the corresponding GRAPH_POINTS_VOLTAGE array
-  the distance values are written in mm
-  for example : 300 = 300mm
-*/
+/**
+ * Distance values for the corresponding GRAPH_POINTS_VOLTAGE array
+ * the distance values are written in mm
+ * For example: 300 = 300 mm
+ */
 static const int32_t GRAPH_POINTS_MM[] =
 {
-  60, 70, 80, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800
+	60, 70, 80, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800
 };
 
 /**
  * @brief Acts as a Linear interpolation formula, thats supposed to help
  * approximate points that are in between 2 graph points if the function is unknown.
- * 
- * This function is to be used if you have the y value but want to find out the 
+ *
+ * This function is to be used if you have the y value but want to find out the
  * corresponding x value between 2 known x values and their given y values
- * 
+ *
  * @param y the point you wanna know the x value of
- * 
+ *
  * @param y1 the y value for x1
  * @param y2 the y value for x2
- * 
- * @param x1 the closest dot to the left, that you know the y value for
- * @param x2 the closest dot to the right, that you know the y value for 
- * 
- * @retval result of the linear interpolation, gives the approximate x for the given y
  *
-*/
+ * @param x1 the closest dot to the left, that you know the y value for
+ * @param x2 the closest dot to the right, that you know the y value for
+ *
+ * @retval result of the linear interpolation, gives the approximate x for the given y
+ */
 static int32_t linear_interpolation_for_y(int32_t y, int32_t y1, int32_t y2, int32_t x1, int32_t x2)
 {
   return (x1 + (y - y1) * (x2 - x1) / (y2 - y1));
@@ -62,7 +68,7 @@ static int32_t closest_voltage_left(int32_t voltage)
   // Iterate through the graph_points_array
   for(int32_t i = 0; i < elements_in_array(GRAPH_POINTS_VOLTAGE); i++)
   {
-    // if theres an element smaller than the current most left voltage, but bigger than 
+    // if theres an element smaller than the current most left voltage, but bigger than
     // the given voltage, make it the new closet_left voltage
     current_v_point = GRAPH_POINTS_VOLTAGE[i];
     if(current_v_point < closest_left && current_v_point > voltage)
@@ -79,7 +85,7 @@ static int32_t closest_voltage_left(int32_t voltage)
  * @brief gets the closest voltage to the right of the given voltage in the GRAPH_POINTS_VOLTAGE[] array
  * @param voltage the given voltage you want to find the closest right value to
  * @retval the closest right voltage in 10mv
-*/
+ */
 static int32_t closest_voltage_right(int32_t voltage)
 {
   // Start with the most right point
@@ -91,7 +97,7 @@ static int32_t closest_voltage_right(int32_t voltage)
   // Iterate through the graph_points_array
   for(int32_t i = 0; i < elements_in_array(GRAPH_POINTS_VOLTAGE); i++)
   {
-    // if theres an element bigger than the current most right voltage, but smaller than 
+    // if theres an element bigger than the current most right voltage, but smaller than
     // the given voltage, make it the new closest_right voltage
     current_v_point = GRAPH_POINTS_VOLTAGE[i];
     if(current_v_point > closest_right && current_v_point < voltage)
@@ -120,13 +126,6 @@ static int32_t get_voltage_index(int32_t voltage)
   }
 
   return -1;
-}
-
-int32_t GP2_read_voltage()
-{
-  // TODO : ADC Funktion
-
-  return 0;
 }
 
 int32_t GP2_get_distance(int32_t voltage)

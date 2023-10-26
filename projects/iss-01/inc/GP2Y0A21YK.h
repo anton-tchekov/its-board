@@ -1,22 +1,22 @@
-#ifndef GP2Y0A21YK_H
-#define GP2Y0A21YK_H
+/**
+ * @file    GP2Y0A21YK.h
+ * @author  Haron Nazari
+ * @version 0.1
+ * @date    2023-10-26
+ * @brief   GP2Y0A21YK distance sensor
+ */
+
+#ifndef __GP2Y0A21YK_H__
+#define __GP2Y0A21YK_H__
 
 #include <stdint.h>
 
-#define ANALOG_PIN_MUX (TODO)
-
-/** TODO
- * @brief reads the voltage of the sensor via the defined adc pin
- * @retval voltage * 10mv
-*/
-int32_t GP2_read_voltage();
-
 /**
- * @brief calculates the distance the sensor measures, by the given voltage
- * @param voltage the voltage which you received by the sensor
- * @retval the distance in mm
-*/
+ * @brief Calculates the distance the sensor measures, by the given voltage
+ *
+ * @param voltage The voltage which you received by the sensor in 10 mV units
+ * @retval The distance in mm
+ */
 int32_t GP2_get_distance(int32_t voltage);
 
-
-#endif
+#endif /* __GP2Y0A21YK_H__ */
