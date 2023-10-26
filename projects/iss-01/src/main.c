@@ -21,6 +21,8 @@ int main(void)
 	timer_init();
 	lcd_init(COLOR_BLACK);
 
+	adc_init(0);
+
 	for(;;)
 	{
 	}
