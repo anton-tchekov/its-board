@@ -42,8 +42,6 @@ static void os_key(void)
 	}
 }
 
-#include "fonts/Terminus16.h"
-
 /**
  * @brief Main function
  * @return Unreachable
@@ -59,6 +57,7 @@ int main(void)
 	shell_init();
 	editor_init();
 
+	shell_open();
 	for(;;)
 	{
 		os_key();
