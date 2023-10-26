@@ -294,11 +294,11 @@ void lcd_callback(int x, int y, int w, int h, void *handle,
 	lcd_window_end();
 }
 
-void lcd_init(int orientation, int color)
+void lcd_init(int color)
 {
 	lcd_reset();
 	lcd_cmd_list(_lcd_init_cmds, sizeof(_lcd_init_cmds));
-	lcd_set_orientation(orientation);
+	lcd_set_orientation(D2U_L2R);
 	delay_ms(200);
 	lcd_cmd(0x11);
 	delay_ms(120);

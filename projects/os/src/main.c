@@ -52,7 +52,7 @@ int main(void)
 {
 	its_board_init();
 	timer_init();
-	lcd_init(D2U_L2R, COLOR_BLACK);
+	lcd_init(COLOR_BLACK);
 	ps2_init();
 	srand(314159265);
 

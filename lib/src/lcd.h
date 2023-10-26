@@ -41,7 +41,7 @@ void lcd_param(int param);
 void lcd_cmd(int cmd);
 void lcd_emit(int color);
 
-void lcd_init(int orientation, int color);
+void lcd_init(int color);
 void lcd_reset(void);
 int lcd_color(int r, int g, int b);
 
