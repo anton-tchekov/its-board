@@ -14,7 +14,7 @@ static const int32_t GRAPH_POINTS_VOLTAGE[] =
 };
 
 /*
-  Distance values for the correspondign GRAPH_POINTS_VOLTAGE array
+  Distance values for the corresponding GRAPH_POINTS_VOLTAGE array
   the distance values are written in mm
   for example : 300 = 300mm
 */
@@ -30,15 +30,15 @@ static const int32_t GRAPH_POINTS_MM[] =
  * This function is to be used if you have the y value but want to find out the 
  * corresponding x value between 2 known x values and their given y values
  * 
- * @param x the point you wanna know the y value of
- * 
- * @param x1 the closest dot to the left, that you know the y value for
- * @param x2 the closest dot to the right, that you know the y value for 
+ * @param y the point you wanna know the x value of
  * 
  * @param y1 the y value for x1
  * @param y2 the y value for x2
  * 
- * @retval result of the linear interpolation
+ * @param x1 the closest dot to the left, that you know the y value for
+ * @param x2 the closest dot to the right, that you know the y value for 
+ * 
+ * @retval result of the linear interpolation, gives the approximate x for the given y
  *
 */
 static int32_t linear_interpolation_for_y(int32_t y, int32_t y1, int32_t y2, int32_t x1, int32_t x2)
