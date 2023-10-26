@@ -6,6 +6,7 @@
  */
 
 #include "assert.h"
+#include "panic.h"
 #include "lcd.h"
 #include "font.h"
 #include "fonts/Terminus16_Bold.h"
@@ -19,6 +20,8 @@ void _assert(const char *str, const char *file, int line)
 	sprintf(buf, "%s:%d: Assertion failed:", file, line);
 	font_str(10, 10, buf, COLOR_BLACK, COLOR_WHITE, Terminus16_Bold);
 	font_str(10, 30, str, COLOR_BLACK, COLOR_WHITE, Terminus16_Bold);
+
+	panic();
 }
 
 #endif /* ASSERT_EN */

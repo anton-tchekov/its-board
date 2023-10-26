@@ -13,11 +13,15 @@ void panic(void)
 {
 	for(;;)
 	{
-		GPIOD->ODR = 0xAA;
-		GPIOE->ODR = 0xAA;
+		GPIOD->BSRR = 0xFF << 16;
+		GPIOE->BSRR = 0xFF << 16;
+		GPIOD->BSRR = 0xAA;
+		GPIOE->BSRR = 0xAA;
 		delay_ms(1000);
-		GPIOD->ODR = 0x55;
-		GPIOE->ODR = 0x55;
+		GPIOD->BSRR = 0xFF << 16;
+		GPIOE->BSRR = 0xFF << 16;
+		GPIOD->BSRR = 0x55;
+		GPIOE->BSRR = 0x55;
 		delay_ms(1000);
 	}
 }
