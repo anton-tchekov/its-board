@@ -6,7 +6,6 @@
  */
 
 #include "stm32f4xx_hal.h"
-#include "assert.h"
 
 #define CR_CLEAR_MASK                     0xFFFC30E0
 #define ADC_TWO_SAMPLING_DELAY_8_CYCLES   0x00000300
@@ -31,7 +30,6 @@ void adc_init(uint32_t adc)
 	uint32_t i;
 	ADC_TypeDef *a;
 
-	assert(adc <= 2);
 	a = adcs[adc];
 
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOFEN;
@@ -80,8 +78,6 @@ int32_t adc_read(uint32_t adc, uint32_t channel)
 	uint32_t i;
 	ADC_TypeDef *a;
 
-	assert(adc <= 2);
-	assert(channel <= 15);
 	a = adcs[adc];
 
 	if(channel < 10)

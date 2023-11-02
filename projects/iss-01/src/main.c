@@ -13,21 +13,32 @@
 #include "font.h"
 #include "fonts/Terminus16_Bold.h"
 #include "adc.h"
-#include "GP2Y0A21YK.h"
+#include "uart.h"
+#include "GP2Y0A21.h"
 #include <stdio.h>
+
+#define NUM_SAMPLES 4096
 
 static void adc_readloop(void)
 {
 	char buf[128];
-	int32_t value, voltage, distance;
+	int32_t value, distance;
+	uint32_t i;
 
 	for(;;)
 	{
-		value = adc_read(2, 6);
-		voltage = adc_to_mv(value) / 10;
-		distance = gp2_get_distance(voltage);
+		value = 0;
+		for(i = 0; i < NUM_SAMPLES; ++i)
+		{
+			value += adc_read(2, 6);
+		}
 
-		sprintf(buf, "%6d | %6d * 10 mV | %6d mm", value, voltage, distance);
+		value /= NUM_SAMPLES;
+		distance = gp2_get_distance(value);
+
+		uart_tx_str("Hello World!\n");
+
+		sprintf(buf, "%6d | %6d mm", value, distance);
 		font_str(10, 10, buf, COLOR_WHITE, COLOR_BLACK, Terminus16_Bold);
 		delay_ms(100);
 	}
@@ -42,6 +53,7 @@ int main(void)
 	its_board_init();
 	timer_init();
 	lcd_init(COLOR_BLACK);
+	uart_init(115200);
 
 	adc_init(2);
 	adc_readloop();
