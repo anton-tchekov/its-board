@@ -8,8 +8,6 @@
 #include "GP2Y0A21.h"
 #include <stddef.h>
 
-#define XXXX 0
-
 int32_t gp2_get_distance(int32_t value)
 {
 	/* Mapping from a ADC value to millimeters */
