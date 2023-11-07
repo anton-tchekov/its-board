@@ -17,7 +17,7 @@
 #include "GP2Y0A21.h"
 #include <stdio.h>
 
-#define NUM_SAMPLES 4096
+#define NUM_SAMPLES 65536
 
 static uint32_t nsample(uint32_t count)
 {

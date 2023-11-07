@@ -17,6 +17,6 @@
  * @param value The ADC value you received from the sensor (0 - 4095)
  * @retval The distance in millimeters
  */
-int32_t gp2_get_distance(uint32_t value);
+int32_t gp2_get_distance(int32_t value);
 
 #endif /* __GP2Y0A21_H__ */
