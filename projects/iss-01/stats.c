@@ -3,10 +3,10 @@
 
 int main(void)
 {
-	double x_r = 1000;
+	double x_r = 150;
 	double ms[] =
 	{
-		1264, 1118, 1068, 1098, 1023, 1051
+		148,147,148,149,148,146
 	};
 
 	int n = sizeof(ms) / sizeof(*ms);
