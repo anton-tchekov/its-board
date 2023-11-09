@@ -6,7 +6,6 @@
  */
 
 #include "nanoc_map.h"
-#include "nanoc_instruction.h"
 #include "nanoc_status.h"
 #include <string.h>
 
@@ -38,19 +37,20 @@ NanoC_Bool nanoc_map_find(
 	return 0;
 }
 
-NanoC_Status nanoc_map_insert(NanoC_Map *map, const char *key, size_t len, size_t *idx)
+NanoC_Status nanoc_map_insert(NanoC_Map *map, const char *key, size_t len,
+	size_t *idx)
 {
 	if(map->Count >= map->Capacity)
 	{
-		return NANOC_ERROR_STACK_OVERFLOW;
+		return NANOC_ERROR_OVERFLOW;
 	}
 
 	if(nanoc_map_find(map, key, len, idx))
 	{
-		return NANOC_ERROR_DUPLICATE_MAP_ELEMENT;
+		return NANOC_ERROR_REDEFINITION;
 	}
 
-	map_elem_set(&map->Elements[map->Count], key, len);
+	map_elem_set(map->Elements + map->Count, key, len);
 	*idx = map->Count++;
 	return NANOC_STATUS_SUCCESS;
 }

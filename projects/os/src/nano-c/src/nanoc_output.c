@@ -40,7 +40,7 @@ void nanoc_output_emit32(NanoC_Output *output, u32r val)
 	output->Pos += 4;
 }
 
-void nanoc_output_emit16_at(NanoC_Output *output, u32r loc, u16r val)
+void nanoc_output_emit_addr_at(NanoC_Output *output, NanoC_Address loc, u16r val)
 {
 	nanoc_write_16(output->Buffer + loc, val);
 }
@@ -83,5 +83,20 @@ void nanoc_output_jump(
 
 void nanoc_output_jump_here(NanoC_Output *output, NanoC_Address addr)
 {
-	nanoc_output_emit16_at(output, addr, output->Pos);
+	nanoc_output_emit_addr_at(output, addr, output->Pos);
+}
+
+NanoC_Address nanoc_output_isp(NanoC_Output *output)
+{
+	NanoC_Address idx;
+	idx = output->Pos;
+	output->Buffer[idx] = NANOC_INSTR_ISP;
+	output->Pos += 2;
+	return idx;
+}
+
+void nanoc_output_isp_amount(NanoC_Output *output, NanoC_Address addr,
+	u8r locals)
+{
+	output->Buffer[addr + 1] = locals;
 }

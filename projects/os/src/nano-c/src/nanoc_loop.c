@@ -58,7 +58,7 @@ NanoC_Status nanoc_for(NanoC_Parser *parser)
 	size_t var_cnt, prev_break, prev_continue;
 	NanoC_TokenType tt;
 
-	var_cnt = nanoc_map_count(&parser->Variables);
+	var_cnt = parser->Variables.Count;
 	prev_break = parser->BreakStack.Top;
 	prev_continue = parser->ContinueStack.Top;
 	NANOC_NEXT();
@@ -110,7 +110,7 @@ NanoC_Status nanoc_for(NanoC_Parser *parser)
 	}
 
 	break_continue_addr(parser, prev_break, prev_continue, idx_continue);
-	nanoc_map_reset(&parser->Variables, var_cnt);
+	parser->Variables.Count = var_cnt;
 	return NANOC_STATUS_SUCCESS;
 }
 
@@ -131,7 +131,7 @@ NanoC_Status nanoc_while(NanoC_Parser *parser)
 	NANOC_NEXT();
 	NANOC_PROPAGATE(loop_nest(parser));
 	nanoc_output_jump(&parser->Output, NANOC_INSTR_JMP, idx_before);
-	nanoc_output_emit16_at(&parser->Output, idx_branch, parser->Output.Pos);
+	nanoc_output_emit_addr_at(&parser->Output, idx_branch, parser->Output.Pos);
 	break_continue_addr(parser, prev_break, prev_continue, idx_before);
 	return NANOC_STATUS_SUCCESS;
 }

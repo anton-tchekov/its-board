@@ -14,13 +14,13 @@
 #define CHECK_UNDERFLOW(N) \
 	if(op < (N)) \
 	{ \
-		return NANOC_ERROR_STACK_UNDERFLOW; \
+		return NANOC_ERROR_UNDERFLOW; \
 	}
 
 #define CHECK_OVERFLOW(N) \
 	if(op > NANOC_OP_STACK_SIZE - (N)) \
 	{ \
-		return NANOC_ERROR_STACK_OVERFLOW; \
+		return NANOC_ERROR_OVERFLOW; \
 	}
 
 #define BINARY_OP(C) \
@@ -202,6 +202,11 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 		}
 
 		case NANOC_INSTR_RET:
+			if(fp < 2)
+			{
+				return NANOC_ERROR_UNDERFLOW;
+			}
+
 			sp = fp;
 			sp -= 1;
 			fp = call_stack[sp];

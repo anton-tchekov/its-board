@@ -24,15 +24,13 @@ static NanoC_Value test(NanoC_Value a, NanoC_Value *p)
 {
 	output = p[0];
 	return 0;
+	(void)a;
 }
 
 static NanoC_Value ldchar(NanoC_Value a, NanoC_Value *p)
 {
-	NanoC_Value v = p[0];
-	printf("sizeof(v) = %d, value = %ld\n", sizeof(NanoC_Value), v);
-	char *s = (char *)v;
-	//printf("value = %s\n", s);
-	return 0; //s[0];
+	return 0;
+	(void)a, (void)p;
 }
 
 static int test_positive_run(const char *source, NanoC_Value expected)

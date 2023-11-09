@@ -20,6 +20,7 @@ static NanoC_Value debug_print(NanoC_Value a, NanoC_Value *p)
 {
 	printf("%"PRIdPTR"\n", p[0]);
 	return 0;
+	(void)a;
 }
 
 int main(int argc, char **argv)
@@ -58,12 +59,11 @@ int main(int argc, char **argv)
 	nanoc_parser_init(&parser, content, strings,
 		output_buf, sizeof(output_buf), &parser_builtins);
 
-	nanoc_statement(&parser);
-	nanoc_output_emit(&parser.Output, NANOC_INSTR_HALT);
+	nanoc_file(&parser);
 	nanoc_disasm(parser.Output.Buffer, parser.Output.Pos);
 
-	printf("status = %d\n",
-		nanoc_interpreter_run(parser.Output.Buffer, &builtins, &rv));
+	printf("interpreter status = %s\n", nanoc_status_message(
+		nanoc_interpreter_run(parser.Output.Buffer, &builtins, &rv)));
 
 #if 0
 	printf("%s\n", content);

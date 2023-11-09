@@ -12,6 +12,8 @@ CC := gcc
 
 # Compiler flags
 CFLAGS := -Wall -Wextra -g -O0 -std=c99 -pedantic -DNANOC_DEBUG \
+	-Werror=maybe-uninitialized \
+	-Werror=uninitialized \
 	-DNANOC_DESKTOP -I ../  -fprofile-arcs -ftest-coverage
 
 # Linker flags

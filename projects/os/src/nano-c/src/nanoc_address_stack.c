@@ -15,7 +15,7 @@ void nanoc_address_stack_update(NanoC_AddressStack *as,
 	while(top > prev)
 	{
 		--top;
-		nanoc_output_emit16_at(output, stack[top], addr);
+		nanoc_output_emit_addr_at(output, stack[top], addr);
 	}
 
 	as->Top = prev;

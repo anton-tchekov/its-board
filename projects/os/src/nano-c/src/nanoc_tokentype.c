@@ -22,6 +22,7 @@ const char *nanoc_tokentype_tostring(NanoC_TokenType token_type)
 		[ NANOC_TT_FLOAT ]          = "TT_FLOAT",
 		[ NANOC_TT_STRING ]         = "TT_STRING",
 
+		[ NANOC_TT_FN ]             = "TT_FN",
 		[ NANOC_TT_IF ]             = "TT_IF",
 		[ NANOC_TT_ELSE ]           = "TT_ELSE",
 		[ NANOC_TT_DO ]             = "TT_DO",

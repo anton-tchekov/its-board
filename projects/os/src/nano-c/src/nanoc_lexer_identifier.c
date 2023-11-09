@@ -13,6 +13,7 @@ NanoC_TokenType nanoc_keyword_detect(const char *ident, size_t len)
 {
 	static const u8 keywords[] =
 	{
+		'f', 'n', NANOC_LUT_ST(NANOC_TT_FN),
 		'i', 'f', NANOC_LUT_ST(NANOC_TT_IF),
 		'e', 'l', 's', 'e', NANOC_LUT_ST(NANOC_TT_ELSE),
 		'd', 'o', NANOC_LUT_ST(NANOC_TT_DO),

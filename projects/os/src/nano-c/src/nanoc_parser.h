@@ -17,6 +17,7 @@
 #include "nanoc_types.h"
 #include "nanoc_builtin.h"
 
+#define NANOC_FUNCTION_CAPACITY   32
 #define NANOC_VARIABLE_CAPACITY   32
 #define NANOC_OPERATOR_STACK_SIZE 32
 #define NANOC_ANDOR_STACK_SIZE    16
@@ -44,16 +45,21 @@
 typedef struct NANOC_PARSER
 {
 	NanoC_MapElement VariableBuffer[NANOC_VARIABLE_CAPACITY];
+	NanoC_MapElement FunctionBuffer[NANOC_FUNCTION_CAPACITY];
 	u8 OperatorStack[NANOC_OPERATOR_STACK_SIZE];
 	u16 AndOrStack[NANOC_ANDOR_STACK_SIZE];
 	u16 BreakBuffer[NANOC_BC_BUFFER_SIZE];
 	u16 ContinueBuffer[NANOC_BC_BUFFER_SIZE];
+	u16 FunctionAddrs[NANOC_FUNCTION_CAPACITY];
+	u8 FunctionArgs[NANOC_FUNCTION_CAPACITY];
 	NanoC_TokenStream TokenStream;
 	NanoC_Output Output;
 	NanoC_AddressStack BreakStack;
 	NanoC_AddressStack ContinueStack;
 	NanoC_Map Variables;
+	NanoC_Map Functions;
 	const NanoC_ParserBuiltins *Builtins;
+	size_t NumLocals;
 	size_t BreakNesting;
 	size_t ContinueNesting;
 	size_t AndOrTop;
@@ -69,5 +75,7 @@ NanoC_Status nanoc_statement(NanoC_Parser *parser);
 NanoC_Status nanoc_block(NanoC_Parser *parser);
 NanoC_Status nanoc_substmt(NanoC_Parser *parser, NanoC_TokenType end);
 NanoC_Status nanoc_int(NanoC_Parser *parser);
+NanoC_Status nanoc_function(NanoC_Parser *parser);
+NanoC_Status nanoc_file(NanoC_Parser *parser);
 
 #endif /* __NANOC_PARSER_H__ */
