@@ -52,6 +52,7 @@ typedef struct NANOC_PARSER
 	u16 ContinueBuffer[NANOC_BC_BUFFER_SIZE];
 	u16 FunctionAddrs[NANOC_FUNCTION_CAPACITY];
 	u8 FunctionArgs[NANOC_FUNCTION_CAPACITY];
+	u8 ReturnFlag;
 	NanoC_TokenStream TokenStream;
 	NanoC_Output Output;
 	NanoC_AddressStack BreakStack;
@@ -77,5 +78,6 @@ NanoC_Status nanoc_substmt(NanoC_Parser *parser, NanoC_TokenType end);
 NanoC_Status nanoc_int(NanoC_Parser *parser);
 NanoC_Status nanoc_function(NanoC_Parser *parser);
 NanoC_Status nanoc_file(NanoC_Parser *parser);
+NanoC_Status nanoc_stmt_list(NanoC_Parser *parser);
 
 #endif /* __NANOC_PARSER_H__ */

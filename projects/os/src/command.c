@@ -19,6 +19,7 @@
 #include "ffstatus.h"
 #include "sd/sd.h"
 #include "ramdisk.h"
+#include "terminal.h"
 
 #include "stm32f4xx.h"
 
@@ -789,6 +790,7 @@ static NanoC_Value _readdir(NanoC_Value a, NanoC_Value *p)
 	(void)a;
 }
 
+static NanoC_Value _exec(NanoC_Value a, NanoC_Value *p);
 static NanoC_Value _help(NanoC_Value a, NanoC_Value *p);
 
 static const NanoC_ParserBuiltin parser_builtins_data[] =
@@ -889,6 +891,8 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 	{ .Name = "opendir",       .NumArgs = 2, .IsVariadic = 0 },
 	{ .Name = "closedir",      .NumArgs = 1, .IsVariadic = 0 },
 	{ .Name = "readdir",       .NumArgs = 2, .IsVariadic = 0 },
+
+	{ .Name = "exec",          .NumArgs = 0, .IsVariadic = 0 },
 };
 
 static const NanoC_ParserBuiltins parser_builtins =
@@ -1035,6 +1039,8 @@ static const NanoC_Builtin functions[] =
 	_opendir,
 	_closedir,
 	_readdir,
+
+	_exec,
 };
 
 static const NanoC_Builtins builtins = { ARRLEN(functions), functions };
@@ -1102,7 +1108,120 @@ static void printaddr(size_t addr)
 	shell_print("\"\n");
 }
 
-static void compile(const char *src, int length)
+size_t _print_handle_tab(NanoC_Char c, size_t count)
+{
+	if(c == '\t')
+	{
+		do
+		{
+			shell_char(' ');
+			++count;
+		}
+		while((count & 0x3) != 0);
+	}
+	else
+	{
+		shell_char(c);
+		++count;
+	}
+
+	return count;
+}
+
+static NanoC_Value _exec(NanoC_Value a, NanoC_Value *p)
+{
+	NanoC_Status status;
+	NanoC_Parser parser;
+	u8 output_buf[4096];
+	char strings[4096];
+	char buf[128];
+	NanoC_Value rv = 0;
+
+	nanoc_parser_init(&parser, editor_buf(), strings, output_buf,
+		sizeof(output_buf), &parser_builtins);
+	status = nanoc_file(&parser);
+	if(status)
+	{
+		size_t i, before, count;
+		const char *s;
+		NanoC_Token *token = nanoc_tokenstream_get(&parser.TokenStream, 0);
+
+		sprintf(buf, "\nParse error: %s\n", nanoc_status_message(status));
+		shell_print(buf);
+
+		sprintf(buf, "%3d:%3d | %s", token->Pos.Row, token->Pos.Col,
+			nanoc_tokentype_tostring(token->Type));
+		shell_print(buf);
+
+		if(token->Type == NANOC_TT_INTEGER)
+		{
+			sprintf(buf, " (value = %d)", token->Value);
+			shell_print(buf);
+		}
+
+		shell_char('\n');
+		if(token->Type == NANOC_TT_NULL)
+		{
+			return 0;
+		}
+
+		/* Print part of line before token */
+		count = 0;
+		for(s = token->LineBegin; s < token->Ptr; ++s)
+		{
+			count = _print_handle_tab(*s, count);
+		}
+
+		/* Print token */
+		before = count;
+		shell_fg(TERMINAL_FG_RED | TERMINAL_BOLD);
+		sprintf(buf, "%.*s", (int)token->Length, token->Ptr);
+		shell_print(buf);
+		shell_fg(TERMINAL_FG_WHITE);
+		count += token->Length;
+		s += token->Length;
+
+		/* Print part of line after token */
+		for(; *s && *s != '\n'; ++s)
+		{
+			count = _print_handle_tab(*s, count);
+		}
+		shell_char('\n');
+
+		/* Print spaces before underline */
+		for(i = 0; i < before; ++i)
+		{
+			shell_char(' ');
+		}
+
+		/* Print underline */
+		shell_fg(TERMINAL_FG_RED | TERMINAL_BOLD);
+		shell_char('^');
+		for(i = 1; i < token->Length; ++i)
+		{
+			shell_char('~');
+		}
+		shell_fg(TERMINAL_FG_WHITE);
+		shell_char('\n');
+
+		return 0;
+	}
+
+	status = nanoc_interpreter_run(parser.Output.Buffer, &builtins, &rv);
+	if(status)
+	{
+		sprintf(buf, "\nRuntime error: %s\n",
+			nanoc_status_message(status));
+
+		shell_print(buf);
+		return 0;
+	}
+
+	return 0;
+	(void)a, (void)p;
+}
+
+void command_run(const char *src, int length)
 {
 	NanoC_Status status;
 	NanoC_Parser parser;
@@ -1113,7 +1232,7 @@ static void compile(const char *src, int length)
 
 	nanoc_parser_init(&parser, src, strings, output_buf,
 		sizeof(output_buf), &parser_builtins);
-	status = nanoc_statement(&parser);
+	status = nanoc_stmt_list(&parser);
 	if(status)
 	{
 		sprintf(buf, "\nParse error: %s\n", nanoc_status_message(status));
@@ -1137,9 +1256,4 @@ static void compile(const char *src, int length)
 	shell_print(buf);
 	printaddr(rv);
 	(void)length;
-}
-
-void command_run(const char *cmd, int len)
-{
-	compile(cmd, len);
 }

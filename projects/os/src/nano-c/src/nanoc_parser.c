@@ -56,6 +56,18 @@ NanoC_Status nanoc_block_inner(NanoC_Parser *parser)
 	return NANOC_STATUS_SUCCESS;
 }
 
+NanoC_Status nanoc_stmt_list(NanoC_Parser *parser)
+{
+	while(NANOC_TT(0) != NANOC_TT_NULL)
+	{
+		NANOC_PROPAGATE(nanoc_statement(parser));
+		NANOC_NEXT();
+	}
+
+	nanoc_output_emit(&parser->Output, NANOC_INSTR_HALT);
+	return NANOC_STATUS_SUCCESS;
+}
+
 NanoC_Status nanoc_block(NanoC_Parser *parser)
 {
 	NANOC_EXPECT(NANOC_TT_L_BRACE, NANOC_ERROR_EXPECTED_L_BRACE);
@@ -241,6 +253,7 @@ NanoC_Status nanoc_int(NanoC_Parser *parser)
 
 static NanoC_Status nanoc_return(NanoC_Parser *parser)
 {
+	parser->ReturnFlag = 1;
 	NANOC_NEXT();
 	if(NANOC_TT(0) == NANOC_TT_SEMICOLON)
 	{
@@ -337,6 +350,7 @@ NanoC_Status nanoc_function(NanoC_Parser *parser)
 	NanoC_Address addr;
 	NanoC_Token *token;
 
+	parser->ReturnFlag = 0;
 	parser->NumLocals = 0;
 	addr = nanoc_output_isp(&parser->Output);
 
@@ -387,6 +401,14 @@ NanoC_Status nanoc_function(NanoC_Parser *parser)
 	NANOC_NEXT();
 	NANOC_PROPAGATE(nanoc_block(parser));
 	nanoc_output_isp_amount(&parser->Output, addr, parser->NumLocals);
+	parser->Variables.Count = 0;
+
+	if(!parser->ReturnFlag)
+	{
+		nanoc_output_emit2(&parser->Output, NANOC_INSTR_PUSHI8, 0);
+		nanoc_output_emit(&parser->Output, NANOC_INSTR_RET);
+	}
+
 	return NANOC_STATUS_SUCCESS;
 }
 

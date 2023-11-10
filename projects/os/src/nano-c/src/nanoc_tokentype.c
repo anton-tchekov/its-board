@@ -8,7 +8,6 @@
 #include "nanoc_tokentype.h"
 #include "nanoc_debug.h"
 
-#ifdef NANOC_DEBUG
 
 const char *nanoc_tokentype_tostring(NanoC_TokenType token_type)
 {
@@ -86,5 +85,6 @@ const char *nanoc_tokentype_tostring(NanoC_TokenType token_type)
 
 	return token_names[token_type];
 }
+#ifdef NANOC_DEBUG
 
 #endif /* NANOC_DEBUG */

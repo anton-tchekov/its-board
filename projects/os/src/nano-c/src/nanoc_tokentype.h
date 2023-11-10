@@ -90,9 +90,11 @@ typedef enum NANOC_TOKENTYPE
 	NANOC_TT_OP_END = NANOC_TT_U_MINUS
 } NanoC_TokenType;
 
-#ifdef NANOC_DEBUG
 
 const char *nanoc_tokentype_tostring(NanoC_TokenType token_type);
+
+#ifdef NANOC_DEBUG
+
 
 #endif /* NANOC_DEBUG */
 

@@ -496,3 +496,5 @@ void editor_key(int key, int c)
 
 	editor_render();
 }
+
+const char *editor_buf(void) { _buf[line.Length] = '\0'; return _buf; }
