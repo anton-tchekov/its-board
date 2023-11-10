@@ -39,10 +39,10 @@ typedef enum
 
 #include <stdio.h>
 
-#define NANOC_THROW(e) \
+#define NANOC_THROW(E) \
 	do \
 	{ \
-		NanoC_Status __ret = e; \
+		NanoC_Status __ret = E; \
 		nanoc_log(__FILE__, __func__, __LINE__, __ret); \
 		return __ret; \
 	} while(0)
@@ -63,10 +63,10 @@ void nanoc_log(
 
 #else /* NANOC_DEBUG */
 
-#define NANOC_THROW(e) \
+#define NANOC_THROW(E) \
 	do \
 	{ \
-		return e; \
+		return E; \
 	} while(0)
 
 #define NANOC_PROPAGATE(E) \

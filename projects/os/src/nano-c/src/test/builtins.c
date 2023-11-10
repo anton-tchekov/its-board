@@ -12,6 +12,11 @@ static const NanoC_ParserBuiltin parser_builtins_data[] =
 		.NumArgs = 1,
 		.IsVariadic = 0,
 	},
+	{
+		.Name = "pchr",
+		.NumArgs = 1,
+		.IsVariadic = 0,
+	},
 };
 
 const NanoC_ParserBuiltins parser_builtins =

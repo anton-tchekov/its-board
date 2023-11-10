@@ -14,9 +14,31 @@ fn fib(n)
 	return fib(n - 2) + fib(n - 1);
 }
 
+fn iter()
+{
+	int i = 32;
+	for(int x = 0; x < 20; ++x)
+	{
+		for(int y = 0; y < 20; ++y)
+		{
+			pchr(i);
+			++i;
+			if(i == 126)
+			{
+				i = 32;
+			}
+		}
+
+		pchr('\n');
+	}
+}
+
 fn main()
 {
 	int i = 0, cnt = 0;
+
+	iter();
+
 	while(i <= 100)
 	{
 		if(count(i))
@@ -27,5 +49,5 @@ fn main()
 		++i;
 	}
 	test(cnt);
-	test(fib(40));
+	test(fib(30));
 }

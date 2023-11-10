@@ -23,6 +23,13 @@ static NanoC_Value debug_print(NanoC_Value a, NanoC_Value *p)
 	(void)a;
 }
 
+static NanoC_Value pchr(NanoC_Value a, NanoC_Value *p)
+{
+	fputc(p[0], stdout);
+	return 0;
+	(void)a;
+}
+
 int main(int argc, char **argv)
 {
 	const char *filename;
@@ -30,14 +37,15 @@ int main(int argc, char **argv)
 	NanoC_Value rv;
 	char *content;
 	NanoC_Parser parser;
+	NanoC_Status ret;
 	u8 output_buf[1024];
 	char strings[1024];
 
-	NanoC_Value (*functions[])(NanoC_Value, NanoC_Value *) = { debug_print };
+	NanoC_Value (*functions[])(NanoC_Value, NanoC_Value *) = { debug_print, pchr, pchr };
 
 	NanoC_Builtins builtins =
 	{
-		1,
+		3,
 		functions
 	};
 
@@ -59,7 +67,12 @@ int main(int argc, char **argv)
 	nanoc_parser_init(&parser, content, strings,
 		output_buf, sizeof(output_buf), &parser_builtins);
 
-	nanoc_file(&parser);
+	if((ret = nanoc_file(&parser)))
+	{
+		nanoc_token_print(nanoc_tokenstream_get(&parser.TokenStream, 0));
+		return 1;
+	}
+
 	nanoc_disasm(parser.Output.Buffer, parser.Output.Pos);
 
 	printf("interpreter status = %s\n", nanoc_status_message(
