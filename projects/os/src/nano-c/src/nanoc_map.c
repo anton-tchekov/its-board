@@ -7,50 +7,52 @@
 
 #include "nanoc_map.h"
 #include "nanoc_status.h"
+#include "ctype_ext.h"
 #include <string.h>
 
-static void map_elem_set(NanoC_MapElement *elem, const char *key, size_t len)
+static NanoC_Bool nanoc_map_compare(const char *p, const char *q)
 {
-	elem->Key = key;
-	elem->Length = len;
+	while(is_ident(*p) || is_ident(*q))
+	{
+		if(*p != *q)
+		{
+			return 0;
+		}
+
+		++p;
+		++q;
+	}
+
+	return 1;
 }
 
-static NanoC_Bool map_elem_equals(
-	NanoC_MapElement *elem, const char *key, size_t len)
-{
-	return (len == elem->Length) && !strncmp(elem->Key, key, len);
-}
-
-NanoC_Bool nanoc_map_find(
-	NanoC_Map *map, const char *key, size_t len, size_t *idx)
+size_t nanoc_map_find(NanoC_Map *map, const char *key)
 {
 	size_t i;
 	for(i = 0; i < map->Count; ++i)
 	{
-		if(map_elem_equals(&map->Elements[i], key, len))
+		if(nanoc_map_compare(key, map->Elements[i].Key))
 		{
-			*idx = i;
-			return 1;
+			return i + 1;
 		}
 	}
 
 	return 0;
 }
 
-NanoC_Status nanoc_map_insert(NanoC_Map *map, const char *key, size_t len,
-	size_t *idx)
+NanoC_Status nanoc_map_insert(NanoC_Map *map, const char *key, size_t *idx)
 {
 	if(map->Count >= map->Capacity)
 	{
 		return NANOC_ERROR_OVERFLOW;
 	}
 
-	if(nanoc_map_find(map, key, len, idx))
+	if(nanoc_map_find(map, key))
 	{
 		return NANOC_ERROR_REDEFINITION;
 	}
 
-	map_elem_set(map->Elements + map->Count, key, len);
+	map->Elements[map->Count].Key = key;
 	*idx = map->Count++;
 	return NANOC_STATUS_SUCCESS;
 }

@@ -13,7 +13,6 @@ NanoC_TokenType nanoc_keyword_detect(const char *ident, size_t len)
 {
 	static const u8 keywords[] =
 	{
-		'f', 'n', NANOC_LUT_ST(NANOC_TT_FN),
 		'i', 'f', NANOC_LUT_ST(NANOC_TT_IF),
 		'e', 'l', 's', 'e', NANOC_LUT_ST(NANOC_TT_ELSE),
 		'd', 'o', NANOC_LUT_ST(NANOC_TT_DO),
@@ -45,7 +44,7 @@ NanoC_TokenType nanoc_keyword_detect(const char *ident, size_t len)
 NanoC_Status nanoc_lexer_identifier(NanoC_Lexer *lexer, NanoC_Token *token)
 {
 	NanoC_Char c = lexer->Current;
-	if(!is_identifer_start(c))
+	if(!is_ident_start(c))
 	{
 		return 0;
 	}
@@ -54,7 +53,7 @@ NanoC_Status nanoc_lexer_identifier(NanoC_Lexer *lexer, NanoC_Token *token)
 	{
 		c = nanoc_lexer_advance(lexer);
 	}
-	while(is_identifier_char(c));
+	while(is_ident(c));
 	token->Length = lexer->Ptr - token->Ptr;
 	token->Type = nanoc_keyword_detect(token->Ptr, token->Length);
 	return 1;

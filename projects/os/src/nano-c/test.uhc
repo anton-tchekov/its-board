@@ -1,4 +1,4 @@
-fn count(n)
+int count(n)
 {
 	if((n & 1) == 0)
 	{
@@ -8,13 +8,33 @@ fn count(n)
 	return 1;
 }
 
-fn fib(n)
+int isA()
+{
+	test(777);
+	return 1;
+}
+
+int isB()
+{
+	test(666);
+	return 1;
+}
+
+int aa()
+{
+	if(isA() || isB())
+	{
+		test(555);
+	}
+}
+
+int fib(n)
 {
 	if(n < 2) { return n; }
 	return fib(n - 2) + fib(n - 1);
 }
 
-fn iter()
+int iter()
 {
 	int i = 32;
 	for(int x = 0; x < 20; ++x)
@@ -33,11 +53,29 @@ fn iter()
 	}
 }
 
-fn main()
+int alles() {
+	return 5;
+}
+
+int alleskoenner() {
+	int alles = 7;
+
+	alles = alles() + alles() + alles;
+
+	test(alles);
+}
+
+int main()
 {
-	int i = 0, cnt = 0;
+	aa();
+alleskoenner();
+
+
+	/*int i = 0, cnt = 0;
+
 
 	iter();
+
 
 	while(i <= 100)
 	{
@@ -49,5 +87,5 @@ fn main()
 		++i;
 	}
 	test(cnt);
-	test(fib(30));
+	test(fib(30));*/
 }

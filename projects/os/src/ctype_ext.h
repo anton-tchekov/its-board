@@ -11,12 +11,12 @@
 
 #include <ctype.h>
 
-static inline int is_identifer_start(int c)
+static inline int is_ident_start(int c)
 {
 	return isalpha(c) || c == '_';
 }
 
-static inline int is_identifier_char(int c)
+static inline int is_ident(int c)
 {
 	return isalnum(c) || c == '_';
 }

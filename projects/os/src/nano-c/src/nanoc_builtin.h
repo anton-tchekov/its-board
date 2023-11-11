@@ -32,7 +32,7 @@ typedef struct NANOC_PARSER_BUILTINS
 	const NanoC_ParserBuiltin *Table;
 } NanoC_ParserBuiltins;
 
-NanoC_Bool nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
-	const char *name, size_t len, size_t *idx);
+size_t nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
+	const char *name);
 
 #endif /* __NANOC_BUILTIN_H__ */

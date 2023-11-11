@@ -213,11 +213,11 @@ static int syntax_color(const char *line, int len, int i, int *fg)
 		color = TERMINAL_FG_YELLOW;
 		++i;
 	}
-	else if(is_identifer_start(c))
+	else if(is_ident_start(c))
 	{
 		NanoC_TokenType tt;
 		int start = i;
-		for(; i < len && is_identifier_char(c = line[i]); ++i) {}
+		for(; i < len && is_ident(c = line[i]); ++i) {}
 
 		tt = nanoc_keyword_detect(line + start, i - start);
 		if(tt == NANOC_TT_INT)

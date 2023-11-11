@@ -7,27 +7,34 @@
 
 #include "nanoc_builtin.h"
 #include "nanoc_types.h"
+#include "ctype_ext.h"
 #include <string.h>
 
-static NanoC_Bool _match(const char *builtin, const char *token, size_t len)
+static NanoC_Bool nanoc_builtin_compare(const char *b, const char *t)
 {
-	return strlen(builtin) == len && !strncmp(builtin, token, len);
+	while(*b || is_ident(*t))
+	{
+		if(*b != *t)
+		{
+			return 0;
+		}
+
+		++b;
+		++t;
+	}
+
+	return 1;
 }
 
-NanoC_Bool nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
-	const char *name, size_t len, size_t *idx)
+size_t nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
+	const char *name)
 {
-	size_t i, count;
-	const NanoC_ParserBuiltin *elem;
-
-	elem = builtins->Table;
-	count = builtins->Count;
-	for(i = 0; i < count; ++i, ++elem)
+	size_t i;
+	for(i = 0; i < builtins->Count; ++i)
 	{
-		if(_match(elem->Name, name, len))
+		if(nanoc_builtin_compare(builtins->Table[i].Name, name))
 		{
-			*idx = i;
-			return 1;
+			return i + 1;
 		}
 	}
 

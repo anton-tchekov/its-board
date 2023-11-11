@@ -20,7 +20,7 @@ static NanoC_Status insert_token(
 		NANOC_THROW(NANOC_ERROR_EXPECTED_IDENTIFIER);
 	}
 
-	return nanoc_map_insert(map, token->Ptr, token->Length, idx);
+	return nanoc_map_insert(map, token->Ptr, idx);
 }
 
 void nanoc_parser_init(NanoC_Parser *parser, const char *source,
@@ -90,18 +90,18 @@ NanoC_Status nanoc_fn_call(NanoC_Parser *parser)
 	arg_cnt = 0;
 	is_variadic = 0;
 	token = NANOC_TOKEN(0);
-	if(nanoc_builtin_find(parser->Builtins, token->Ptr, token->Length,
-		&fn_id))
+	if((fn_id = nanoc_builtin_find(parser->Builtins, token->Ptr)))
 	{
 		const NanoC_ParserBuiltin *builtin;
+		--fn_id;
 		builtin = &parser->Builtins->Table[fn_id];
 		fn_addr = -fn_id - 1;
 		fn_args = builtin->NumArgs;
 		is_variadic = builtin->IsVariadic;
 	}
-	else if(nanoc_map_find(&parser->Functions, token->Ptr, token->Length,
-		&fn_id))
+	else if((fn_id = nanoc_map_find(&parser->Functions, token->Ptr)))
 	{
+		--fn_id;
 		fn_addr = parser->FunctionAddrs[fn_id];
 		fn_args = parser->FunctionArgs[fn_id];
 	}
@@ -212,12 +212,12 @@ static NanoC_Status nanoc_identifier(NanoC_Parser *parser)
 	else if(is_assign(tt))
 	{
 		size_t local;
-		if(!nanoc_map_find(&parser->Variables,
-			token->Ptr, token->Length, &local))
+		if(!(local = nanoc_map_find(&parser->Variables, token->Ptr)))
 		{
 			NANOC_THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
 		}
 
+		--local;
 		NANOC_NEXT();
 		return nanoc_assign(parser, assign_instr(tt), local);
 	}
@@ -276,12 +276,12 @@ static NanoC_Status nanoc_parser_inc_dec(
 	NanoC_Token *token;
 	NANOC_NEXT();
 	token = NANOC_TOKEN(0);
-	if(!nanoc_map_find(&parser->Variables,
-		token->Ptr, token->Length, &idx))
+	if(!(idx = nanoc_map_find(&parser->Variables, token->Ptr)))
 	{
 		NANOC_THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
 	}
 
+	--idx;
 	NANOC_NEXT();
 	nanoc_output_emit2(&parser->Output, instr, idx);
 	return NANOC_STATUS_SUCCESS;
@@ -354,12 +354,11 @@ NanoC_Status nanoc_function(NanoC_Parser *parser)
 	parser->NumLocals = 0;
 	addr = nanoc_output_isp(&parser->Output);
 
-	NANOC_EXPECT(NANOC_TT_FN, NANOC_ERROR_EXPECTED_FN);
+	NANOC_EXPECT(NANOC_TT_INT, NANOC_ERROR_EXPECTED_FN);
 	NANOC_NEXT();
 	token = NANOC_TOKEN(0);
 
-	if(nanoc_builtin_find(parser->Builtins, token->Ptr, token->Length,
-		&fidx))
+	if(nanoc_builtin_find(parser->Builtins, token->Ptr))
 	{
 		NANOC_THROW(NANOC_ERROR_REDEFINITION);
 	}
@@ -426,11 +425,12 @@ NanoC_Status nanoc_file(NanoC_Parser *parser)
 		NANOC_NEXT();
 	}
 
-	if(!nanoc_map_find(&parser->Functions, "main", 4, &fn_id))
+	if(!(fn_id = nanoc_map_find(&parser->Functions, "main")))
 	{
 		NANOC_THROW(NANOC_ERROR_NO_MAIN);
 	}
 
+	--fn_id;
 	nanoc_output_emit_addr_at(&parser->Output, 2, parser->FunctionAddrs[fn_id]);
 	return NANOC_STATUS_SUCCESS;
 }

@@ -107,12 +107,12 @@ static NanoC_Status nanoc_expression_identifier(NanoC_Parser *parser)
 	}
 	else
 	{
-		if(!nanoc_map_find(&parser->Variables, token->Ptr,
-			token->Length, &local))
+		if(!(local = nanoc_map_find(&parser->Variables, token->Ptr)))
 		{
 			NANOC_THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
 		}
 
+		--local;
 		nanoc_output_emit2(&parser->Output, NANOC_INSTR_PUSHL, local);
 	}
 
