@@ -457,23 +457,7 @@ static void I2C1_MspInit(I2C_HandleTypeDef* i2cHandle)
 
 static void I2C1_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 {
-  /* USER CODE BEGIN I2C1_MspDeInit 0 */
 
-  /* USER CODE END I2C1_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_I2C1_CLK_DISABLE();
-
-    /**I2C1 GPIO Configuration
-    PB8     ------> I2C1_SCL
-    PB9     ------> I2C1_SDA
-    */
-    HAL_GPIO_DeInit(BUS_I2C1_SCL_GPIO_PORT, BUS_I2C1_SCL_GPIO_PIN);
-
-    HAL_GPIO_DeInit(BUS_I2C1_SDA_GPIO_PORT, BUS_I2C1_SDA_GPIO_PIN);
-
-  /* USER CODE BEGIN I2C1_MspDeInit 1 */
-
-  /* USER CODE END I2C1_MspDeInit 1 */
 }
 
 /**
@@ -491,4 +475,3 @@ static void I2C1_MspDeInit(I2C_HandleTypeDef* i2cHandle)
 /**
   * @}
   */
-

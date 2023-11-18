@@ -1,7 +1,7 @@
 CC        := arm-none-eabi-gcc
 CFLAGS    += -Wall -Wextra -ffreestanding -nostdlib -nostartfiles \
 	-nodefaultlibs -O2 -std=c99 -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 \
-	-D STM32F429xx
+	-D STM32F429xx -mfloat-abi=hard
 
 BINDIR    := bin
 SRCDIR    := src
@@ -70,7 +70,7 @@ $(TARGET).elf: $(OBJECTS) $(LIBOBJECTS) $(LIBOBJDIR)/startup.o
 	@mkdir -p bin/
 	@$(CC) -nostartfiles -nostdlib -T $(LIBDIR)/linker.ld \
 		$(LIBOBJDIR)/startup.o $(OBJECTS) $(LIBOBJECTS) \
-		-o $(TARGET).elf \
+		-o $(TARGET).elf --specs nano.specs -lc -lgcc
 
 $(LIBOBJDIR)/startup.o: $(LIBSRCDIR)/startup.s
 	arm-none-eabi-as $(LIBSRCDIR)/startup.s -o $(LIBOBJDIR)/startup.o
