@@ -3,22 +3,22 @@
  * @file    iks01a3.c
  * @author  Tobias De Gasperis
  *          HAW-Hamburg
- *          Labor für technische Informatik
+ *          Labor fï¿½r technische Informatik
  *          Berliner Tor  7
  *          D-20099 Hamburg
  * @version 1.0
  *
  * @date    29. April 2022
- * @brief   Funktionen für das IKS01A3-Sensorboard basierend auf dem Code 
+ * @brief   Funktionen fï¿½r das IKS01A3-Sensorboard basierend auf dem Code
  *          der X-CUBE_MEMS MEMS-App.
  ******************************************************************************
  */
- 
+
 /* Includes ------------------------------------------------------------------*/
 #include "iks01a3.h"
 #include <stdio.h>
 
-IKS01A3_Acc_Gyro_t acc_gyro = 
+IKS01A3_Acc_Gyro_t acc_gyro =
 {
 	NULL,
 	acc_gyro_init,
@@ -29,7 +29,7 @@ IKS01A3_Acc_Gyro_t acc_gyro =
 	acc_gyro_get_g_axes,
 };
 
-IKS01A3_Accelerometer_t accelerometer = 
+IKS01A3_Accelerometer_t accelerometer =
 {
 	NULL,
 	accel_init,
@@ -38,7 +38,7 @@ IKS01A3_Accelerometer_t accelerometer =
 	accel_get_a_axes,
 };
 
-IKS01A3_Magnetometer_t magnetometer = 
+IKS01A3_Magnetometer_t magnetometer =
 {
 	NULL,
 	mag_init,
@@ -58,9 +58,9 @@ IKS01A3_Hum_Temp_t hum_temp =
 	hum_temp_get_temp,
 };
 
-IKS01A3_Press_Temp_t press_temp = 
+IKS01A3_Press_Temp_t press_temp =
 {
-	NULL, 
+	NULL,
 	press_temp_init,
 	press_temp_enable_press,
 	press_temp_enable_temp,
@@ -69,7 +69,7 @@ IKS01A3_Press_Temp_t press_temp =
 	press_temp_get_temp,
 };
 
-IKS01A3_Temp_t temp = 
+IKS01A3_Temp_t temp =
 {
 	NULL,
 	temp_init,
@@ -81,9 +81,9 @@ IKS01A3_Temp_t temp =
 int32_t acc_gyro_init(LSM6DSO_Object_t* lsm6dso_obj)
 {
 	LSM6DSO_IO_t            io_ctx;
-  uint8_t                 id;
-  LSM6DSO_Capabilities_t  cap;
-  int32_t ret = BSP_ERROR_NONE;
+	uint8_t                 id;
+	LSM6DSO_Capabilities_t  cap;
+	int32_t ret = BSP_ERROR_NONE;
 
 	if(NULL == lsm6dso_obj)
 	{
@@ -184,7 +184,7 @@ int32_t acc_gyro_get_a_axes(int32_t* acceleration)
 		acceleration[2] = Acceleration.z;
 	}
 	return ret;
-	
+
 }
 
 int32_t acc_gyro_get_g_axes(int32_t* angularRate)
@@ -219,7 +219,7 @@ int32_t accel_init(LIS2DW12_Object_t* pObj)
 	else
 	{
 		accelerometer.pLis2DW12_obj = pObj;
-		
+
 		/* Configure the accelero driver */
 		io_ctx.BusType     = LIS2DW12_I2C_BUS; /* I2C */
 		io_ctx.Address     = LIS2DW12_I2C_ADD_H;
@@ -292,7 +292,7 @@ int32_t accel_get_a_axes(int32_t *acceleration)
 	}
 	return ret;
 }
-	
+
 int32_t mag_init(LIS2MDL_Object_t* pObj)
 {
 	LIS2MDL_IO_t            io_ctx;
@@ -306,7 +306,7 @@ int32_t mag_init(LIS2MDL_Object_t* pObj)
 	else
 	{
 		magnetometer.pLis2MDL_obj = pObj;
-		
+
 		/* Configure the accelero driver */
 		io_ctx.BusType     = LIS2MDL_I2C_BUS; /* I2C */
 		io_ctx.Address     = LIS2MDL_I2C_ADD;
@@ -383,12 +383,12 @@ int32_t mag_get_a_axes(int32_t *magneticField)
 	}
 	return ret;
 }
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 
 
 
@@ -430,7 +430,7 @@ int32_t hum_temp_init(HTS221_Object_t* pObj)
 		else
 		{
 			(void)HTS221_GetCapabilities(pObj, &cap);
-			
+
 			if ((ret == BSP_ERROR_NONE) && (cap.Temperature == 1U))
 			{
 				if (HTS221_Init(pObj) != HTS221_OK)
@@ -595,7 +595,7 @@ int32_t press_temp_enable_press(void)
 	}
 	return ret;
 }
-	
+
 int32_t press_temp_enable_temp(void)
 {
 	int32_t ret = BSP_ERROR_NONE;
@@ -645,7 +645,7 @@ int32_t temp_init(STTS751_Object_t* pObj)
   uint8_t                 id;
   int32_t                 ret = BSP_ERROR_NONE;
   STTS751_Capabilities_t  cap;
-	
+
 	if(NULL == pObj)
 	{
 		ret = BSP_ERROR_WRONG_PARAM;
@@ -726,4 +726,3 @@ int32_t temp_get_temp(float* temperature)
 	}
 	return ret;
 }
-

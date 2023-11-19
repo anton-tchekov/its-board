@@ -3,13 +3,13 @@
  * @file    iks01a3.h
  * @author  Tobias De Gasperis
  *          HAW-Hamburg
- *          Labor für technische Informatik
+ *          Labor fï¿½r technische Informatik
  *          Berliner Tor  7
  *          D-20099 Hamburg
  * @version 1.0
  *
  * @date    29. April 2022
- * @brief   Funktionen für das IKS01A3-Sensorboard basierend auf dem Code 
+ * @brief   Funktionen fï¿½r das IKS01A3-Sensorboard basierend auf dem Code
  *          der X-CUBE_MEMS MEMS-App.
  ******************************************************************************
  */
@@ -23,10 +23,10 @@
 /* Motion Sensor instance Info */
 typedef struct
 {
-  LSM6DSO_Object_t acc_gyro;
+	LSM6DSO_Object_t acc_gyro;
 	LIS2DW12_Object_t acc;
 	LIS2MDL_Object_t mag;
-  HTS221_Object_t hum_temp;
+	HTS221_Object_t hum_temp;
 	LPS22HH_Object_t press_temp;
 	STTS751_Object_t temp;
 } IKS01A3_SENSORS_t;

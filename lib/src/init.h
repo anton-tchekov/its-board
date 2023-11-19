@@ -11,12 +11,13 @@
 
 #include <stdint.h>
 
-extern uint32_t __bss_start, __bss_end;
+extern uint32_t __bss_start, __bss_end,
+	__data_start, __data_end, __data_si;
 
 /**
  * @brief Initialize ITS-Board
  *        This function must be called at the beginning of the main function
-  */
+ */
 void its_board_init(void);
 
 #endif /* __INIT_H__ */

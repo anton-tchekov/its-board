@@ -260,6 +260,17 @@ static void init_bss(void)
 	}
 }
 
+static void init_data(void)
+{
+	uint32_t *src = &__data_si;
+	uint32_t *dst = &__data_start;
+	uint32_t *end = &__data_end;
+	while(dst < end)
+	{
+		*dst++ = *src++;
+	}
+}
+
 void its_board_init(void)
 {
 	RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -337,4 +348,5 @@ void its_board_init(void)
 	spi_ll_init();
 
 	init_bss();
+	init_data();
 }
