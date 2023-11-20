@@ -14,45 +14,13 @@
 #include "iks01a3.h"
 #include <stdio.h>
 
-#define NUMBER_OF_AXES	3
 #define SIZE_OF_BUFFER   128
-#define DECIMAL_DIGITS	2
 
-char *print_double(char *str, double v, int decimalDigits)
+static void check(char *s, int ret)
 {
-	int i = 1;
-	int intPart, fractPart;
-	int len;
-	char *ptr;
-
-	/* prepare decimal digits multiplicator */
-	for(; decimalDigits != 0; i *= 10, decimalDigits--) ;
-
-	/* calculate integer & fractinal parts */
-	intPart = (int)v;
-	fractPart = (int)((v - (double)(int)v) * i);
-
-	/* fill in integer part */
-	sprintf(str, "%i.", intPart);
-
-	/* prepare fill in of fractional part */
-	len = strlen(str);
-	ptr = &str[len];
-
-	/* fill in leading fractional zeros */
-	for(i /= 10; i > 1; i /= 10, ptr++)
-	{
-		if(fractPart >= i)
-		{
-			break;
-		}
-
-		*ptr = '0';
-	}
-
-	/* fill in (rest of) fractional part */
-	sprintf(ptr, "%i", fractPart);
-	return str;
+	char buf[SIZE_OF_BUFFER];
+	sprintf(buf, "%s : %d\n", s, ret);
+	uart_tx_str(buf);
 }
 
 /**
@@ -63,86 +31,51 @@ int main(void)
 {
 	IKS01A3_SENSORS_t iks;
 	uint8_t id = 0;
-	int32_t axes[NUMBER_OF_AXES] = {0};
-	float value1 = 0.0f;
-	float value2 = 0.0f;
+	int32_t axes[12];
 	char buf[SIZE_OF_BUFFER];
-	char buf1[SIZE_OF_BUFFER];
-	char buf2[SIZE_OF_BUFFER];
 
 	its_board_init();
 	timer_init();
 	uart_init(115200);
 	uart_tx_str("ISS-02 Init\n");
 
-	acc_gyro.init(&iks.acc_gyro);
-	uart_tx_str("acc_gyro Init\n");
+	check("acc_gyro.init", acc_gyro.init(&iks.acc_gyro));
+	check("accelerometer.init", accelerometer.init(&iks.acc));
+	check("magnetometer.init", magnetometer.init(&iks.mag));
+	check("acc_gyro.enable_acc", acc_gyro.enable_acc());
+	check("acc_gyro.enable_gyr", acc_gyro.enable_gyr());
+	check("accelerometer.enable_acc", accelerometer.enable_acc());
+	check("magnetometer.enable_mag", magnetometer.enable_mag());
 
-	accelerometer.init(&iks.acc);
-	uart_tx_str("accelerometer Init\n");
-
-	magnetometer.init(&iks.mag);
-	uart_tx_str("magnetometer Init\n");
-
-	hum_temp.init(&iks.hum_temp);
-	uart_tx_str("hum_temp Init\n");
-
-	press_temp.init(&iks.press_temp);
-	uart_tx_str("press_temp Init\n");
-
-	temp.init(&iks.temp);
-
-	uart_tx_str("Init done\n");
-
-	acc_gyro.enable_acc();
-	acc_gyro.enable_gyr();
-	accelerometer.enable_acc();
-	magnetometer.enable_mag();
-	hum_temp.enable_hum();
-	hum_temp.enable_temp();
-	press_temp.enable_press();
-	press_temp.enable_temp();
-	temp.enable_temp();
-
-	uart_tx_str("Enable done\n");
-
-	acc_gyro.read_id(&id);
-	sprintf(buf, "LSM6DSO accelerometer & gyroscope = 0x%x\n", id);
+	check("acc_gyro.read_id", acc_gyro.read_id(&id));
+	sprintf(buf, "LSM6DSO accelerometer and gyroscope = 0x%x\n", id);
+	uart_tx_str(buf);
+	check("accelerometer.read_id", accelerometer.read_id(&id));
+	sprintf(buf, "LIS2DW12 accelerometer              = 0x%x\n", id);
+	uart_tx_str(buf);
+	check("magnetometer.read_id", magnetometer.read_id(&id));
+	sprintf(buf, "LIS2MDL magnetometer                = 0x%x\n", id);
 	uart_tx_str(buf);
 
-	accelerometer.read_id(&id);
-	sprintf(buf, "LIS2DW12 accelerometer            = 0x%x\n", id);
-	uart_tx_str(buf);
+/*
+		"LSM6DSO [acc/mg]:"
+		"LSM6DSO [gyro/mdps]:"
+		"LIS2DW12 [acc/mg]:"
+		"LIS2MDL [mag/mgauss]"
+*/
 
-	magnetometer.read_id(&id);
-	sprintf(buf, "LIS2MDL magnetometer              = 0x%x\n", id);
-	uart_tx_str(buf);
-
+	uart_tx_str(" AccX | AccY | AccZ |GyroX |GyroY |GyroZ | AccX | AccY | AccZ | MagX | MagY | MagZ \n");
 	for(;;)
 	{
-		uart_tx_str("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+		check("acc_gyro.get_a_axes", acc_gyro.get_a_axes(&axes[0]));
+		check("acc_gyro.get_g_axes", acc_gyro.get_g_axes(&axes[3]));
+		check("accelerometer.get_a_axes", accelerometer.get_a_axes(&axes[6]));
+		check("magnetometer.get_m_axes", magnetometer.get_m_axes(&axes[9]));
 
-		acc_gyro.get_a_axes(axes);
-		sprintf(buf, "LSM6DSO [acc/mg]:      %6d, %6d, %6d\n",
-			axes[0], axes[1], axes[2]);
+		sprintf(buf, "%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d\n",
+			axes[0], axes[1], axes[2], axes[3], axes[4], axes[5],
+			axes[6], axes[7], axes[8], axes[9], axes[10], axes[11]);
 		uart_tx_str(buf);
-
-		acc_gyro.get_g_axes(axes);
-		sprintf(buf, "LSM6DSO [gyro/mdps]:   %6d, %6d, %6d\n",
-			axes[0], axes[1], axes[2]);
-		uart_tx_str(buf);
-
-		accelerometer.get_a_axes(axes);
-		sprintf(buf, "LIS2DW12 [acc/mg]:     %6d, %6d, %6d\n",
-			axes[0], axes[1], axes[2]);
-		uart_tx_str(buf);
-
-		magnetometer.get_m_axes(axes);
-		sprintf(buf, "LIS2MDL [mag/mgauss]:  %6d, %6d, %6d\n",
-			axes[0], axes[1], axes[2]);
-		uart_tx_str(buf);
-
-		uart_tx_str("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 		delay_ms(1500);
 	}
 
