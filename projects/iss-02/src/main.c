@@ -64,15 +64,13 @@ int main(void)
 		"LIS2MDL [mag/mgauss]"
 */
 
-	uart_tx_str(" AccX | AccY | AccZ |GyroX |GyroY |GyroZ | AccX | AccY | AccZ | MagX | MagY | MagZ \n");
 	for(;;)
 	{
-		check("acc_gyro.get_a_axes", acc_gyro.get_a_axes(&axes[0]));
-		check("acc_gyro.get_g_axes", acc_gyro.get_g_axes(&axes[3]));
-		check("accelerometer.get_a_axes", accelerometer.get_a_axes(&axes[6]));
-		check("magnetometer.get_m_axes", magnetometer.get_m_axes(&axes[9]));
-
-		sprintf(buf, "%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d|%6d\n",
+		acc_gyro.get_a_axes(&axes[0]);
+		acc_gyro.get_g_axes(&axes[3]);
+		accelerometer.get_a_axes(&axes[6]);
+		magnetometer.get_m_axes(&axes[9]);
+		sprintf(buf, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
 			axes[0], axes[1], axes[2], axes[3], axes[4], axes[5],
 			axes[6], axes[7], axes[8], axes[9], axes[10], axes[11]);
 		uart_tx_str(buf);
