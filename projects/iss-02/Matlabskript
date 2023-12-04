@@ -1,0 +1,47 @@
+%clear all;
+close all;
+
+% Dateneinlesen
+eins = readtable("itsboard_ruhelage_1.csv"); % Ruhelage
+zwei = readtable("itsboard_drehungzumaufrichten_2.csv"); % Leicht aufgehoben, aufgerichtet, gewartet, hingelegt
+drei = readtable("itsboard_bewegunggradlinieg_3.csv"); % Bewegung nach rechts und nach links wieder
+vier = readtable("itsboard_mehrmalsgradlinieg_4.csv"); % Mehrere Bewegung nach rechts und links
+fuenf = readtable("itsboard_gradliniegundrotieren_5.csv"); % "Achterbahn" bewegung auf dem Tisch
+sechs = readtable("itsboard_randombewegung_6.csv"); % "Acht" bewegung in der luft bzw. herumschaukeln
+
+% Ändere Datenset oder X-Achse
+current_dataset = fuenf;
+X = current_dataset.Zeit;
+S = current_dataset.Sample;
+
+CX = S; % Current X-Axis
+
+%% Plot Gyro
+figure();
+xlabel("Sample");
+ylabel("Stärke ?")
+title("Messdaten ITS-Board Accelerometer")
+hold on;
+
+% Gyro
+plot(CX, current_dataset.Acc_x, 'DisplayName', 'Acc_X');
+plot(CX, current_dataset.Acc_y, 'DisplayName', 'Acc_y');
+plot(CX, current_dataset.Acc_z, 'DisplayName', 'Acc_z');
+
+legend('show');
+hold off;
+
+%% Plot Accelerometer
+figure();
+xlabel("Sample");
+ylabel("Stärke ?")
+title("Messdaten ITS-Board Gyrometer")
+hold on;
+
+% Acc
+plot(CX, current_dataset.Gyro_x, 'DisplayName', 'Gyro_x');
+plot(CX, current_dataset.Gyro_y, 'DisplayName', 'Gyro_y');
+plot(CX, current_dataset.Gyro_z, 'DisplayName', 'Gyro_z');
+
+legend('show');
+hold off;
