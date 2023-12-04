@@ -1,9 +1,12 @@
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 #include "stm32f4xx_hal.h"
 #include "init.h"
 #include "delay.h"
 #include "iks01a3.h"
 #include "timer.h"
+#include <limits.h>
 
 #define NUMBER_OF_AXES  3
 #define SIZE_OF_BUFFER 32
@@ -43,39 +46,39 @@ void l_demo(void)
 	float val1, val2;
   char buf1[SIZE_OF_BUFFER];
 	char buf2[SIZE_OF_BUFFER];
-
-	printf("> Demo\n\n");
-
+	
+	printf("> Demo\r\n\r\n");
+	
 	for(;;)
 	{
-		printf("\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+		printf("\r\nvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\r\n");
 		acc_gyro.get_a_axes(axes);
-		printf("LSM6DSO [acc/mg]:      %6d, %6d, %6d\r\n", axes[0], axes[1], axes[2]);
+		printf("LSM6DSO [acc/mg]:      %6d, %6d, %6d\r\r\n", axes[0], axes[1], axes[2]);
 		acc_gyro.get_g_axes(axes);
-		printf("LSM6DSO [gyro/mdps]:   %6d, %6d, %6d\r\n", axes[0], axes[1], axes[2]);
+		printf("LSM6DSO [gyro/mdps]:   %6d, %6d, %6d\r\r\n", axes[0], axes[1], axes[2]);
 		accelerometer.get_a_axes(axes);
-		printf("LIS2DW12 [acc/mg]:     %6d, %6d, %6d\r\n", axes[0], axes[1], axes[2]);
+		printf("LIS2DW12 [acc/mg]:     %6d, %6d, %6d\r\r\n", axes[0], axes[1], axes[2]);
 		magnetometer.get_m_axes(axes);
-		printf("LIS2MDL [mag/mgauss]:  %6d, %6d, %6d\r\n", axes[0], axes[1], axes[2]);
+		printf("LIS2MDL [mag/mgauss]:  %6d, %6d, %6d\r\r\n", axes[0], axes[1], axes[2]);
 
-		printf("---\r\n");
+		printf("---\r\r\n");
 
 		hum_temp.get_temp(&val1);
 		hum_temp.get_hum(&val2);
-		printf("HTS221:  [temp] %7s C,   [hum] %s%%\n",
+		printf("HTS221:  [temp] %7s C,   [hum] %s%%\r\n",
 			print_double(buf1, val1, 2),
 			print_double(buf2, val2, DECIMAL_DIGITS));
 
 		press_temp.get_temp(&val1);
 		press_temp.get_press(&val2);
-		printf("LPS22HH: [temp] %7s C, [press] %s mbar\n",
+		printf("LPS22HH: [temp] %7s C, [press] %s mbar\r\n",
 			print_double(buf1, val1, 2),
 			print_double(buf2, val2, DECIMAL_DIGITS));
 
 		temp.get_temp(&val1);
-		printf("STTS751: [temp] %7s C\r\n",
+		printf("STTS751: [temp] %7s C\r\r\n",
 			print_double(buf1, val1, DECIMAL_DIGITS));
-		printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+		printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n");
 		delay(1500);
 	}
 }
@@ -83,35 +86,106 @@ void l_demo(void)
 void l_csv(void)
 {
 	int32_t axes[12];
-	printf("> CSV\n\n");
+	printf("> CSV\r\n\r\n");
 	for(;;)
 	{
 		acc_gyro.get_a_axes(&axes[0]);
 		acc_gyro.get_g_axes(&axes[3]);
 		accelerometer.get_a_axes(&axes[6]);
 		magnetometer.get_m_axes(&axes[9]);
-		printf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+		printf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
 			axes[0], axes[1], axes[2], axes[3], axes[4], axes[5],
 			axes[6], axes[7], axes[8], axes[9], axes[10], axes[11]);
-		delay(1500);
 	}
 }
+
+#define PI 3.14159f
+#define RAD_TO_DEG (180.0f / PI)
 
 void l_joystick(void)
 {
-	printf("> Joystick\n\n");
+	printf("> Joystick\r\n\r\n");
+	int32_t axes[3];
+
+	float x1, y1, z1;
+	float jX, jY;
+	
 	for(;;)
 	{
+		acc_gyro.get_a_axes(axes);
+		x1 = axes[0] / 1000.0f;
+		y1 = axes[1] / 1000.0f;
+		z1 = axes[2] / 1000.0f;
+
+		jX = RAD_TO_DEG * (atan2(-y1, -z1) + PI);
+		jY = RAD_TO_DEG * (atan2(-x1, -z1) + PI);
+		
+		if(jX > 270.0f) { jX -= 360.0f; }
+		if(jY > 270.0f) { jY -= 360.0f; }
+		
+		printf("X: %5.2f | Y: %5.2f\r\n", jX, jY);
 	}
 }
 
+#define BASELINE_SAMPLE 1024
+#define BASELINE_SENSI   20
+
 void l_alarm(void)
 {
-	printf("> Alarmanlage\n\n");
+	delay(100);
+	int32_t min_acc[3] = { INT_MAX, INT_MAX, INT_MAX };
+	int32_t max_acc[3] = { INT_MIN, INT_MIN, INT_MIN };
+	int32_t changed_acc[3];
+	int32_t i;
+
+	printf("> Alarmanlage\r\n\r\n");
+
+	for(i = 0; i < BASELINE_SAMPLE; ++i)
+	{
+		acc_gyro.get_a_axes(changed_acc);
+
+		if(changed_acc[0] < min_acc[0]) { min_acc[0] = changed_acc[0]; }
+		if(changed_acc[1] < min_acc[1]) { min_acc[1] = changed_acc[1]; }
+		if(changed_acc[2] < min_acc[2]) { min_acc[2] = changed_acc[2]; }
+
+		if(changed_acc[0] > max_acc[0]) { max_acc[0] = changed_acc[0]; }
+		if(changed_acc[1] > max_acc[1]) { max_acc[1] = changed_acc[1]; }
+		if(changed_acc[2] > max_acc[2]) { max_acc[2] = changed_acc[2]; }
+
+		delay(1);
+	}
+
+	max_acc[0] += BASELINE_SENSI;
+	max_acc[1] += BASELINE_SENSI;
+	max_acc[2] += BASELINE_SENSI;
+
+	min_acc[0] -= BASELINE_SENSI;
+	min_acc[1] -= BASELINE_SENSI;
+	min_acc[2] -= BASELINE_SENSI;
+
 	for(;;)
 	{
+		acc_gyro.get_a_axes(changed_acc);
+		if(changed_acc[0] < min_acc[0] || changed_acc[1] < min_acc[1] || changed_acc[2] < min_acc[2] ||
+			changed_acc[0] > max_acc[0] || changed_acc[1] > max_acc[1] || changed_acc[2] > max_acc[2])
+		{
+			GPIOD->BSRR = (1 << 0);
+		}
 	}
 }
+
+void l_measure(void)
+{
+	uint8_t id;
+	printf("> I2C Oszilloskop Messung\r\n\r\n");
+	
+	for(;;)
+	{
+		acc_gyro.read_id(&id);
+		delay(1000);
+	}
+}
+
 
 #define NUM_SAMPLES  1024
 
@@ -121,8 +195,8 @@ void l_buffer(void)
 	int32_t *cur;
 	int32_t i;
 
-	printf("> Buffer\n\n");
-	for(;;)
+	printf("> Buffer\r\n\r\n");
+	//for(;;)
 	{
 		GPIOD->BSRR |= (1 << 1);
 		TIM2->CNT = 0;
@@ -141,16 +215,16 @@ void l_buffer(void)
 		}
 		GPIOD->BSRR |= (1 << (16 + 1));
 
-		printf("-----------------------\n");
 		cur = samples;
+		printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\r\n",
+		"Sample", "Zeit", "Acc_x", "Acc_y", "Acc_z", "Gyro_x", "Gyro_y", "Gyro_z", "Acc_x2", "Acc_y2", "Acc_z2", "Mag_x", "Mag_y", "Mag_z");
 		for(i = 0; i < NUM_SAMPLES; ++i)
 		{
-			printf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
-				cur[0], cur[1], cur[2], cur[3], cur[4], cur[5],
+			printf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\r\n",
+				i, cur[0], cur[1], cur[2], cur[3], cur[4], cur[5],
 				cur[6], cur[7], cur[8], cur[9], cur[10], cur[11], cur[12]);
 			cur += 13;
 		}
-		printf("-----------------------\n");
 	}
 }
 
@@ -179,26 +253,26 @@ int main(void)
 	press_temp.enable_temp();
 	temp.enable_temp();
 
-	printf("\n--- Starting new run ---\n");
+	printf("\r\n--- Starting new run ---\r\n");
 	acc_gyro.read_id(&id);
-	printf("LSM6DSO accelerometer & gyroscope = 0x%X\n", id);
+	printf("LSM6DSO accelerometer & gyroscope = 0x%X\r\n", id);
 	accelerometer.read_id(&id);
-	printf("LIS2DW12 accelerometer            = 0x%X\n", id);
+	printf("LIS2DW12 accelerometer            = 0x%X\r\n", id);
 	magnetometer.read_id(&id);
-	printf("LIS2MDL magnetometer              = 0x%X\n", id);
+	printf("LIS2MDL magnetometer              = 0x%X\r\n", id);
 	hum_temp.read_id(&id);
-	printf("HTS221  humidity & temperature    = 0x%X\n", id);
+	printf("HTS221  humidity & temperature    = 0x%X\r\n", id);
 	press_temp.read_id(&id);
-	printf("LPS22HH  pressure & temperature   = 0x%X\n", id);
+	printf("LPS22HH  pressure & temperature   = 0x%X\r\n", id);
 	temp.read_id(&id);
-	printf("STTS751 temperature               = 0x%X\n", id);
+	printf("STTS751 temperature               = 0x%X\r\n", id);
 
-	printf("\nPress button to choose option:\n"
-		"  S7: CSV Ausgabe\n"
-		"  S6: Joystick\n"
-		"  S5: Alarmanlage\n"
-		"  S4: Buffer\n"
-		"  S0: Demo program\n\n");
+	printf("\r\nPress button to choose option:\r\n"
+		"  S7: CSV Ausgabe\r\n"
+		"  S6: Joystick\r\n"
+		"  S5: Alarmanlage\r\n"
+		"  S4: Buffer\r\n"
+		"  S0: Demo program\r\n\r\n");
 
 	for(;;)
 	{
@@ -218,6 +292,10 @@ int main(void)
 		else if(!(btns & 0x10))
 		{
 			l_buffer();
+		}
+		else if(!(btns & 0x02))
+		{
+			l_measure();
 		}
 		else if(!(btns & 0x01))
 		{
