@@ -17,7 +17,10 @@
 #include "shell.h"
 #include "editor.h"
 
+#include "thread.h"
+
 #include <stdlib.h>
+#include <stdio.h>
 
 static void os_key(void)
 {
@@ -41,6 +44,35 @@ static void os_key(void)
 		break;
 	}
 }
+	char buf[128];
+
+void thread2(void)
+{
+	int i;
+	uint32_t sp = getsp();
+	sprintf(buf, "Cur2 SP: %08x\n", sp);
+	shell_print(buf);
+
+	for(i = 0; i < 5; ++i)
+	{
+		shell_print("Message from second thread");
+		yield();
+	}
+}
+
+void thread1(void)
+{
+	int i;
+
+	shell_print("Init 2!\n");
+	thread_init(getsp() - 64 * 1024, thread2);
+
+	for(i = 0; i < 5; ++i)
+	{
+		shell_print("Message from first thread");
+		yield();
+	}
+}
 
 /**
  * @brief Main function
@@ -58,6 +90,7 @@ int main(void)
 	editor_init();
 
 	shell_open();
+
 	for(;;)
 	{
 		os_key();

@@ -259,7 +259,9 @@ static NanoC_Value _blkinfo(NanoC_Value a, NanoC_Value *p)
 	switch(drive)
 	{
 	case 0:
+#ifdef ENABLE_RAMDISK
 		ramdisk_info_print();
+#endif
 		break;
 
 	case 1:

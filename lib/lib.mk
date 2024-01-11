@@ -37,7 +37,7 @@ sizes:
 
 SOURCES := $(shell find $(SRCDIR) -type f -name *.c*)
 HEDEARS := $(shell find $(INCDIR) -type f -name *.h*)
-OBJECTS := $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(addsuffix .o,$(basename $(SOURCES))))
+OBJECTS += $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(addsuffix .o,$(basename $(SOURCES))))
 DEPS    := $(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(addsuffix .d,$(basename $(SOURCES))))
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c*

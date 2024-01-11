@@ -71,9 +71,11 @@ DRESULT disk_read (
 {
 	switch(pdrv)
 	{
+#ifdef ENABLE_RAMDISK
 	case DEV_RAM:
 		ramdisk_read(buff, sector, count);
 		return RES_OK;
+#endif
 
 	case DEV_MMC:
 		return sd_read(&sd, sector, count, buff) ? RES_ERROR : RES_OK;
@@ -97,9 +99,11 @@ DRESULT disk_write (
 {
 	switch(pdrv)
 	{
+#ifdef ENABLE_RAMDISK
 	case DEV_RAM:
 		ramdisk_write(buff, sector, count);
 		return RES_OK;
+#endif
 
 	case DEV_MMC:
 		return sd_write(&sd, sector, count, buff) ? RES_ERROR : RES_OK;

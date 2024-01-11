@@ -1,3 +1,5 @@
+#ifdef ENABLE_RAMDISK
+
 #include "ramdisk.h"
 #include "shell.h"
 #include <string.h>
@@ -18,3 +20,5 @@ void ramdisk_info_print(void)
 {
 	shell_print("RAMDISK Capacity : 192 blocks\n");
 }
+
+#endif
