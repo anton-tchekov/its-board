@@ -1,0 +1,12 @@
+Der URG-04LX ist ein Laserscanner, welcher einen Bereich scannt. Der Laser nutzt einen infrarot sensor und die
+FOV beim area scan ist 240 grad. Er kann distanzen bis zu 4000mm scannen und die maximale Fehlerrate 
+beträgt 40mm bei 4000mm scannung. Die Messungen basieren auf phase difference.
+
+Distanz: bis zu 4000mm
+Auflösung: 1mm
+Genauigkeit: +-1% of measurement bei 1000-4000mm und +-10mm bei 60-1000mm
+Scan Geschwindigkeit: 100ms/scan
+Schnitstellen: RS-232C, USB
+Betriebsspannung: 5VDC
+
+https://imgur.com/caV7er3.png

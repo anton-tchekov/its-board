@@ -1,0 +1,11 @@
+Der UTM-30LX-EW nutzt eine Laserquelle um für jeden schritt die distanz zu messen.
+Ein Schritt beträgt 0.25 grad
+
+Distanz: 0.1-30m (60m maximum nicht garantiert)
+Auflösung: 1mm
+Genauigkeit: 0.1-10m: +-30mm; 10-30m: +-50mm
+FOV: 270 Grad
+Step: 0.25 grad
+Schnitstellen: Ethernet / Synchronous Output
+Geschwindigkeit: 25ms
+
