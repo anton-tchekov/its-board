@@ -1,4 +1,16 @@
 
+sensor2_angle = np.radians(0)
+sensor2_translation = np.array((0, 0))
+c = np.cos(sensor2_angle)
+s = np.sin(sensor2_angle)
+sensor2_rotation = np.array(((c, -s), (s, c)))
+
+print("Sensor 2 Translation:")
+print(sensor2_translation)
+print("Sensor 2 Rotation:")
+print(sensor2_rotation)
+
+
 
 def calculate_kn_distance(X,k):
 	kn_distance = []
