@@ -3,14 +3,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
+import sklearn
 
 def pol2cart(rho, phi):
+	phi += np.pi / 2
+	# phi = -phi
 	x = rho * np.cos(phi)
 	y = rho * np.sin(phi)
+	x = -x
 	return(x, y)
 
-sensor2_angle = np.radians(130)
-sensor2_translation = np.array((0.5, 0.1))
+sensor2_angle = np.radians(-45)
+sensor2_translation = np.array((1.0, 0.0))
 c = np.cos(sensor2_angle)
 s = np.sin(sensor2_angle)
 sensor2_rotation = np.array(((c, -s), (s, c)))
@@ -55,15 +59,15 @@ with open('testdata.csv', newline='') as csvfile:
 		x2 = np.append(x2, x)
 		y2 = np.append(y2, y)
 
-def calculate_kn_distance(X, k):
+def calculate_kn_distance(x, y, k):
 	kn_distance = []
-	for i in range(len(X)):
+	for i in range(x.size):
 		eucl_dist = []
-		for j in range(len(X)):
+		for j in range(x.size):
 			eucl_dist.append(
-				math.sqrt(
-					((X[i,0] - X[j,0]) ** 2) +
-					((X[i,1] - X[j,1]) ** 2)))
+				np.sqrt(
+					((x[i] - x[j]) ** 2) +
+					((y[i] - y[j]) ** 2)))
 
 		eucl_dist.sort()
 		kn_distance.append(eucl_dist[k])
@@ -80,7 +84,9 @@ ax.plot(x1, y1, '.')
 ax.plot(x2, y2, '.')
 plt.show()
 
-# eps_dist = calculate_kn_distance(X[1], 4)
-# plt.hist(eps_dist, bins=30)
-# plt.ylabel('n')
-# plt.xlabel('Epsilon distance')
+plt.figure()
+eps_dist = calculate_kn_distance(x1, y1, 4)
+plt.hist(eps_dist, bins=30)
+plt.ylabel('n')
+plt.xlabel('Epsilon distance')
+plt.show()
