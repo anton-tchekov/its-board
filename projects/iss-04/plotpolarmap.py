@@ -15,9 +15,6 @@ with open('sensor1.csv', newline='') as csvfile:
 		angle = np.append(angle, float(row[0]))
 		dist = np.append(dist, float(row[1]))
 
-# dist = np.random.rand(360) / 5 + 1
-# angle = 2 * np.pi * (np.arange(0, 360, 1) / 360)
-
 fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
 fig.canvas.manager.set_window_title(title)
 
