@@ -1,23 +1,37 @@
-from sklearn.datasets import make_blobs
-from sklearn.preprocessing import StandardScaler
+from sklearn import metrics
+from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
+import numpy as np
+import csv
 
-centers = [[1, 1], [-1, -1], [1, -1]]
-X, labels_true = make_blobs(
-	n_samples=750, centers=centers, cluster_std=0.4, random_state=0
-)
+def pol2cart(rho, phi):
+	phi += np.pi / 2
+	x = rho * np.cos(phi)
+	y = rho * np.sin(phi)
+	x = -x
+	return(x, y)
 
-X = StandardScaler().fit_transform(X)
+X = np.zeros((682-79-19-8-21, 2))
+i = 0
+
+with open('ACM0_result.txt', newline='') as csvfile:
+	dreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+	for row in dreader:
+		a = np.radians(float(row[0]))
+		d = float(row[1])
+		(x, y) = pol2cart(d, a)
+		if not (x < 30 and y < 30 and x > -30 and y > -30):
+			X[i,:] = [ x, y ]
+			i += 1
+
+# X = X.reshape(-1, 1)
 
 plt.scatter(X[:, 0], X[:, 1])
 plt.show()
 
-import numpy as np
+print(X)
 
-from sklearn import metrics
-from sklearn.cluster import DBSCAN
-
-db = DBSCAN(eps=0.3, min_samples=10).fit(X)
+db = DBSCAN(eps=180, min_samples=4).fit(X)
 labels = db.labels_
 
 n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
@@ -60,3 +74,29 @@ for k, col in zip(unique_labels, colors):
 
 plt.title(f"Estimated number of clusters: {n_clusters_}")
 plt.show()
+
+
+# def calculate_kn_distance(x, y, k):
+# 	kn_distance = []
+# 	for i in range(x.size):
+# 		eucl_dist = []
+# 		for j in range(x.size):
+# 			eucl_dist.append(
+# 				np.sqrt(
+# 					((x[i] - x[j]) ** 2) +
+# 					((y[i] - y[j]) ** 2)))
+# 
+# 		eucl_dist.sort()
+# 		kn_distance.append(eucl_dist[k])
+# 
+# 	return kn_distance
+# 
+# 
+# 
+# plt.figure()
+# eps_dist = calculate_kn_distance(x1, y1, 4)
+# plt.hist(eps_dist, bins=30)
+# plt.ylabel('n')
+# plt.xlabel('Epsilon distance')
+# plt.show()
+
