@@ -1,0 +1,46 @@
+De Gasperis, Tobias
+
+Zugriff auf die Hokuyo-Sensoren für das 4. Praktikum
+der Zugriff auf die Hokuyo URG-04LX-UG01 Sensoren (2 Stück) wird auch in
+diesem Semester über einen Remote-Zugriff realisiert. Die Sensoren stehen
+in einem Raum in der Hochschule und sind an einen Raspberry Pi angeschlossen.
+Jedes Team bekommt einen eigenen User auf dem Raspberry Pi und kann mittels
+SSH auf diese zugreifen. Der Zugriff ist nur aus dem HAW-Netz möglich
+(über die Laborrechner oder per VPN).
+
+SSH-Keys
+Alle Teams bekommen einen SSH-Key und Passwort um den Key zu entsperren
+zugesendet.
+Wenn ihr ein privates Team nach dem Muster G3-T2 (G3 steht für Gruppe 3
+(im Stundenplan) und T2 steht für Team 2) seht, findet ihr in diesem unter
+Dateien die Keys und eine config Datei. Wenn ihr unter Windows im Labor
+arbeitet, erstellt in eurem Benutzerordner (C:\Users\infwxx123) einen
+Ordner .ssh und kopiert alle Dateien aus dem Team dort hinein. Jetzt könnt
+ihr über die cmd.exe oder die PowerShell mit dem Befehl  "ssh ISSP-LabPi"
+euch mit dem Raspberry Pi verbinden.
+Dabei erfolgt unter anderem die Abfrage nach dem Passwort für den SSH-Key.
+(Achtung: Bei der Eingabe des Passworts sieht man kein Feedback, also keine
+Eingabe.)
+Wenn die Verbindung erfolgreich hergestellt ist, seht ihr in der
+cmd.exe/PowerShell in der untersten Zeile ein G3-T2@lab02.
+
+Mittels ls kann man sich den Inhalt des eigenen Benutzerordners anzeigen
+lassen.
+Es gibt einen Ordner hokuyo und ein Pythonskript test.py.
+
+Um das Pythonskript auszuführen, bzw. auf die Hokuyos zugreifen zu können
+muss das Python-venv für die Hokuyos aktiviert werden. Dafür muss der
+Befehl: "source hokuyo/bin/activate" ausgeführt werden. Danach steht vor
+dem Team-Namen ein (hokuyo). Nun kann mittels "python test.py" das gegebene
+Skript ausgeführt werden.
+(In das venv können mittels pip auch weitere Pakete von Python hinzugefügt
+werden, wenn dies notwendig sein sollte.)
+
+Als Editor stehen auf dem Raspberry Pi  nano (einfach) oder vim
+(gewöhnungsbedürftig) zur Verfügung. Auch git kann genutzt werden.
+(Der Remote-Zugriff über VS-Code sollte auch möglich sein.)
+
+Für den Zugriff wird eine Python-Bibliothek verwendet, die man unter
+https://github.com/pasuder/hokuyo-python-lib findet.
+
+Passwort: ncvms82Hbn5E

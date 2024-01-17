@@ -1,7 +1,0 @@
-Der Sensor kann über Ethernet angesteuert werden.
-
-Die Betriebsspannung ist von 8 bis 19 Volt.
-Stromverbrauch 0.9 A (8 Watt) in normaler Operation (maximal 3 A).
-
-Die Konfiguration des Sensors kann über ein Web-Inferface erfolgen oder
-mit HTTP-Requests an bestimmten Endpunkten.

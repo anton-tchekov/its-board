@@ -1,0 +1,5 @@
+Host ISSP-LabPi
+            HostName 141.22.26.195
+            User G1-T6
+            Port 2202
+            IdentityFile ~/.ssh/labpi_G1-T6_ed25519
