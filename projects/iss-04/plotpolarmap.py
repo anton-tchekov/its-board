@@ -9,17 +9,17 @@ title = 'Lidar Messdaten 2D Karte'
 dist = np.array(())
 angle = np.array(())
 
-with open('sensor1.csv', newline='') as csvfile:
+with open('ACM0_result.txt', newline='') as csvfile:
 	dreader = csv.reader(csvfile, delimiter=',', quotechar='|')
 	for row in dreader:
-		angle = np.append(angle, float(row[0]))
+		angle = np.append(angle, np.radians(float(row[0])))
 		dist = np.append(dist, float(row[1]))
 
 fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
 fig.canvas.manager.set_window_title(title)
 
 ax.plot(angle, dist, '.')
-ax.set_rmax(2)
+ax.set_rmax(5600)
 ax.set_theta_zero_location("N")
 ax.set_theta_direction(-1)
 
