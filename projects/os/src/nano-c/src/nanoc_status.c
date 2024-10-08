@@ -1,10 +1,3 @@
-/**
- * @file    nanoc_status.c
- * @author  Anton Tchekov
- * @version 0.1
- * @date    2023-10-09
- */
-
 #include "nanoc_status.h"
 #include "nanoc_debug.h"
 #include "nanoc_util.h"
@@ -39,13 +32,13 @@ const char *nanoc_status_message(NanoC_Status status_code)
 		"NO_MAIN",
 		"UNDERFLOW",
 		"OVERFLOW",
-		"UNDEFINED_VARIABLE",
-		"UNDEFINED_FN",
+		"UNDEFINED",
 		"FN_NUM_ARGS",
 		"DIVISION_BY_ZERO",
 		"INVALID_INSTRUCTION"
 	};
 
-	nanoc_assert(status_code < NANOC_ARRLEN(err_msgs));
-	return err_msgs[status_code];
+	size_t idx = -status_code;
+	nanoc_assert(idx < NANOC_ARRLEN(err_msgs));
+	return err_msgs[idx];
 }

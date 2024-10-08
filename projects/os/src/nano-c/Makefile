@@ -14,7 +14,8 @@ CC := gcc
 CFLAGS := -Wall -Wextra -g -O0 -std=c99 -pedantic -DNANOC_DEBUG \
 	-Werror=maybe-uninitialized \
 	-Werror=uninitialized \
-	-DNANOC_DESKTOP -I ../  -fprofile-arcs -ftest-coverage
+	-DNANOC_DESKTOP -I ../ \
+# -fprofile-arcs -ftest-coverage
 
 # Linker flags
 LDFLAGS := -lm  -fprofile-arcs -ftest-coverage

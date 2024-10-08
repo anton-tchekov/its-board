@@ -1,10 +1,3 @@
-/**
- * @file    nanoc_address_stack.c
- * @author  Anton Tchekov
- * @version 0.1
- * @date    2023-10-09
- */
-
 #include "nanoc_address_stack.h"
 
 void nanoc_address_stack_update(NanoC_AddressStack *as,

@@ -25,6 +25,8 @@
 #define LCD_HEIGHT  320
 #define LCD_WIDTH   480
 
+#define LCD_COLOR(r, g, b) ((((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3))
+
 enum LCD_Orientation
 {
 	L2R_U2D,

@@ -26,7 +26,7 @@ static NanoC_Bool nanoc_builtin_compare(const char *b, const char *t)
 	return 1;
 }
 
-size_t nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
+ssize_t nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
 	const char *name)
 {
 	size_t i;
@@ -34,9 +34,9 @@ size_t nanoc_builtin_find(const NanoC_ParserBuiltins *builtins,
 	{
 		if(nanoc_builtin_compare(builtins->Table[i].Name, name))
 		{
-			return i + 1;
+			return i;
 		}
 	}
 
-	return 0;
+	return -1;
 }

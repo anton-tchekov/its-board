@@ -99,7 +99,6 @@ static void nanoc_expression_number(NanoC_Parser *parser, NanoC_Token *token)
 
 static NanoC_Status nanoc_expression_identifier(NanoC_Parser *parser)
 {
-	size_t local;
 	NanoC_Token *token = NANOC_TOKEN(0);
 	if(NANOC_TT(1) == NANOC_TT_L_PAREN)
 	{
@@ -107,13 +106,9 @@ static NanoC_Status nanoc_expression_identifier(NanoC_Parser *parser)
 	}
 	else
 	{
-		if(!(local = nanoc_map_find(&parser->Variables, token->Ptr)))
-		{
-			NANOC_THROW(NANOC_ERROR_UNDEFINED_VARIABLE);
-		}
-
-		--local;
-		nanoc_output_emit2(&parser->Output, NANOC_INSTR_PUSHL, local);
+		ssize_t var;
+		NANOC_PROPAGATE(var = nanoc_map_find(&parser->Variables, token->Ptr));
+		nanoc_output_emit2(&parser->Output, NANOC_INSTR_PUSHL, var);
 	}
 
 	return NANOC_STATUS_SUCCESS;
@@ -165,7 +160,7 @@ static void nanoc_expression_operator(NanoC_Parser *parser,
 static NanoC_Status check_prev(
 	NanoC_TokenClass prev_class, NanoC_TokenClass cur_class)
 {
-	static const u8 lut[TC_COUNT][TC_COUNT] =
+	static const i8 lut[TC_COUNT][TC_COUNT] =
 	{
 		[TC_OPERAND][TC_OPERAND] = NANOC_ERROR_UNEXPECTED_TOKEN,
 		[TC_OPERAND][TC_BINARY]  = NANOC_STATUS_SUCCESS,

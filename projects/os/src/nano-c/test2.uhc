@@ -1,0 +1,6 @@
+main()
+{
+	a = ;
+	test(a);
+	return 0;
+}

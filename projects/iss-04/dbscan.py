@@ -42,20 +42,16 @@ for k, col in zip(unique_labels, colors):
 	plt.plot(
 		xy[:, 0],
 		xy[:, 1],
-		"o",
+		".",
 		markerfacecolor=tuple(col),
-		markeredgecolor="k",
-		markersize=14,
 	)
 
 	xy = X[class_member_mask & ~core_samples_mask]
 	plt.plot(
 		xy[:, 0],
 		xy[:, 1],
-		"o",
+		".",
 		markerfacecolor=tuple(col),
-		markeredgecolor="k",
-		markersize=6,
 	)
 
 plt.title(f"Estimated number of clusters: {n_clusters_}")

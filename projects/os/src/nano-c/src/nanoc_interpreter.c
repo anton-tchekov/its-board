@@ -1,10 +1,3 @@
-/**
- * @file    nanoc_interpreter.c
- * @author  Anton Tchekov
- * @version 0.1
- * @date    2023-10-09
- */
-
 #include "nanoc_interpreter.h"
 #include "nanoc_instruction.h"
 #include "nanoc_debug.h"
@@ -14,13 +7,13 @@
 #define CHECK_UNDERFLOW(N) \
 	if(op < (N)) \
 	{ \
-		return NANOC_ERROR_UNDERFLOW; \
+		NANOC_THROW(NANOC_ERROR_UNDERFLOW); \
 	}
 
 #define CHECK_OVERFLOW(N) \
 	if(op > NANOC_OP_STACK_SIZE - (N)) \
 	{ \
-		return NANOC_ERROR_OVERFLOW; \
+		NANOC_THROW(NANOC_ERROR_OVERFLOW); \
 	}
 
 #define BINARY_OP(C) \
@@ -43,7 +36,7 @@
 		B = op_stack[op]; \
 		if(B == 0) \
 		{ \
-			return NANOC_ERROR_DIVISION_BY_ZERO; \
+			NANOC_THROW(NANOC_ERROR_DIVISION_BY_ZERO); \
 		} \
 		op_stack[op - 1] = (C); \
 		ip += 1; \
@@ -204,7 +197,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 		case NANOC_INSTR_RET:
 			if(fp < 2)
 			{
-				return NANOC_ERROR_UNDERFLOW;
+				NANOC_THROW(NANOC_ERROR_UNDERFLOW);
 			}
 
 			sp = fp;
@@ -256,7 +249,7 @@ NanoC_Status nanoc_interpreter_run(const u8 *program,
 		case NANOC_INSTR_U_MINUS: UNARY_OP(-A);          break;
 
 		default:
-			return NANOC_ERROR_INVALID_INSTRUCTION;
+			NANOC_THROW(NANOC_ERROR_INVALID_INSTRUCTION);
 		}
 	}
 

@@ -15,5 +15,6 @@ typedef u8r NanoC_Bool;
 typedef u8r NanoC_Char;
 typedef u16r NanoC_Address;
 typedef intptr_t NanoC_Value;
+typedef intptr_t ssize_t;
 
 #endif /* __NANOC_TYPES__ */

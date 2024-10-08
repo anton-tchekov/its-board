@@ -1,4 +1,4 @@
-int count(n)
+count(n)
 {
 	if((n & 1) == 0)
 	{
@@ -8,19 +8,19 @@ int count(n)
 	return 1;
 }
 
-int isA()
+isA()
 {
 	test(777);
 	return 1;
 }
 
-int isB()
+isB()
 {
 	test(666);
 	return 1;
 }
 
-int aa()
+aa()
 {
 	if(isA() || isB())
 	{
@@ -28,18 +28,18 @@ int aa()
 	}
 }
 
-int fib(n)
+fib(n)
 {
 	if(n < 2) { return n; }
 	return fib(n - 2) + fib(n - 1);
 }
 
-int iter()
+iter()
 {
-	int i = 32;
-	for(int x = 0; x < 20; ++x)
+	i = 32;
+	for(x = 0; x < 20; ++x)
 	{
-		for(int y = 0; y < 20; ++y)
+		for(y = 0; y < 20; ++y)
 		{
 			pchr(i);
 			++i;
@@ -53,29 +53,24 @@ int iter()
 	}
 }
 
-int alles() {
+alles() {
 	return 5;
 }
 
-int alleskoenner() {
-	int alles = 7;
-
+alleskoenner() {
+	alles = 7;
 	alles = alles() + alles() + alles;
-
 	test(alles);
 }
 
-int main()
+main()
 {
 	aa();
-alleskoenner();
+	alleskoenner();
 
-
-	/*int i = 0, cnt = 0;
-
+	/* i = 0, cnt = 0;
 
 	iter();
-
 
 	while(i <= 100)
 	{
